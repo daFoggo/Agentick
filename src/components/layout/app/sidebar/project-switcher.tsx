@@ -26,7 +26,7 @@ export const ProjectSwitcher = () => {
             </SidebarMenuBadge>
           </SidebarMenuButton>
         </PopoverTrigger>
-        <PopoverContent>
+        <PopoverContent align="start">
           <PopoverHeader>My Projects</PopoverHeader>
         </PopoverContent>
       </Popover>

@@ -1,9 +1,8 @@
 import type { TSidebarNavigation } from "@/types/sidebar"
-import { CalendarRange, ChartNoAxesGantt, LayoutTemplate } from "lucide-react"
+import { ChartNoAxesGantt, Inbox, LayoutTemplate, Users } from "lucide-react"
 
 export const SIDEBAR_NAVIGATION: TSidebarNavigation = [
   {
-    label: "",
     items: [
       {
         title: "Overview",
@@ -11,14 +10,19 @@ export const SIDEBAR_NAVIGATION: TSidebarNavigation = [
         icon: LayoutTemplate,
       },
       {
-        title: "Schedule",
-        to: "/dashboard/schedule",
-        icon: CalendarRange,
+        title: "My Tasks",
+        to: "/dashboard/my-tasks",
+        icon: ChartNoAxesGantt,
       },
       {
-        title: "Tasks",
-        to: "/dashboard/tasks",
-        icon: ChartNoAxesGantt,
+        title: "Inbox",
+        to: "/dashboard/inbox",
+        icon: Inbox,
+      },
+      {
+        title: "Team",
+        to: "/dashboard/team",
+        icon: Users,
       },
     ],
   },

@@ -12,9 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
-import { Route as DashboardTasksIndexRouteImport } from './routes/dashboard/tasks/index'
-import { Route as DashboardScheduleIndexRouteImport } from './routes/dashboard/schedule/index'
+import { Route as DashboardTeamIndexRouteImport } from './routes/dashboard/team/index'
 import { Route as DashboardOverviewIndexRouteImport } from './routes/dashboard/overview/index'
+import { Route as DashboardMyTasksIndexRouteImport } from './routes/dashboard/my-tasks/index'
+import { Route as DashboardInboxIndexRouteImport } from './routes/dashboard/inbox/index'
 
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
   id: '/dashboard',
@@ -31,14 +32,9 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
-const DashboardTasksIndexRoute = DashboardTasksIndexRouteImport.update({
-  id: '/tasks/',
-  path: '/tasks/',
-  getParentRoute: () => DashboardRouteRoute,
-} as any)
-const DashboardScheduleIndexRoute = DashboardScheduleIndexRouteImport.update({
-  id: '/schedule/',
-  path: '/schedule/',
+const DashboardTeamIndexRoute = DashboardTeamIndexRouteImport.update({
+  id: '/team/',
+  path: '/team/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
 const DashboardOverviewIndexRoute = DashboardOverviewIndexRouteImport.update({
@@ -46,30 +42,43 @@ const DashboardOverviewIndexRoute = DashboardOverviewIndexRouteImport.update({
   path: '/overview/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardMyTasksIndexRoute = DashboardMyTasksIndexRouteImport.update({
+  id: '/my-tasks/',
+  path: '/my-tasks/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardInboxIndexRoute = DashboardInboxIndexRouteImport.update({
+  id: '/inbox/',
+  path: '/inbox/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/inbox/': typeof DashboardInboxIndexRoute
+  '/dashboard/my-tasks/': typeof DashboardMyTasksIndexRoute
   '/dashboard/overview/': typeof DashboardOverviewIndexRoute
-  '/dashboard/schedule/': typeof DashboardScheduleIndexRoute
-  '/dashboard/tasks/': typeof DashboardTasksIndexRoute
+  '/dashboard/team/': typeof DashboardTeamIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/inbox': typeof DashboardInboxIndexRoute
+  '/dashboard/my-tasks': typeof DashboardMyTasksIndexRoute
   '/dashboard/overview': typeof DashboardOverviewIndexRoute
-  '/dashboard/schedule': typeof DashboardScheduleIndexRoute
-  '/dashboard/tasks': typeof DashboardTasksIndexRoute
+  '/dashboard/team': typeof DashboardTeamIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/inbox/': typeof DashboardInboxIndexRoute
+  '/dashboard/my-tasks/': typeof DashboardMyTasksIndexRoute
   '/dashboard/overview/': typeof DashboardOverviewIndexRoute
-  '/dashboard/schedule/': typeof DashboardScheduleIndexRoute
-  '/dashboard/tasks/': typeof DashboardTasksIndexRoute
+  '/dashboard/team/': typeof DashboardTeamIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -77,24 +86,27 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/dashboard/'
+    | '/dashboard/inbox/'
+    | '/dashboard/my-tasks/'
     | '/dashboard/overview/'
-    | '/dashboard/schedule/'
-    | '/dashboard/tasks/'
+    | '/dashboard/team/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/dashboard'
+    | '/dashboard/inbox'
+    | '/dashboard/my-tasks'
     | '/dashboard/overview'
-    | '/dashboard/schedule'
-    | '/dashboard/tasks'
+    | '/dashboard/team'
   id:
     | '__root__'
     | '/'
     | '/dashboard'
     | '/dashboard/'
+    | '/dashboard/inbox/'
+    | '/dashboard/my-tasks/'
     | '/dashboard/overview/'
-    | '/dashboard/schedule/'
-    | '/dashboard/tasks/'
+    | '/dashboard/team/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -125,18 +137,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/dashboard/tasks/': {
-      id: '/dashboard/tasks/'
-      path: '/tasks'
-      fullPath: '/dashboard/tasks/'
-      preLoaderRoute: typeof DashboardTasksIndexRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
-    '/dashboard/schedule/': {
-      id: '/dashboard/schedule/'
-      path: '/schedule'
-      fullPath: '/dashboard/schedule/'
-      preLoaderRoute: typeof DashboardScheduleIndexRouteImport
+    '/dashboard/team/': {
+      id: '/dashboard/team/'
+      path: '/team'
+      fullPath: '/dashboard/team/'
+      preLoaderRoute: typeof DashboardTeamIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/overview/': {
@@ -146,21 +151,37 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardOverviewIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/my-tasks/': {
+      id: '/dashboard/my-tasks/'
+      path: '/my-tasks'
+      fullPath: '/dashboard/my-tasks/'
+      preLoaderRoute: typeof DashboardMyTasksIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/inbox/': {
+      id: '/dashboard/inbox/'
+      path: '/inbox'
+      fullPath: '/dashboard/inbox/'
+      preLoaderRoute: typeof DashboardInboxIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
   }
 }
 
 interface DashboardRouteRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardInboxIndexRoute: typeof DashboardInboxIndexRoute
+  DashboardMyTasksIndexRoute: typeof DashboardMyTasksIndexRoute
   DashboardOverviewIndexRoute: typeof DashboardOverviewIndexRoute
-  DashboardScheduleIndexRoute: typeof DashboardScheduleIndexRoute
-  DashboardTasksIndexRoute: typeof DashboardTasksIndexRoute
+  DashboardTeamIndexRoute: typeof DashboardTeamIndexRoute
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardInboxIndexRoute: DashboardInboxIndexRoute,
+  DashboardMyTasksIndexRoute: DashboardMyTasksIndexRoute,
   DashboardOverviewIndexRoute: DashboardOverviewIndexRoute,
-  DashboardScheduleIndexRoute: DashboardScheduleIndexRoute,
-  DashboardTasksIndexRoute: DashboardTasksIndexRoute,
+  DashboardTeamIndexRoute: DashboardTeamIndexRoute,
 }
 
 const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
