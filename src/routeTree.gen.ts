@@ -9,38 +9,108 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as DashboardTasksIndexRouteImport } from './routes/dashboard/tasks/index'
+import { Route as DashboardScheduleIndexRouteImport } from './routes/dashboard/schedule/index'
+import { Route as DashboardOverviewIndexRouteImport } from './routes/dashboard/overview/index'
 
+const DashboardRouteRoute = DashboardRouteRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardTasksIndexRoute = DashboardTasksIndexRouteImport.update({
+  id: '/tasks/',
+  path: '/tasks/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardScheduleIndexRoute = DashboardScheduleIndexRouteImport.update({
+  id: '/schedule/',
+  path: '/schedule/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardOverviewIndexRoute = DashboardOverviewIndexRouteImport.update({
+  id: '/overview/',
+  path: '/overview/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/overview/': typeof DashboardOverviewIndexRoute
+  '/dashboard/schedule/': typeof DashboardScheduleIndexRoute
+  '/dashboard/tasks/': typeof DashboardTasksIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/overview': typeof DashboardOverviewIndexRoute
+  '/dashboard/schedule': typeof DashboardScheduleIndexRoute
+  '/dashboard/tasks': typeof DashboardTasksIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/overview/': typeof DashboardOverviewIndexRoute
+  '/dashboard/schedule/': typeof DashboardScheduleIndexRoute
+  '/dashboard/tasks/': typeof DashboardTasksIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/dashboard/'
+    | '/dashboard/overview/'
+    | '/dashboard/schedule/'
+    | '/dashboard/tasks/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/dashboard/overview'
+    | '/dashboard/schedule'
+    | '/dashboard/tasks'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/dashboard/'
+    | '/dashboard/overview/'
+    | '/dashboard/schedule/'
+    | '/dashboard/tasks/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +118,58 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/tasks/': {
+      id: '/dashboard/tasks/'
+      path: '/tasks'
+      fullPath: '/dashboard/tasks/'
+      preLoaderRoute: typeof DashboardTasksIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/schedule/': {
+      id: '/dashboard/schedule/'
+      path: '/schedule'
+      fullPath: '/dashboard/schedule/'
+      preLoaderRoute: typeof DashboardScheduleIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/overview/': {
+      id: '/dashboard/overview/'
+      path: '/overview'
+      fullPath: '/dashboard/overview/'
+      preLoaderRoute: typeof DashboardOverviewIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
   }
 }
 
+interface DashboardRouteRouteChildren {
+  DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardOverviewIndexRoute: typeof DashboardOverviewIndexRoute
+  DashboardScheduleIndexRoute: typeof DashboardScheduleIndexRoute
+  DashboardTasksIndexRoute: typeof DashboardTasksIndexRoute
+}
+
+const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
+  DashboardIndexRoute: DashboardIndexRoute,
+  DashboardOverviewIndexRoute: DashboardOverviewIndexRoute,
+  DashboardScheduleIndexRoute: DashboardScheduleIndexRoute,
+  DashboardTasksIndexRoute: DashboardTasksIndexRoute,
+}
+
+const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
+  DashboardRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRouteRoute: DashboardRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

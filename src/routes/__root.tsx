@@ -6,7 +6,8 @@ import appCss from "../styles.css?url"
 import { ToasterProvider } from "@/components/common/toaster-provider"
 import { ThemeProvider } from "@/components/common/theme-provider"
 import { getThemeServerFn } from "@/lib/theme"
-import { ISiteConfig } from "@/configs/site"
+import { SITE_CONFIG } from "@/configs/site"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 export const Route = createRootRoute({
   head: () => ({
@@ -19,11 +20,11 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: ISiteConfig.site_metadata.title,
+        title: SITE_CONFIG.metadata.title,
       },
       {
         name: "description",
-        content: ISiteConfig.site_metadata.description,
+        content: SITE_CONFIG.metadata.description,
       },
     ],
     links: [
@@ -46,7 +47,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <ThemeProvider theme={theme}>
-          {children}
+          <TooltipProvider>{children}</TooltipProvider>
           <ToasterProvider />
         </ThemeProvider>
         <TanStackDevtools
