@@ -35,7 +35,7 @@ export const SidebarGroupSection = ({ group }: { group: ISidebarGroup }) => {
                         isActive ? "text-foreground" : "text-muted-foreground"
                       )}
                     >
-                      ``
+                      
                       {item.title}
                     </span>
                   </SidebarMenuButton>
