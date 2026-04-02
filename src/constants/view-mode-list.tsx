@@ -1,3 +1,4 @@
+import type { LucideIcon } from "lucide-react"
 import {
   Archive,
   Bookmark,
@@ -7,7 +8,6 @@ import {
   Kanban,
   ListTree,
 } from "lucide-react"
-import type { LucideIcon } from "lucide-react"
 import type { ReactNode } from "react"
 
 export interface IViewModeCatalogItem {
@@ -17,7 +17,13 @@ export interface IViewModeCatalogItem {
   isDefault?: boolean
   isVisibleByDefault?: boolean
   badge?: string | number | ReactNode
-  badgeVariant?: "default" | "secondary" | "destructive" | "outline" | "ghost" | "link"
+  badgeVariant?:
+    | "default"
+    | "secondary"
+    | "destructive"
+    | "outline"
+    | "ghost"
+    | "link"
 }
 
 export const PROJECT_VIEW_MODE_CATALOG: IViewModeCatalogItem[] = [
@@ -54,19 +60,16 @@ export const INBOX_VIEW_MODE_CATALOG: IViewModeCatalogItem[] = [
     label: "Active",
     icon: Inbox,
     isDefault: true,
-  
   },
   {
     value: "bookmarks",
     label: "Bookmarks",
     icon: Bookmark,
-  
   },
   {
     value: "archive",
     label: "Archive",
     icon: Archive,
-  
   },
 ]
 

@@ -19,7 +19,7 @@ export const SAMPLE_PROJECTS: IProject[] = [
     name: "Project 2",
     description:
       "A second project for demonstration purposes with different details and members.",
-    members: SAMPLE_PROJECT_MEMBERS.slice(0, 2),
+    members: SAMPLE_PROJECT_MEMBERS,
     tasks: [],
     createdAt: "2026-03-31T12:00:00.000Z",
   },

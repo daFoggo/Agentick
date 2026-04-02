@@ -1,4 +1,8 @@
-import { SAMPLE_USER_1, SAMPLE_USER_2 } from "../users/sample-data"
+import {
+  SAMPLE_USER_1,
+  SAMPLE_USER_2,
+  SAMPLE_USER_3,
+} from "../users/sample-data"
 import type { IProjectMember } from "./types"
 
 export const SAMPLE_PROJECT_MEMBERS: IProjectMember[] = [
@@ -14,6 +18,13 @@ export const SAMPLE_PROJECT_MEMBERS: IProjectMember[] = [
     projectId: "project-1",
     userId: SAMPLE_USER_2.id,
     user: SAMPLE_USER_2,
+    role: "member",
+  },
+  {
+    id: "project-member-3",
+    projectId: "project-1",
+    userId: SAMPLE_USER_3.id,
+    user: SAMPLE_USER_3,
     role: "member",
   },
 ]

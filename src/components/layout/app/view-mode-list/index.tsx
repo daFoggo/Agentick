@@ -11,10 +11,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   type IViewModeDefinition,
   resolveViewModes,
+  useViewModeListHydrated,
   useViewModeListStore,
 } from "@/stores/use-view-mode-list-store"
 import { useMatches } from "@tanstack/react-router"
 import { SlidersHorizontal } from "lucide-react"
+import { ViewModeListSkeleton } from "./skeleton"
 
 interface IViewModeListProps {
   definitions?: IViewModeDefinition[]
@@ -41,6 +43,7 @@ export const ViewModeList = ({
     "global"
   const allowViewModeCustomization =
     allowCustomization ?? currentStaticData?.allowViewModeCustomization ?? true
+  const hasHydrated = useViewModeListHydrated()
 
   const scopeState = useViewModeListStore(
     (state) => state.modesByScope[viewModeScope]
@@ -56,6 +59,10 @@ export const ViewModeList = ({
     viewModeDefinitions.length === 0
   ) {
     return null
+  }
+
+  if (!hasHydrated) {
+    return <ViewModeListSkeleton />
   }
 
   const { modes, activeValue } = resolveViewModes(
@@ -91,7 +98,7 @@ export const ViewModeList = ({
         {allowViewModeCustomization ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
+              <Button variant="outline">
                 <SlidersHorizontal />
                 Customize
               </Button>

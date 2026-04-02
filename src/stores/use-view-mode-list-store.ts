@@ -29,6 +29,29 @@ export interface IResolvedViewMode extends IViewModeState {
   badgeVariant?: "default" | "secondary" | "destructive" | "outline" | "ghost" | "link"
 }
 
+interface IViewModeListStore {
+  modesByScope: Record<string, IViewModeScopeState>
+  hasHydrated: boolean
+  setHasHydrated: (value: boolean) => void
+  setModes: (scope: string, modes: IViewModeState[]) => void
+  toggleModeVisibility: (scope: string, value: string, definitions: IViewModeDefinition[]) => void
+  reorderModes: (
+    scope: string,
+    sourceIndex: number,
+    targetIndex: number,
+    definitions: IViewModeDefinition[]
+  ) => void
+  updateMode: (
+    scope: string,
+    value: string,
+    updates: Partial<IViewModeState>,
+    definitions: IViewModeDefinition[]
+  ) => void
+  updateModeMetadata: (scope: string, value: string, metadata: Record<string, unknown>) => void
+  setActiveMode: (scope: string, value: string) => void
+  resetToDefault: (scope: string) => void
+}
+
 export interface IViewModeScopeState {
   modes: IViewModeState[]
   activeValue?: string
@@ -97,26 +120,7 @@ export const resolveViewModes = (
   }
 }
 
-interface IViewModeListStore {
-  modesByScope: Record<string, IViewModeScopeState>
-  setModes: (scope: string, modes: IViewModeState[]) => void
-  toggleModeVisibility: (scope: string, value: string, definitions: IViewModeDefinition[]) => void
-  reorderModes: (
-    scope: string,
-    sourceIndex: number,
-    targetIndex: number,
-    definitions: IViewModeDefinition[]
-  ) => void
-  updateMode: (
-    scope: string,
-    value: string,
-    updates: Partial<IViewModeState>,
-    definitions: IViewModeDefinition[]
-  ) => void
-  updateModeMetadata: (scope: string, value: string, metadata: Record<string, unknown>) => void
-  setActiveMode: (scope: string, value: string) => void
-  resetToDefault: (scope: string) => void
-}
+
 
 const getScopeState = (
   scope: string,
@@ -134,6 +138,12 @@ export const useViewModeListStore = create<IViewModeListStore>()(
   persist(
     (set) => ({
       modesByScope: {},
+      hasHydrated: false,
+
+      setHasHydrated: (value) =>
+        set(() => ({
+          hasHydrated: value,
+        })),
 
       setModes: (scope, modes) =>
         set((state) => ({
@@ -256,6 +266,15 @@ export const useViewModeListStore = create<IViewModeListStore>()(
     {
       name: "view-mode-list-storage",
       version: 1,
+      partialize: (state) => ({
+        modesByScope: state.modesByScope,
+      }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true)
+      },
     }
   )
 )
+
+export const useViewModeListHydrated = () =>
+  useViewModeListStore((state) => state.hasHydrated)
