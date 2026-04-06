@@ -116,7 +116,7 @@ export function DataTableHeaderCell<TData>({
       className={cn(
         "group/head transition-colors select-none",
         "bg-background hover:bg-muted/30",
-        isDragSource && "opacity-40",
+        isDragSource && "opacity-50 bg-accent ring-2 ring-primary ring-inset",
         isPinned === "left" && isLastLeft && "border-r border-border/50",
         isPinned === "right" && isFirstRight && "border-l border-border/50"
       )}
