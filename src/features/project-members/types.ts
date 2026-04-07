@@ -1,10 +1,12 @@
 import type { IUser } from "../users"
 
+export type TProjectRole = "manager" | "member" | "viewer"
+
 export interface IProjectMember {
   id: string
-  user: IUser
+  user?: IUser
   userId: string
   projectId: string
-  role: string // "manager" | "member" | "viewer"
+  role: TProjectRole
   joinedAt?: Date
 }

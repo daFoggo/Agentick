@@ -1,10 +1,12 @@
 import type { IUser } from "../users"
 
+export type TTeamRole = "owner" | "manager" | "member" | "viewer"
+
 export interface ITeamMember {
   id: string
-  user: IUser
+  user?: IUser
   userId: string
   teamId: string
-  role: string // "owner" | "manager" | "member" | "viewer"
+  role: TTeamRole
   joinedAt?: Date
 }

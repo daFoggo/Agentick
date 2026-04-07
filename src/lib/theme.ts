@@ -3,8 +3,8 @@ import { getCookie, setCookie } from "@tanstack/react-start/server"
 import * as z from "zod"
 
 const postThemeValidator = z.union([z.literal("light"), z.literal("dark")])
-export type TTheme = z.infer<typeof postThemeValidator>
 const storageKey = "_preferred-theme"
+export type TTheme = z.infer<typeof postThemeValidator>
 
 export const getThemeServerFn = createServerFn().handler(
   async () => (getCookie(storageKey) || "light") as TTheme
