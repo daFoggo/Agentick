@@ -3,7 +3,8 @@
 interface ImportMetaEnv {
   // Client-side environment variables (prefixed with VITE_)
   readonly VITE_APP_NAME: string
-  readonly VITE_BACKEND_URL: string
+  readonly VITE_API_CORE_URL: string
+  readonly VITE_API_AI_URL: string
   readonly VITE_SELINE_URL?: string
 }
 

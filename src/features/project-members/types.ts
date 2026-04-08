@@ -1,10 +1,10 @@
-import type { IUser } from "../users"
+import type { TUser } from "../users"
 
 export type TProjectRole = "manager" | "member" | "viewer"
 
 export interface IProjectMember {
   id: string
-  user?: IUser
+  user?: TUser
   userId: string
   projectId: string
   role: TProjectRole

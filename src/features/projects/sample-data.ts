@@ -1,8 +1,8 @@
 import { SAMPLE_PROJECT_MEMBERS } from "../project-members/sample-data"
 import { SAMPLE_TEAM } from "../teams/sample-data"
-import type { IProject } from "./types"
+import type { TProject } from "./types"
 
-export const SAMPLE_PROJECTS: IProject[] = [
+export const SAMPLE_PROJECTS: TProject[] = [
   {
     id: "project-1",
     teamId: SAMPLE_TEAM.id,

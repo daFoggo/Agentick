@@ -1,4 +1,4 @@
-import type { IProject } from "../projects"
+import type { TProject } from "../projects"
 import type { ITeamMember } from "../team-members"
 
 export interface ITeam {
@@ -6,6 +6,6 @@ export interface ITeam {
   name: string
   avatarUrl?: string
   members?: ITeamMember[]
-  projects?: IProject[]
+  projects?: TProject[]
   createdAt?: string
 }

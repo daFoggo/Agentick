@@ -1,17 +1,36 @@
-import '@tanstack/react-start/server-only'
-
+import "@tanstack/react-start/server-only"
 import { SAMPLE_PROJECTS } from "./sample-data"
-import type { IProject } from "./types"
-import type { GetProjectsInput } from "./schemas"
+import type { TProject, TGetProjectsInput } from "./schemas"
+import type { TBaseResponse } from "@/types/api"
 
-export async function fetchProjects(_params: GetProjectsInput): Promise<IProject[]> {
+/**
+ * @description Lấy danh sách projects (Mocking API behavior)
+ */
+export async function fetchProjects(
+  _params: TGetProjectsInput
+): Promise<TBaseResponse<TProject[]>> {
   await new Promise((resolve) => setTimeout(resolve, 300))
-  return SAMPLE_PROJECTS
+  
+  return {
+    success: true,
+    message: "Fetched projects successfully",
+    data: SAMPLE_PROJECTS as TProject[]
+  }
 }
 
-export async function fetchProjectById(projectId: string): Promise<IProject | null> {
+/**
+ * @description Lấy chi tiết project theo ID
+ */
+export async function fetchProjectById(
+  projectId: string
+): Promise<TBaseResponse<TProject | null>> {
   await new Promise((resolve) => setTimeout(resolve, 300))
 
   const project = SAMPLE_PROJECTS.find((p) => p.id === projectId)
-  return project || null
+  
+  return {
+    success: true,
+    message: project ? "Project found" : "Project not found",
+    data: (project as TProject) || null
+  }
 }

@@ -1,18 +1,18 @@
 import { queryOptions } from "@tanstack/react-query"
 import { getProjectByIdFn, getProjectsFn } from "./functions"
-import type { GetProjectsInput } from "./schemas"
+import type { TGetProjectsInput } from "./schemas"
 
 // Query key factory
 export const projectKeys = {
   all: ["projects"] as const,
   lists: () => [...projectKeys.all, "list"] as const,
-  list: (params: GetProjectsInput) => [...projectKeys.lists(), params] as const,
+  list: (params: TGetProjectsInput) => [...projectKeys.lists(), params] as const,
   details: () => [...projectKeys.all, "detail"] as const,
   detail: (id: string) => [...projectKeys.details(), id] as const,
 }
 
 // Query options
-export const projectsQueryOptions = (params: GetProjectsInput = {}) =>
+export const projectsQueryOptions = (params: TGetProjectsInput = {}) =>
   queryOptions({
     queryKey: projectKeys.list(params),
     queryFn: () => getProjectsFn({ data: params }),
