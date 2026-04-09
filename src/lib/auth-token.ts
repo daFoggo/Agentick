@@ -1,6 +1,18 @@
-/**
- * @description Utility to get the auth token isomorphically (works on client and server).
- */
+import { createServerFn } from "@tanstack/react-start"
+
+const getServerToken = createServerFn({ method: "GET" }).handler(async () => {
+  const { useAppSession } = await import("./session.server")
+  const session = await useAppSession()
+  return session.data.access_token
+})
+
+const clearServerSession = createServerFn({ method: "POST" }).handler(
+  async () => {
+    const { useAppSession } = await import("./session.server")
+    const session = await useAppSession()
+    await session.clear()
+  }
+)
 
 export async function getAuthToken() {
   // Client-side: Lấy từ localStorage
@@ -8,11 +20,9 @@ export async function getAuthToken() {
     return localStorage.getItem("access_token")
   }
 
-  // Server-side: Lấy từ TanStack Session thông qua cookie
+  // Server-side: Lấy thông qua server function (nếu chạy trên server nó sẽ chạy code handler trực tiếp)
   try {
-    const { useAppSession } = await import("./session")
-    const session = await useAppSession()
-    return session.data.access_token
+    return await getServerToken()
   } catch (error) {
     return null
   }
@@ -25,13 +35,12 @@ export async function deleteAuthToken() {
   if (typeof window !== "undefined") {
     localStorage.removeItem("access_token")
     localStorage.removeItem("refresh_token")
-  } else {
-    try {
-      const { useAppSession } = await import("./session")
-      const session = await useAppSession()
-      await session.clear()
-    } catch (error) {
-      console.error("Failed to clear session on server", error)
-    }
+  }
+
+  // Luôn cố gắng xóa session ở server để đảm bảo an toàn
+  try {
+    await clearServerSession()
+  } catch (error) {
+    console.error("Failed to clear session on server", error)
   }
 }

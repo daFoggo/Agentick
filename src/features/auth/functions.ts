@@ -7,7 +7,7 @@ export const signInFn = createServerFn({ method: "POST" })
   .middleware([requestLoggerMiddleware])
   .inputValidator(SignInSchema)
   .handler(async ({ data }) => {
-    const { useAppSession } = await import("@/lib/session")
+    const { useAppSession } = await import("@/lib/session.server")
     const response = await signIn(data)
     const session = await useAppSession()
     await session.update({

@@ -41,7 +41,7 @@ export const requestLoggerMiddleware = createMiddleware().server(
  * @description Middleware giúp tự động lấy Token từ Session và truyền vào Context của Server Functions.
  */
 export const authMiddleware = createMiddleware().server(async ({ next }) => {
-  const { useAppSession } = await import("./session")
+  const { useAppSession } = await import("./session.server")
   const session = await useAppSession()
   const token = session.data.access_token
 

@@ -12,10 +12,10 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { SITE_CONFIG } from "@/configs/site"
 import { authMutationOptions } from "@/features/auth/queries"
 import { SignUpSchema, type TSignUpInput } from "@/features/auth/schemas"
-import { ArrowRight, ChevronRight, Loader2, UserPlus } from "lucide-react"
-import { SITE_CONFIG } from "@/configs/site"
+import { ArrowRight, Loader2 } from "lucide-react"
 
 interface ISignUpFormProps {}
 
