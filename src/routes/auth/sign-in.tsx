@@ -21,11 +21,17 @@ import {
 import { SignInSchema } from "@/features/auth/schemas"
 import { authMutationOptions } from "@/features/auth/queries"
 
+import { z } from "zod"
+
 export const Route = createFileRoute("/auth/sign-in")({
+  validateSearch: z.object({
+    redirect: z.string().optional(),
+  }),
   component: SignInPage,
 })
 
 function SignInPage() {
+  const { redirect } = Route.useSearch()
   const navigate = useNavigate()
   const signInMutation = useMutation(authMutationOptions.signIn())
 
@@ -47,7 +53,11 @@ function SignInPage() {
         localStorage.setItem("refresh_expiration", response.refresh_expiration)
 
         toast.success("Đăng nhập thành công")
-        navigate({ to: "/dashboard" })
+        if (redirect) {
+          window.location.href = redirect
+        } else {
+          navigate({ to: "/dashboard" })
+        }
       } catch (error) {
         toast.error("Đăng nhập thất bại. Vui lòng thử lại.")
         console.error(error)

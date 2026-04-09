@@ -10,11 +10,28 @@ export async function getAuthToken() {
 
   // Server-side: Lấy từ TanStack Session thông qua cookie
   try {
-    // Chúng ta dùng dynamic import để tránh bundle server-only code vào trình duyệt
     const { useAppSession } = await import("./session")
     const session = await useAppSession()
     return session.data.access_token
   } catch (error) {
     return null
+  }
+}
+
+/**
+ * @description Xóa auth token khi logout hoặc token hết hạn (401).
+ */
+export async function deleteAuthToken() {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("access_token")
+    localStorage.removeItem("refresh_token")
+  } else {
+    try {
+      const { useAppSession } = await import("./session")
+      const session = await useAppSession()
+      await session.clear()
+    } catch (error) {
+      console.error("Failed to clear session on server", error)
+    }
   }
 }

@@ -2,9 +2,21 @@ import { PageHeader } from "@/components/layout/app/page-header"
 import { AppSidebar } from "@/components/layout/app/sidebar"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { userQueries } from "@/features/users"
-import { createFileRoute, Outlet } from "@tanstack/react-router"
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/dashboard")({
+  beforeLoad: async ({ location }) => {
+    const { getAuthToken } = await import("@/lib/auth-token")
+    const token = await getAuthToken()
+    if (!token) {
+      throw redirect({
+        to: "/auth/sign-in",
+        search: {
+          redirect: location.href,
+        },
+      })
+    }
+  },
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData(userQueries.me())
   },

@@ -1,12 +1,12 @@
+import { serverEnv } from "@/configs/env.server"
 import { createServerFn } from "@tanstack/react-start"
-import { getServerEnv } from "../configs/env"
 
 /**
  * Example Server Function accessing server-only environment variables securely.
  */
 export const getSecretData = createServerFn({ method: "GET" }).handler(
   async () => {
-    const { OPEN_AI_API_KEY } = getServerEnv()
+    const { OPEN_AI_API_KEY } = serverEnv
 
     // In a real app, you would use this key to fetch data from an external API
     // const response = await fetch('https://api.openai.com/v1/models', {
