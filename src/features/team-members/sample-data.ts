@@ -1,4 +1,4 @@
-import { SAMPLE_USER_1, SAMPLE_USER_2 } from "../users/sample-data"
+import { SAMPLE_USER_1, SAMPLE_USER_2 } from "../users"
 
 export const SAMPLE_TEAM_MEMBERS = [
   {

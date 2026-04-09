@@ -18,8 +18,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { SignInSchema } from "@/features/users/schemas"
-import { authMutationOptions } from "@/features/users/queries"
+import { SignInSchema } from "@/features/auth/schemas"
+import { authMutationOptions } from "@/features/auth/queries"
 
 export const Route = createFileRoute("/auth/sign-in")({
   component: SignInPage,
@@ -40,12 +40,16 @@ function SignInPage() {
     onSubmit: async ({ value }) => {
       try {
         const response = await signInMutation.mutateAsync(value)
-        // Store token in localStorage
+        // Store auth data in localStorage
         localStorage.setItem("access_token", response.access_token)
+        localStorage.setItem("refresh_token", response.refresh_token)
+        localStorage.setItem("expiration", response.expiration)
+        localStorage.setItem("refresh_expiration", response.refresh_expiration)
+
         toast.success("Đăng nhập thành công")
         navigate({ to: "/dashboard" })
       } catch (error) {
-        toast.error("Đăng nhập thất bại. Vui lòng kiểm tra lại.")
+        toast.error("Đăng nhập thất bại. Vui lòng thử lại.")
         console.error(error)
       }
     },

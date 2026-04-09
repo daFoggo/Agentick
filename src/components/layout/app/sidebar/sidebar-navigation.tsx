@@ -15,7 +15,7 @@ export const SidebarGroupSection = ({ group }: { group: ISidebarGroup }) => {
     <SidebarGroup key={group.label || "default"}>
       {group.label && <SidebarGroupLabel>{group.label}</SidebarGroupLabel>}
       <SidebarGroupContent>
-        <SidebarMenu>
+        <SidebarMenu className="gap-0.5">
           {group.items.map((item) => (
             <SidebarMenuItem key={item.to}>
               <Link to={item.to}>
@@ -35,7 +35,6 @@ export const SidebarGroupSection = ({ group }: { group: ISidebarGroup }) => {
                         isActive ? "text-foreground" : "text-muted-foreground"
                       )}
                     >
-                      
                       {item.title}
                     </span>
                   </SidebarMenuButton>

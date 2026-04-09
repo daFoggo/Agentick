@@ -1,8 +1,4 @@
-import {
-  SAMPLE_USER_1,
-  SAMPLE_USER_2,
-  SAMPLE_USER_3,
-} from "../users/sample-data"
+import { SAMPLE_USER_1, SAMPLE_USER_2, SAMPLE_USER_3 } from "../users"
 import type { IProjectMember } from "./types"
 
 export const SAMPLE_PROJECT_MEMBERS: IProjectMember[] = [

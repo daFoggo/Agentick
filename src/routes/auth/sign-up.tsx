@@ -18,8 +18,8 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { authMutationOptions } from "@/features/users/queries"
-import { SignUpSchema } from "@/features/users/schemas"
+import { authMutationOptions } from "@/features/auth/queries"
+import { SignUpSchema, type TSignUpInput } from "@/features/auth/schemas"
 
 export const Route = createFileRoute("/auth/sign-up")({
   component: SignUpPage,
@@ -34,18 +34,25 @@ function SignUpPage() {
       name: "",
       email: "",
       password: "",
-    },
+      avatarUrl: "",
+    } as TSignUpInput,
     validators: {
       onSubmit: SignUpSchema,
     },
     onSubmit: async ({ value }) => {
+      console.log("Submit started with value:", value)
+      const { avatarUrl, ...rest } = value
+      const data: TSignUpInput = {
+        ...rest,
+        avatarUrl: avatarUrl || undefined,
+      }
       try {
-        await signUpMutation.mutateAsync(value)
+        await signUpMutation.mutateAsync(data)
         toast.success("Đăng ký thành công! Vui lòng đăng nhập.")
         navigate({ to: "/auth/sign-in" })
       } catch (error) {
-        toast.error("Đăng ký thất bại. Email có thể đã tồn tại.")
-        console.error(error)
+        console.error("Mutation failed:", error)
+        toast.error("Đăng ký thất bại. Vui lòng thử lại.")
       }
     },
   })

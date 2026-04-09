@@ -8,13 +8,11 @@ const baseOptions: Options = {
   timeout: 30000,
   hooks: {
     beforeRequest: [
-      ({ request }) => {
-        // Tự động đính kèm Token nếu đang ở trình duyệt
-        if (typeof window !== "undefined") {
-          const token = localStorage.getItem("access_token")
-          if (token) {
-            request.headers.set("Authorization", `Bearer ${token}`)
-          }
+      async ({ request }) => {
+        const { getAuthToken } = await import("./auth-token")
+        const token = await getAuthToken()
+        if (token) {
+          request.headers.set("Authorization", `Bearer ${token}`)
         }
       },
     ],

@@ -1,9 +1,13 @@
 import { PageHeader } from "@/components/layout/app/page-header"
 import { AppSidebar } from "@/components/layout/app/sidebar"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { userQueries } from "@/features/users"
 import { createFileRoute, Outlet } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/dashboard")({
+  loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData(userQueries.me())
+  },
   component: DashboardLayout,
   staticData: {
     getTitle: () => "Dashboard",

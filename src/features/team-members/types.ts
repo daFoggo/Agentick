@@ -1,4 +1,4 @@
-import type { TUser } from "../users"
+import type { TUser } from "../auth"
 
 export type TTeamRole = "owner" | "manager" | "member" | "viewer"
 
