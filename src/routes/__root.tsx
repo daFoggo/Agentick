@@ -10,6 +10,7 @@ import { getThemeServerFn } from "@/lib/theme"
 import { SITE_CONFIG } from "@/configs/site"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import type { IRouterContext } from "@/router"
+import { NotFound, ErrorFallback } from "@/components/common/error-pages"
 
 export const Route = createRootRouteWithContext<IRouterContext>()({
   head: () => ({
@@ -38,6 +39,8 @@ export const Route = createRootRouteWithContext<IRouterContext>()({
   }),
   loader: () => getThemeServerFn(),
   shellComponent: RootDocument,
+  notFoundComponent: NotFound,
+  errorComponent: ErrorFallback,
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {

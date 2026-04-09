@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { AuthPageHeader } from "@/components/layout/auth/page-header"
 import { SignUpForm } from "@/features/auth"
+import { PixelBackground } from "@/components/decorations/pixel-background"
 
 export const Route = createFileRoute("/auth/sign-up")({
   component: SignUpPage,
@@ -8,12 +9,21 @@ export const Route = createFileRoute("/auth/sign-up")({
 
 function SignUpPage() {
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-background p-6">
-      <AuthPageHeader />
+    <PixelBackground
+      className="h-screen bg-background"
+      gap={10}
+      speed={20}
+      pattern="cursor"
+      darkColors="#0d1b4b,#1a3a8f,#2563eb"
+      lightColors="#bfdbfe,#93c5fd,#3b82f6"
+    >
+      <div className="flex h-full flex-col p-6">
+        <AuthPageHeader />
 
-      <main className="flex flex-1 items-center justify-center">
-        <SignUpForm />
-      </main>
-    </div>
+        <main className="flex flex-1 items-center justify-center">
+          <SignUpForm />
+        </main>
+      </div>
+    </PixelBackground>
   )
 }
