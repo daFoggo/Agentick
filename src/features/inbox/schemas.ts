@@ -4,7 +4,7 @@ export const GetInboxStatsSchema = z.object({})
 
 export type GetInboxStatsInput = z.infer<typeof GetInboxStatsSchema>
 
-export interface IInboxStats {
+export type TInboxStats = {
   activeCount: number
   bookmarksCount: number
   archiveCount: number

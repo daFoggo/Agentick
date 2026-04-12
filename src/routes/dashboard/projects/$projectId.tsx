@@ -11,7 +11,7 @@ import {
   AvatarImage,
 } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import type { IProjectMember } from "@/features/project-members"
+import type { TProjectMember } from "@/features/project-members"
 import { projectQueryOptions } from "@/features/projects/queries"
 import { SAMPLE_TASKS, TaskTable } from "@/features/tasks"
 import { useSuspenseQuery } from "@tanstack/react-query"
@@ -62,7 +62,7 @@ function ProjectHeader() {
 
       <div className="flex items-center gap-2">
         <AvatarGroup>
-          {project?.members?.slice(0, 2).map((member: IProjectMember) => (
+          {project?.members?.slice(0, 2).map((member: TProjectMember) => (
             <Avatar key={member.id}>
               <AvatarImage src={member?.user?.avatarUrl} />
               <AvatarFallback>{member.user?.name?.charAt(0)}</AvatarFallback>

@@ -83,7 +83,7 @@ export const SignUpForm = (_props: ISignUpFormProps) => {
                   field.state.meta.isTouched && !!field.state.meta.errors.length
                 return (
                   <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Full name</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>User name</FieldLabel>
                     <Input
                       id={field.name}
                       name={field.name}

@@ -1,6 +1,7 @@
+import type { TTeamMember } from "./schemas"
 import { SAMPLE_USER_1, SAMPLE_USER_2 } from "../users"
 
-export const SAMPLE_TEAM_MEMBERS = [
+export const SAMPLE_TEAM_MEMBERS: TTeamMember[] = [
   {
     id: "team-member-1",
     teamId: "team-1",

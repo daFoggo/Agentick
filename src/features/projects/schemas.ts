@@ -1,6 +1,6 @@
 import { z } from "zod"
-import type { IProjectMember } from "../project-members"
-import type { ITask } from "../tasks"
+import type { TProjectMember } from "../project-members"
+import type { TTask } from "../tasks"
 
 /**
  * @description Project Schema & Type
@@ -8,17 +8,16 @@ import type { ITask } from "../tasks"
 export const ProjectSchema = z.object({
   id: z.string(),
   teamId: z.string(),
-  name: z.string().min(3),
+  name: z.string().min(3, "Tên dự án tối thiểu 3 ký tự"),
   description: z.string().optional(),
-  avatarUrl: z.url().optional(),
-  createdAt: z.iso.datetime().optional(),
-  
-  // Relations (Dùng any hoặc define cụ thể nếu muốn, ở đây tạm dùng type cũ để tương thích)
-  members: z.custom<IProjectMember[]>().optional(),
-  tasks: z.custom<ITask[]>().optional(),
+  avatarUrl: z.string().url().optional().or(z.literal("")),
+  createdAt: z.string().datetime().optional(),
 })
 
-export type TProject = z.infer<typeof ProjectSchema>
+export type TProject = z.infer<typeof ProjectSchema> & {
+  members?: TProjectMember[]
+  tasks?: TTask[]
+}
 
 /**
  * @description Inputs for Project operations
@@ -31,6 +30,14 @@ export const GetProjectsSchema = z.object({
   teamId: z.string().optional(),
 })
 
+export const CreateProjectSchema = ProjectSchema.omit({
+  id: true,
+  createdAt: true,
+})
+
+export const UpdateProjectSchema = CreateProjectSchema.partial()
+
 export type TGetProjectInput = z.infer<typeof GetProjectSchema>
 export type TGetProjectsInput = z.infer<typeof GetProjectsSchema>
-
+export type TCreateProjectInput = z.infer<typeof CreateProjectSchema>
+export type TUpdateProjectInput = z.infer<typeof UpdateProjectSchema>

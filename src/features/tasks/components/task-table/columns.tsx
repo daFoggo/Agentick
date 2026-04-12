@@ -13,7 +13,7 @@ import {
   TASK_STATUS_CATALOG,
   TASK_TYPE_CATALOG,
 } from "@/features/tasks/constants"
-import type { ITask } from "@/features/tasks/types"
+import type { TTask } from "@/features/tasks"
 import { ChevronDown, MoreHorizontal, Pencil, Trash2 } from "lucide-react"
 import { generateColumns } from "@/lib/data-table"
 
@@ -39,7 +39,7 @@ function getTypeOption(value: string) {
 
 // ── Column definitions ─────────────────────────────────────────────────────
 
-export const taskColumns = generateColumns<ITask>([
+export const taskColumns = generateColumns<TTask>([
   // 1. Title (with expand for sub-tasks)
   {
     accessorKey: "title",
@@ -216,7 +216,7 @@ export const taskColumns = generateColumns<ITask>([
     label: "Assignee",
     size: 150,
     cell: ({ getValue }) => {
-      const assignee = getValue() as ITask["assignee"]
+      const assignee = getValue() as TTask["assignee"]
       if (!assignee)
         return <span className="text-xs text-muted-foreground">Unassigned</span>
       return (

@@ -5,13 +5,13 @@ import {
   TASK_STATUS_CATALOG,
   TASK_TYPE_CATALOG,
 } from "./constants"
-import type { ITask } from "./types"
+import type { TTask } from "./schemas"
 
 export const SAMPLE_TASK_TYPES = TASK_TYPE_CATALOG
 export const SAMPLE_TASK_STATUSES = TASK_STATUS_CATALOG
 export const SAMPLE_TASK_PRIORITIES = TASK_PRIORITY_CATALOG
 
-export const SAMPLE_TASKS: ITask[] = [
+export const SAMPLE_TASKS: TTask[] = [
   {
     id: "task-1",
     projectId: SAMPLE_PROJECTS[0].id,

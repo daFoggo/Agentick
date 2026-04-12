@@ -1,6 +1,6 @@
 import { ViewModeList } from "@/components/layout/app/view-mode-list"
 import { INBOX_VIEW_MODE_CATALOG, buildViewModes } from "@/constants/view-mode-list"
-import type { IInboxStats } from "@/features/inbox"
+import type { TInboxStats } from "@/features/inbox"
 import { createFileRoute } from "@tanstack/react-router"
 import { inboxStatsQueryOptions } from "@/features/inbox/queries"
 import { useSuspenseQuery } from "@tanstack/react-query"
@@ -11,7 +11,7 @@ const inboxRenderers = {
   archive: () => <div>Inbox archived items</div>,
 }
 
-const toInboxBadgeMap = (stats: IInboxStats) => ({
+const toInboxBadgeMap = (stats: TInboxStats) => ({
   active: stats.activeCount,
   bookmarks: stats.bookmarksCount,
   archive: stats.archiveCount,

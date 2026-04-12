@@ -1,9 +1,8 @@
 import '@tanstack/react-start/server-only'
 
-import type { GetInboxStatsInput } from "./schemas"
-import type { IInboxStats } from "./schemas"
+import type { GetInboxStatsInput, TInboxStats } from "./schemas"
 
-export async function fetchInboxStats(_params: GetInboxStatsInput): Promise<IInboxStats> {
+export async function fetchInboxStats(_params: GetInboxStatsInput): Promise<TInboxStats> {
   // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 300))
 

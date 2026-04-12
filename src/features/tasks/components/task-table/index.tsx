@@ -1,9 +1,9 @@
 import { DataTable } from "@/components/common/data-table"
-import type { ITask } from "@/features/tasks/types"
+import type { TTask } from "@/features/tasks"
 import { taskColumns } from "./columns"
 
 interface ITaskTableProps {
-  data: ITask[]
+  data: TTask[]
   groupBy?: string
   defaultPageSize?: number
 }
@@ -14,7 +14,7 @@ export const TaskTable = ({
   defaultPageSize = 20,
 }: ITaskTableProps) => {
   return (
-    <DataTable<ITask>
+    <DataTable<TTask>
       data={data}
       columns={taskColumns}
       getRowId={(row) => row.id}

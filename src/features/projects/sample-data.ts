@@ -1,6 +1,6 @@
 import { SAMPLE_PROJECT_MEMBERS } from "../project-members/sample-data"
 import { SAMPLE_TEAM } from "../teams/sample-data"
-import type { TProject } from "./types"
+import type { TProject } from "./schemas"
 
 export const SAMPLE_PROJECTS: TProject[] = [
   {

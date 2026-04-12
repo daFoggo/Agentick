@@ -3,7 +3,6 @@ import { AuthPageHeader } from "@/components/layout/auth/page-header"
 import { Button } from "@/components/ui/button"
 import { Link } from "@tanstack/react-router"
 import { Home, RotateCcw } from "lucide-react"
-import { Textarea } from "../ui/textarea"
 
 export const NotFound = () => {
   return (
@@ -31,13 +30,7 @@ export const NotFound = () => {
   )
 }
 
-export const ErrorFallback = ({
-  error,
-  reset,
-}: {
-  error: any
-  reset: () => void
-}) => {
+export const ErrorFallback = ({ reset }: { reset: () => void }) => {
   return (
     <PixelBackground
       className="h-screen bg-background"
