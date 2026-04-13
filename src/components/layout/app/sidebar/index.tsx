@@ -1,4 +1,3 @@
-import { Suspense } from "react"
 import {
   Sidebar,
   SidebarContent,
@@ -9,13 +8,15 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { SidebarGroupSection } from "./sidebar-navigation"
-import { HeaderContent } from "./header-content"
+import { SIDEBAR_PERSONAL, SIDEBAR_TEAM } from "@/constants/sidebar-navigation"
 import { SidebarProjectList } from "@/features/projects"
+import { Suspense } from "react"
+import { HeaderContent } from "./header-content"
+import { SidebarGroupSection } from "./sidebar-navigation"
+import { TeamSwitcher } from "./team-switcher"
 import { ThemeToggleWrapper } from "./theme-toggle-wrapper"
 import { TimezoneViewer } from "./timezone-viewer"
 import { UserProfile } from "./user-profile"
-import { SIDEBAR_PERSONAL, SIDEBAR_TEAM } from "@/constants/sidebar-navigation"
 
 export const AppSidebar = () => {
   return (
@@ -24,6 +25,12 @@ export const AppSidebar = () => {
         <HeaderContent />
       </SidebarHeader>
       <SidebarContent>
+        <SidebarGroup>
+          <SidebarMenu>
+            <TeamSwitcher />
+          </SidebarMenu>
+        </SidebarGroup>
+
         <SidebarGroupSection group={SIDEBAR_PERSONAL} />
 
         <SidebarProjectList />

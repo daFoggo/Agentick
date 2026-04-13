@@ -419,7 +419,7 @@ export const rateLimitLogin = (ip: string): boolean => {
 import { z } from 'zod'
 
 const loginSchema = z.object({
-  email: z.string().email().max(255),
+  email: z.email().max(255),
   password: z.string().min(8).max(100),
 })
 

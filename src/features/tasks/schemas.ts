@@ -10,13 +10,13 @@ import {
  * @description Task Enums from Constants
  */
 export const TaskTypeSchema = z.enum(
-  TASK_TYPE_CATALOG.map((i) => i.value) as [string, ...string[]],
+  TASK_TYPE_CATALOG.map((i) => i.value) as [string, ...string[]]
 )
 export const TaskStatusSchema = z.enum(
-  TASK_STATUS_CATALOG.map((i) => i.value) as [string, ...string[]],
+  TASK_STATUS_CATALOG.map((i) => i.value) as [string, ...string[]]
 )
 export const TaskPrioritySchema = z.enum(
-  TASK_PRIORITY_CATALOG.map((i) => i.value) as [string, ...string[]],
+  TASK_PRIORITY_CATALOG.map((i) => i.value) as [string, ...string[]]
 )
 
 /**
@@ -27,7 +27,7 @@ export const TagSchema = z.object({
   name: z.string(),
   color: z.string(),
   teamId: z.string(),
-  createdAt: z.string().datetime().or(z.date()),
+  createdAt: z.iso.datetime().or(z.date()),
 })
 
 /**
@@ -38,9 +38,9 @@ export const PhaseSchema = z.object({
   projectId: z.string(),
   name: z.string(),
   order: z.number(),
-  startDate: z.string().datetime().optional().or(z.date()),
-  endDate: z.string().datetime().optional().or(z.date()),
-  createdAt: z.string().datetime().or(z.date()),
+  startDate: z.iso.datetime().optional().or(z.date()),
+  endDate: z.iso.datetime().optional().or(z.date()),
+  createdAt: z.iso.datetime().or(z.date()),
 })
 
 /**
@@ -56,12 +56,12 @@ export const TaskSchema = z.object({
   priority: TaskPrioritySchema,
   phaseId: z.string().optional(),
   assigneeId: z.string().optional(),
-  startDate: z.string().datetime().optional().or(z.date()),
-  dueDate: z.string().datetime().optional().or(z.date()),
+  startDate: z.iso.datetime().optional().or(z.date()),
+  dueDate: z.iso.datetime().optional().or(z.date()),
   estimatedHours: z.number().optional(),
   actualHours: z.number().optional(),
-  createdAt: z.string().datetime().or(z.date()),
-  updatedAt: z.string().datetime().or(z.date()),
+  createdAt: z.iso.datetime().or(z.date()),
+  updatedAt: z.iso.datetime().or(z.date()),
 })
 
 /**

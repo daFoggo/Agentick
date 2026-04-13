@@ -7,7 +7,7 @@ import { z } from "zod"
  * The 'server-only' import above ensures this file NEVER reaches the browser bundle.
  */
 const serverEnvSchema = z.object({
-  DATABASE_URL: z.string().url(),
+  DATABASE_URL: z.url(),
   OPEN_AI_API_KEY: z.string().min(1),
   SELINE_TOKEN: z.string().min(1),
   NODE_ENV: z

@@ -14,7 +14,7 @@ export const ProjectMemberSchema = z.object({
   userId: z.string(),
   projectId: z.string(),
   role: ProjectRoleSchema,
-  joinedAt: z.string().datetime().optional(),
+  joinedAt: z.iso.datetime().optional(),
   user: UserSchema.optional(),
 })
 

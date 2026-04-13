@@ -46,8 +46,8 @@ export const UserProfile = () => {
         <DropdownMenuTrigger asChild>
           <SidebarMenuButton size="lg">
             <Avatar size="sm">
-              {user?.avatarUrl && (
-                <AvatarImage src={user.avatarUrl} alt={user.name} />
+              {user?.avatar_url && (
+                <AvatarImage src={user.avatar_url} alt={user.name} />
               )}
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>

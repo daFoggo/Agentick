@@ -64,7 +64,7 @@ function ProjectHeader() {
         <AvatarGroup>
           {project?.members?.slice(0, 2).map((member: TProjectMember) => (
             <Avatar key={member.id}>
-              <AvatarImage src={member?.user?.avatarUrl} />
+              <AvatarImage src={member?.user?.avatar_url} />
               <AvatarFallback>{member.user?.name?.charAt(0)}</AvatarFallback>
             </Avatar>
           ))}

@@ -10,8 +10,8 @@ export const ProjectSchema = z.object({
   teamId: z.string(),
   name: z.string().min(3, "Tên dự án tối thiểu 3 ký tự"),
   description: z.string().optional(),
-  avatarUrl: z.string().url().optional().or(z.literal("")),
-  createdAt: z.string().datetime().optional(),
+  avatarUrl: z.url().optional().or(z.literal("")),
+  createdAt: z.iso.datetime().optional(),
 })
 
 export type TProject = z.infer<typeof ProjectSchema> & {

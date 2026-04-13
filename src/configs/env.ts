@@ -4,8 +4,8 @@ import { z } from "zod"
  * @description CLIENT-SIDE environment variables.
  */
 const clientEnvSchema = z.object({
-  VITE_API_CORE_URL: z.string().url(),
-  VITE_API_AI_URL: z.string().url(),
+  VITE_API_CORE_URL: z.url(),
+  VITE_API_AI_URL: z.url(),
   VITE_APP_NAME: z.string().default("Agentick App"),
 })
 
