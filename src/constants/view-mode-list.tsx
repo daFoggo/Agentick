@@ -8,6 +8,7 @@ import {
   Kanban,
   LayoutDashboard,
   ListTree,
+  Settings,
   Users,
 } from "lucide-react"
 import type { ReactNode } from "react"
@@ -70,6 +71,11 @@ export const TEAM_VIEW_MODE_CATALOG: IViewModeCatalogItem[] = [
     value: "members",
     label: "Members",
     icon: Users,
+  },
+  {
+    value: "settings",
+    label: "Settings",
+    icon: Settings,
   },
 ]
 

@@ -2,9 +2,6 @@ import { z } from "zod"
 import type { TProject } from "../projects"
 import type { TTeamMember } from "../team-members"
 
-/**
- * @description Team Schema (Single Source of Truth) - Using snake_case to match Backend
- */
 export const TeamSchema = z.object({
   id: z.string(),
   name: z.string().min(2, "Tên team tối thiểu 2 ký tự"),
@@ -16,9 +13,6 @@ export const TeamSchema = z.object({
   updated_at: z.string().optional().nullable(),
 })
 
-/**
- * @description Team Types inferred from Zod Schema
- */
 export type TTeam = z.infer<typeof TeamSchema> & {
   members?: TTeamMember[]
   projects?: TProject[]
@@ -32,16 +26,17 @@ export const CreateTeamSchema = z.object({
 
 export const UpdateTeamSchema = CreateTeamSchema.partial()
 
-// Input Schemas for Functions - Using snake_case
-export const GetTeamsSchema = z.object({
-  ordering: z.string().optional(),
-  page: z.number().optional(),
-  page_size: z.number().optional(),
-  id__eq: z.string().optional(),
-  name__ilike: z.string().optional(),
-  owner_id__eq: z.string().optional(),
-  is_deleted__eq: z.boolean().optional(),
-}).optional()
+export const GetTeamsSchema = z
+  .object({
+    ordering: z.string().optional(),
+    page: z.number().optional(),
+    page_size: z.number().optional(),
+    id__eq: z.string().optional(),
+    name__ilike: z.string().optional(),
+    owner_id__eq: z.string().optional(),
+    is_deleted__eq: z.boolean().optional(),
+  })
+  .optional()
 
 export const FetchTeamByIdSchema = z.string()
 

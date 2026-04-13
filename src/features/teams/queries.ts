@@ -1,4 +1,8 @@
-import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import {
+  queryOptions,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query"
 import {
   fetchTeamsFn,
   fetchMyTeamsFn,
@@ -8,9 +12,6 @@ import {
   deleteTeamFn,
 } from "./functions"
 
-/**
- * @description Query options cho tính năng Teams
- */
 export const teamQueries = {
   all: (params?: { name__ilike?: string; page?: number; size?: number }) =>
     queryOptions({
@@ -29,9 +30,6 @@ export const teamQueries = {
     }),
 }
 
-/**
- * @description Mutations cho tính năng Teams
- */
 export const useTeamMutations = () => {
   const queryClient = useQueryClient()
 
@@ -43,10 +41,13 @@ export const useTeamMutations = () => {
   })
 
   const update = useMutation({
-    mutationFn: (data: { team_id: string; payload: any }) => updateTeamFn({ data }),
+    mutationFn: (data: { team_id: string; payload: any }) =>
+      updateTeamFn({ data }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["teams", "list"] })
-      queryClient.invalidateQueries({ queryKey: ["teams", "detail", variables.team_id] })
+      queryClient.invalidateQueries({
+        queryKey: ["teams", "detail", variables.team_id],
+      })
     },
   })
 

@@ -1,4 +1,8 @@
-import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import {
+  queryOptions,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query"
 import {
   fetchTeamMembersFn,
   addTeamMemberFn,
@@ -6,9 +10,6 @@ import {
   removeTeamMemberFn,
 } from "./functions"
 
-/**
- * @description Query options cho tính năng Team Members
- */
 export const teamMemberQueries = {
   list: (team_id: string) =>
     queryOptions({
@@ -17,25 +18,31 @@ export const teamMemberQueries = {
     }),
 }
 
-/**
- * @description Mutations cho tính năng Team Members
- */
 export const useTeamMemberMutations = () => {
   const queryClient = useQueryClient()
 
   const add = useMutation({
-    mutationFn: (data: { team_id: string; payload: { user_id: string; role: any } }) =>
-      addTeamMemberFn({ data }),
+    mutationFn: (data: {
+      team_id: string
+      payload: { user_id: string; role: any }
+    }) => addTeamMemberFn({ data }),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["teams", variables.team_id, "members"] })
+      queryClient.invalidateQueries({
+        queryKey: ["teams", variables.team_id, "members"],
+      })
     },
   })
 
   const updateRole = useMutation({
-    mutationFn: (data: { team_id: string; user_id: string; payload: { role: any } }) =>
-      updateTeamMemberRoleFn({ data }),
+    mutationFn: (data: {
+      team_id: string
+      user_id: string
+      payload: { role: any }
+    }) => updateTeamMemberRoleFn({ data }),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["teams", variables.team_id, "members"] })
+      queryClient.invalidateQueries({
+        queryKey: ["teams", variables.team_id, "members"],
+      })
     },
   })
 
@@ -43,7 +50,9 @@ export const useTeamMemberMutations = () => {
     mutationFn: (data: { team_id: string; user_id: string }) =>
       removeTeamMemberFn({ data }),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["teams", variables.team_id, "members"] })
+      queryClient.invalidateQueries({
+        queryKey: ["teams", variables.team_id, "members"],
+      })
     },
   })
 

@@ -29,12 +29,16 @@ import {
   Loader2,
 } from "lucide-react"
 
-interface IMemberListProps {
+interface ITeamMemberListProps {
   teamId: string
 }
 
-export const MemberList = ({ teamId }: IMemberListProps) => {
-  const { data: membersData, isLoading, error } = useQuery(teamMemberQueries.list(teamId))
+export const TeamMemberList = ({ teamId }: ITeamMemberListProps) => {
+  const {
+    data: membersData,
+    isLoading,
+    error,
+  } = useQuery(teamMemberQueries.list(teamId))
   const { updateRole, remove } = useTeamMemberMutations()
 
   const members = membersData?.founds ?? []
@@ -98,7 +102,10 @@ export const MemberList = ({ teamId }: IMemberListProps) => {
         <TableBody>
           {members.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+              <TableCell
+                colSpan={4}
+                className="h-24 text-center text-muted-foreground"
+              >
                 No members found.
               </TableCell>
             </TableRow>

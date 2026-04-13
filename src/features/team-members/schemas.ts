@@ -23,7 +23,6 @@ export const TeamMemberSchema = z.object({
 export type TTeamRole = z.infer<typeof TeamRoleSchema>
 export type TTeamMember = z.infer<typeof TeamMemberSchema>
 
-// Input Schemas for Functions - Using snake_case
 export const FetchTeamMembersSchema = z.string()
 
 export const AddTeamMemberSchema = z.object({
