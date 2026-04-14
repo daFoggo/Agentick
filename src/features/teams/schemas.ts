@@ -36,7 +36,7 @@ export const GetTeamsSchema = z
 export const FetchTeamByIdSchema = z.string()
 
 export const UpdateTeamInputSchema = z.object({
-  team_id: z.string(),
+  teamId: z.string(),
   payload: UpdateTeamSchema,
 })
 

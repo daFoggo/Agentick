@@ -32,6 +32,8 @@ import { Route as DashboardTeamIdInboxActiveRouteImport } from './routes/dashboa
 import { Route as DashboardTeamIdProjectsProjectIdRouteRouteImport } from './routes/dashboard/$teamId/projects/$projectId/route'
 import { Route as DashboardTeamIdProjectsProjectIdIndexRouteImport } from './routes/dashboard/$teamId/projects/$projectId/index'
 import { Route as DashboardTeamIdProjectsProjectIdTimelineRouteImport } from './routes/dashboard/$teamId/projects/$projectId/timeline'
+import { Route as DashboardTeamIdProjectsProjectIdSettingsRouteImport } from './routes/dashboard/$teamId/projects/$projectId/settings'
+import { Route as DashboardTeamIdProjectsProjectIdMembersRouteImport } from './routes/dashboard/$teamId/projects/$projectId/members'
 import { Route as DashboardTeamIdProjectsProjectIdListRouteImport } from './routes/dashboard/$teamId/projects/$projectId/list'
 import { Route as DashboardTeamIdProjectsProjectIdDashboardRouteImport } from './routes/dashboard/$teamId/projects/$projectId/dashboard'
 import { Route as DashboardTeamIdProjectsProjectIdBoardRouteImport } from './routes/dashboard/$teamId/projects/$projectId/board'
@@ -167,6 +169,18 @@ const DashboardTeamIdProjectsProjectIdTimelineRoute =
     path: '/timeline',
     getParentRoute: () => DashboardTeamIdProjectsProjectIdRouteRoute,
   } as any)
+const DashboardTeamIdProjectsProjectIdSettingsRoute =
+  DashboardTeamIdProjectsProjectIdSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => DashboardTeamIdProjectsProjectIdRouteRoute,
+  } as any)
+const DashboardTeamIdProjectsProjectIdMembersRoute =
+  DashboardTeamIdProjectsProjectIdMembersRouteImport.update({
+    id: '/members',
+    path: '/members',
+    getParentRoute: () => DashboardTeamIdProjectsProjectIdRouteRoute,
+  } as any)
 const DashboardTeamIdProjectsProjectIdListRoute =
   DashboardTeamIdProjectsProjectIdListRouteImport.update({
     id: '/list',
@@ -211,6 +225,8 @@ export interface FileRoutesByFullPath {
   '/dashboard/$teamId/projects/$projectId/board': typeof DashboardTeamIdProjectsProjectIdBoardRoute
   '/dashboard/$teamId/projects/$projectId/dashboard': typeof DashboardTeamIdProjectsProjectIdDashboardRoute
   '/dashboard/$teamId/projects/$projectId/list': typeof DashboardTeamIdProjectsProjectIdListRoute
+  '/dashboard/$teamId/projects/$projectId/members': typeof DashboardTeamIdProjectsProjectIdMembersRoute
+  '/dashboard/$teamId/projects/$projectId/settings': typeof DashboardTeamIdProjectsProjectIdSettingsRoute
   '/dashboard/$teamId/projects/$projectId/timeline': typeof DashboardTeamIdProjectsProjectIdTimelineRoute
   '/dashboard/$teamId/projects/$projectId/': typeof DashboardTeamIdProjectsProjectIdIndexRoute
 }
@@ -235,6 +251,8 @@ export interface FileRoutesByTo {
   '/dashboard/$teamId/projects/$projectId/board': typeof DashboardTeamIdProjectsProjectIdBoardRoute
   '/dashboard/$teamId/projects/$projectId/dashboard': typeof DashboardTeamIdProjectsProjectIdDashboardRoute
   '/dashboard/$teamId/projects/$projectId/list': typeof DashboardTeamIdProjectsProjectIdListRoute
+  '/dashboard/$teamId/projects/$projectId/members': typeof DashboardTeamIdProjectsProjectIdMembersRoute
+  '/dashboard/$teamId/projects/$projectId/settings': typeof DashboardTeamIdProjectsProjectIdSettingsRoute
   '/dashboard/$teamId/projects/$projectId/timeline': typeof DashboardTeamIdProjectsProjectIdTimelineRoute
   '/dashboard/$teamId/projects/$projectId': typeof DashboardTeamIdProjectsProjectIdIndexRoute
 }
@@ -264,6 +282,8 @@ export interface FileRoutesById {
   '/dashboard/$teamId/projects/$projectId/board': typeof DashboardTeamIdProjectsProjectIdBoardRoute
   '/dashboard/$teamId/projects/$projectId/dashboard': typeof DashboardTeamIdProjectsProjectIdDashboardRoute
   '/dashboard/$teamId/projects/$projectId/list': typeof DashboardTeamIdProjectsProjectIdListRoute
+  '/dashboard/$teamId/projects/$projectId/members': typeof DashboardTeamIdProjectsProjectIdMembersRoute
+  '/dashboard/$teamId/projects/$projectId/settings': typeof DashboardTeamIdProjectsProjectIdSettingsRoute
   '/dashboard/$teamId/projects/$projectId/timeline': typeof DashboardTeamIdProjectsProjectIdTimelineRoute
   '/dashboard/$teamId/projects/$projectId/': typeof DashboardTeamIdProjectsProjectIdIndexRoute
 }
@@ -294,6 +314,8 @@ export interface FileRouteTypes {
     | '/dashboard/$teamId/projects/$projectId/board'
     | '/dashboard/$teamId/projects/$projectId/dashboard'
     | '/dashboard/$teamId/projects/$projectId/list'
+    | '/dashboard/$teamId/projects/$projectId/members'
+    | '/dashboard/$teamId/projects/$projectId/settings'
     | '/dashboard/$teamId/projects/$projectId/timeline'
     | '/dashboard/$teamId/projects/$projectId/'
   fileRoutesByTo: FileRoutesByTo
@@ -318,6 +340,8 @@ export interface FileRouteTypes {
     | '/dashboard/$teamId/projects/$projectId/board'
     | '/dashboard/$teamId/projects/$projectId/dashboard'
     | '/dashboard/$teamId/projects/$projectId/list'
+    | '/dashboard/$teamId/projects/$projectId/members'
+    | '/dashboard/$teamId/projects/$projectId/settings'
     | '/dashboard/$teamId/projects/$projectId/timeline'
     | '/dashboard/$teamId/projects/$projectId'
   id:
@@ -346,6 +370,8 @@ export interface FileRouteTypes {
     | '/dashboard/$teamId/projects/$projectId/board'
     | '/dashboard/$teamId/projects/$projectId/dashboard'
     | '/dashboard/$teamId/projects/$projectId/list'
+    | '/dashboard/$teamId/projects/$projectId/members'
+    | '/dashboard/$teamId/projects/$projectId/settings'
     | '/dashboard/$teamId/projects/$projectId/timeline'
     | '/dashboard/$teamId/projects/$projectId/'
   fileRoutesById: FileRoutesById
@@ -521,6 +547,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardTeamIdProjectsProjectIdTimelineRouteImport
       parentRoute: typeof DashboardTeamIdProjectsProjectIdRouteRoute
     }
+    '/dashboard/$teamId/projects/$projectId/settings': {
+      id: '/dashboard/$teamId/projects/$projectId/settings'
+      path: '/settings'
+      fullPath: '/dashboard/$teamId/projects/$projectId/settings'
+      preLoaderRoute: typeof DashboardTeamIdProjectsProjectIdSettingsRouteImport
+      parentRoute: typeof DashboardTeamIdProjectsProjectIdRouteRoute
+    }
+    '/dashboard/$teamId/projects/$projectId/members': {
+      id: '/dashboard/$teamId/projects/$projectId/members'
+      path: '/members'
+      fullPath: '/dashboard/$teamId/projects/$projectId/members'
+      preLoaderRoute: typeof DashboardTeamIdProjectsProjectIdMembersRouteImport
+      parentRoute: typeof DashboardTeamIdProjectsProjectIdRouteRoute
+    }
     '/dashboard/$teamId/projects/$projectId/list': {
       id: '/dashboard/$teamId/projects/$projectId/list'
       path: '/list'
@@ -589,6 +629,8 @@ interface DashboardTeamIdProjectsProjectIdRouteRouteChildren {
   DashboardTeamIdProjectsProjectIdBoardRoute: typeof DashboardTeamIdProjectsProjectIdBoardRoute
   DashboardTeamIdProjectsProjectIdDashboardRoute: typeof DashboardTeamIdProjectsProjectIdDashboardRoute
   DashboardTeamIdProjectsProjectIdListRoute: typeof DashboardTeamIdProjectsProjectIdListRoute
+  DashboardTeamIdProjectsProjectIdMembersRoute: typeof DashboardTeamIdProjectsProjectIdMembersRoute
+  DashboardTeamIdProjectsProjectIdSettingsRoute: typeof DashboardTeamIdProjectsProjectIdSettingsRoute
   DashboardTeamIdProjectsProjectIdTimelineRoute: typeof DashboardTeamIdProjectsProjectIdTimelineRoute
   DashboardTeamIdProjectsProjectIdIndexRoute: typeof DashboardTeamIdProjectsProjectIdIndexRoute
 }
@@ -601,6 +643,10 @@ const DashboardTeamIdProjectsProjectIdRouteRouteChildren: DashboardTeamIdProject
       DashboardTeamIdProjectsProjectIdDashboardRoute,
     DashboardTeamIdProjectsProjectIdListRoute:
       DashboardTeamIdProjectsProjectIdListRoute,
+    DashboardTeamIdProjectsProjectIdMembersRoute:
+      DashboardTeamIdProjectsProjectIdMembersRoute,
+    DashboardTeamIdProjectsProjectIdSettingsRoute:
+      DashboardTeamIdProjectsProjectIdSettingsRoute,
     DashboardTeamIdProjectsProjectIdTimelineRoute:
       DashboardTeamIdProjectsProjectIdTimelineRoute,
     DashboardTeamIdProjectsProjectIdIndexRoute:

@@ -5,6 +5,7 @@ import {
   addTeamMember,
   updateTeamMemberRole,
   removeTeamMember,
+  getMemberProjectCount,
 } from "./server"
 import {
   FetchTeamMembersSchema,
@@ -16,21 +17,26 @@ import {
 export const fetchTeamMembersFn = createServerFn({ method: "GET" })
   .middleware([requestLoggerMiddleware])
   .inputValidator(FetchTeamMembersSchema)
-  .handler(({ data: team_id }) => fetchTeamMembers(team_id))
+  .handler(({ data }) => fetchTeamMembers(data))
 
 export const addTeamMemberFn = createServerFn({ method: "POST" })
   .middleware([requestLoggerMiddleware])
   .inputValidator(AddTeamMemberInputSchema)
-  .handler(({ data }) => addTeamMember(data.team_id, data.payload))
+  .handler(({ data }) => addTeamMember(data.teamId, data.payload))
 
 export const updateTeamMemberRoleFn = createServerFn({ method: "POST" })
   .middleware([requestLoggerMiddleware])
   .inputValidator(UpdateTeamMemberRoleInputSchema)
   .handler(({ data }) =>
-    updateTeamMemberRole(data.team_id, data.user_id, data.payload)
+    updateTeamMemberRole(data.teamId, data.user_id, data.payload)
   )
 
 export const removeTeamMemberFn = createServerFn({ method: "POST" })
   .middleware([requestLoggerMiddleware])
   .inputValidator(RemoveTeamMemberSchema)
-  .handler(({ data }) => removeTeamMember(data.team_id, data.user_id))
+  .handler(({ data }) => removeTeamMember(data.teamId, data.user_id))
+
+export const getMemberProjectCountFn = createServerFn({ method: "GET" })
+  .middleware([requestLoggerMiddleware])
+  .inputValidator(RemoveTeamMemberSchema) // Reusing RemoveTeamMemberSchema since it has teamId and user_id
+  .handler(({ data }) => getMemberProjectCount(data.teamId, data.user_id))

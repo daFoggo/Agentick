@@ -10,19 +10,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { TEAM_ROLE_CATALOG, getTeamRoleOption } from "@/constants/team-roles"
-import { ChevronDown, Loader2, MoreHorizontal, UserMinus } from "lucide-react"
+import { ChevronDown, MoreHorizontal, UserMinus } from "lucide-react"
 import { generateColumns } from "@/lib/data-table"
-import type { TTeamMember } from "../schemas"
-import { memberProjectCountQueryOptions, useTeamMemberMutations } from "../queries"
+import type { TProjectMember } from "../schemas"
+import { useProjectMemberMutations } from "../queries"
 import type { CellContext } from "@tanstack/react-table"
-import { useState } from "react"
-import { useQueryClient } from "@tanstack/react-query"
-import { RemoveTeamMemberDialog } from "./remove-team-member-dialog"
 
-const RoleCell = ({ row }: CellContext<TTeamMember, any>) => {
+// Reuse team roles catalog since project roles are identical (owner, manager, member, viewer)
+
+const RoleCell = ({ row }: CellContext<TProjectMember, any>) => {
   const member = row.original
-  const { updateRole } = useTeamMemberMutations()
-  const roleOption = getTeamRoleOption(member.role)
+  const { updateRole } = useProjectMemberMutations()
+  const roleOption = getTeamRoleOption(member.role as any)
 
   if (!roleOption) return null
 
@@ -30,7 +29,7 @@ const RoleCell = ({ row }: CellContext<TTeamMember, any>) => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Badge
-          variant={roleOption.variant}
+          variant={roleOption.variant as any}
           className={`cursor-pointer transition-colors ${roleOption.className}`}
         >
           <roleOption.icon className="size-3" />
@@ -48,9 +47,9 @@ const RoleCell = ({ row }: CellContext<TTeamMember, any>) => {
             disabled={member.role === opt.value}
             onClick={() =>
               updateRole.mutate({
-                teamId: member.team_id,
+                projectId: member.project_id,
                 user_id: member.user_id,
-                payload: { role: opt.value },
+                payload: { role: opt.value as any },
               })
             }
           >
@@ -63,79 +62,36 @@ const RoleCell = ({ row }: CellContext<TTeamMember, any>) => {
   )
 }
 
-const ActionCell = ({ row }: CellContext<TTeamMember, any>) => {
+const ActionCell = ({ row }: CellContext<TProjectMember, any>) => {
   const member = row.original
-  const { removeMember } = useTeamMemberMutations()
-  const queryClient = useQueryClient()
-  
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
-  const [projectCount, setProjectCount] = useState<number>(0)
-  const [isChecking, setIsChecking] = useState(false)
-
-  const handleRemoveClick = async () => {
-    setIsChecking(true)
-    try {
-      const count = await queryClient.fetchQuery(
-        memberProjectCountQueryOptions(member.team_id, member.user_id)
-      )
-      setProjectCount(count)
-      setIsConfirmOpen(true)
-    } catch (error) {
-      setIsConfirmOpen(true)
-    } finally {
-      setIsChecking(false)
-    }
-  }
-
-  const handleConfirmRemove = () => {
-    removeMember.mutate(
-      {
-        teamId: member.team_id,
-        user_id: member.user_id,
-      },
-      {
-        onSuccess: () => setIsConfirmOpen(false),
-      }
-    )
-  }
+  const { removeMember } = useProjectMemberMutations()
 
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="size-8">
-            <MoreHorizontal className="size-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuItem
-            className="text-destructive focus:bg-destructive/10 focus:text-destructive"
-            disabled={isChecking}
-            onClick={handleRemoveClick}
-          >
-            {isChecking ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <UserMinus className="size-4" />
-            )}
-            Remove from Team
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <RemoveTeamMemberDialog
-        member={member}
-        projectCount={projectCount}
-        open={isConfirmOpen}
-        onOpenChange={setIsConfirmOpen}
-        onConfirm={handleConfirmRemove}
-        isPending={removeMember.isPending}
-      />
-    </>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="size-8">
+          <MoreHorizontal className="size-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuItem
+          className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+          onClick={() =>
+            removeMember.mutate({
+              projectId: member.project_id,
+              user_id: member.user_id,
+            })
+          }
+        >
+          <UserMinus className="size-4" />
+          Remove from Project
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
-export const teamMemberColumns = generateColumns<TTeamMember>([
+export const projectMemberColumns = generateColumns<TProjectMember>([
   {
     id: "member",
     label: "Member",
@@ -145,7 +101,7 @@ export const teamMemberColumns = generateColumns<TTeamMember>([
       return (
         <div className="flex items-center gap-2">
           <Avatar>
-            <AvatarImage src={member.user?.avatar_url} />
+            <AvatarImage src={member.user?.avatar_url ?? undefined} />
             <AvatarFallback>
               {member.user?.name.slice(0, 2).toUpperCase()}
             </AvatarFallback>

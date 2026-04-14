@@ -8,53 +8,62 @@ import {
   addTeamMemberFn,
   updateTeamMemberRoleFn,
   removeTeamMemberFn,
+  getMemberProjectCountFn,
 } from "./functions"
+import type { TAddTeamMemberInput, TUpdateTeamMemberRoleInput } from "./schemas"
 
-export const teamMemberQueries = {
-  list: (team_id: string) =>
-    queryOptions({
-      queryKey: ["teams", team_id, "members"],
-      queryFn: () => fetchTeamMembersFn({ data: team_id }),
-    }),
+export const teamMemberKeys = {
+  all: ["teamMembers"] as const,
+  lists: () => [...teamMemberKeys.all, "list"] as const,
+  list: (teamId: string) => [...teamMemberKeys.lists(), teamId] as const,
 }
+
+// Query options
+export const teamMembersQueryOptions = (teamId: string) =>
+  queryOptions({
+    queryKey: teamMemberKeys.list(teamId),
+    queryFn: () => fetchTeamMembersFn({ data: { teamId } }),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  })
+
+export const memberProjectCountQueryOptions = (teamId: string, userId: string) =>
+  queryOptions({
+    queryKey: [...teamMemberKeys.list(teamId), userId, "projectCount"],
+    queryFn: () => getMemberProjectCountFn({ data: { teamId, user_id: userId } }),
+    staleTime: 1000 * 30, // 30 seconds
+  })
 
 export const useTeamMemberMutations = () => {
   const queryClient = useQueryClient()
 
-  const add = useMutation({
-    mutationFn: (data: {
-      team_id: string
-      payload: { user_id: string; role: any }
-    }) => addTeamMemberFn({ data }),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["teams", variables.team_id, "members"],
+  const addMember = useMutation({
+    mutationFn: (payload: TAddTeamMemberInput) => addTeamMemberFn({ data: payload }),
+    onSuccess: async (_, variables) => {
+      await queryClient.invalidateQueries({
+        queryKey: teamMemberKeys.list(variables.teamId),
       })
     },
   })
 
   const updateRole = useMutation({
-    mutationFn: (data: {
-      team_id: string
-      user_id: string
-      payload: { role: any }
-    }) => updateTeamMemberRoleFn({ data }),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["teams", variables.team_id, "members"],
+    mutationFn: (payload: TUpdateTeamMemberRoleInput) =>
+      updateTeamMemberRoleFn({ data: payload }),
+    onSuccess: async (_, variables) => {
+      await queryClient.invalidateQueries({
+        queryKey: teamMemberKeys.list(variables.teamId),
       })
     },
   })
 
-  const remove = useMutation({
-    mutationFn: (data: { team_id: string; user_id: string }) =>
+  const removeMember = useMutation({
+    mutationFn: (data: { teamId: string; user_id: string }) =>
       removeTeamMemberFn({ data }),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["teams", variables.team_id, "members"],
+    onSuccess: async (_, variables) => {
+      await queryClient.invalidateQueries({
+        queryKey: teamMemberKeys.list(variables.teamId),
       })
     },
   })
 
-  return { add, updateRole, remove }
+  return { addMember, updateRole, removeMember }
 }

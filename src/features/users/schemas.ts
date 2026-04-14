@@ -26,7 +26,9 @@ export const UserSearchResultSchema = z.object({
 export const SearchUsersInputSchema = z.object({
   q: z.string().min(1).max(100),
   limit: z.number().min(1).max(50).optional(),
-  team_id: z.string().optional(),
+  teamId: z.string().optional(),
+  excludeTeamId: z.string().optional(),
+  excludeProjectId: z.string().optional(),
 })
 
 export type TUserSearchResult = z.infer<typeof UserSearchResultSchema>

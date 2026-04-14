@@ -8,7 +8,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { TTeamMember } from "@/features/team-members"
-import { InviteMemberDialog } from "@/features/team-members"
+import { InviteTeamMemberDialog } from "@/features/team-members"
 import { teamQueries } from "@/features/teams"
 import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
@@ -75,7 +75,7 @@ export function TeamDetailsHeader({ teamId }: ITeamDetailsHeaderProps) {
           <UserPlus />
         </Button>
 
-        <InviteMemberDialog
+        <InviteTeamMemberDialog
           teamId={teamId}
           open={inviteOpen}
           onOpenChange={setInviteOpen}

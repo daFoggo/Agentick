@@ -20,7 +20,10 @@ export const TeamMemberSchema = z.object({
   user: UserSchema.optional(),
 })
 
-export const FetchTeamMembersSchema = z.string()
+export const FetchTeamMembersSchema = z.object({
+  teamId: z.string(),
+  q: z.string().optional(),
+})
 
 export const AddTeamMemberSchema = z.object({
   role: TeamRoleSchema.default("member"),
@@ -31,19 +34,28 @@ export const UpdateTeamMemberRoleSchema = z.object({
   role: TeamRoleSchema,
 })
 
+/**
+ * @description Input schema for adding member (with teamId)
+ */
 export const AddTeamMemberInputSchema = z.object({
-  team_id: z.string(),
+  teamId: z.string(),
   payload: AddTeamMemberSchema,
 })
 
+/**
+ * @description Input schema for updating member role
+ */
 export const UpdateTeamMemberRoleInputSchema = z.object({
-  team_id: z.string(),
+  teamId: z.string(),
   user_id: z.string(),
   payload: UpdateTeamMemberRoleSchema,
 })
 
+/**
+ * @description Input schema for removing member
+ */
 export const RemoveTeamMemberSchema = z.object({
-  team_id: z.string(),
+  teamId: z.string(),
   user_id: z.string(),
 })
 
@@ -61,3 +73,7 @@ export interface TTeamMembersResponse {
 
 export type TTeamRole = z.infer<typeof TeamRoleSchema>
 export type TTeamMember = z.infer<typeof TeamMemberSchema>
+export type TAddTeamMemberPayload = z.infer<typeof AddTeamMemberSchema>
+export type TUpdateTeamMemberRolePayload = z.infer<typeof UpdateTeamMemberRoleSchema>
+export type TAddTeamMemberInput = z.infer<typeof AddTeamMemberInputSchema>
+export type TUpdateTeamMemberRoleInput = z.infer<typeof UpdateTeamMemberRoleInputSchema>

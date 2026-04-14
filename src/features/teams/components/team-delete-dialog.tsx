@@ -63,9 +63,11 @@ export const TeamDeleteDialog = ({
             </Button>
           </AlertDialogTrigger>
 
-          <AlertDialogContent>
+          <AlertDialogContent className="sm:min-w-md">
             <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure you want to delete this team?</AlertDialogTitle>
+              <AlertDialogTitle>
+                Are you sure you want to delete this team?
+              </AlertDialogTitle>
               <AlertDialogDescription>
                 This action cannot be undone. All team data and member access
                 related to this team will be removed.
@@ -73,7 +75,7 @@ export const TeamDeleteDialog = ({
             </AlertDialogHeader>
 
             {isLastTeam ? (
-                <Alert className="max-w-md border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
+              <Alert className="max-w-md border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
                 <AlertTriangle className="size-4" />
                 <AlertTitle>You currently only have 1 team</AlertTitle>
                 <AlertDescription>

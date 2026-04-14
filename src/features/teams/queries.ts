@@ -23,15 +23,15 @@ export const teamQueries = {
       queryKey: ["teams", "me"],
       queryFn: () => fetchMyTeamsFn(),
     }),
-  detail: (team_id?: string) =>
+  detail: (teamId?: string) =>
     queryOptions({
-      queryKey: ["teams", "detail", team_id ?? null],
-      enabled: typeof team_id === "string" && team_id.length > 0,
+      queryKey: ["teams", "detail", teamId ?? null],
+      enabled: typeof teamId === "string" && teamId.length > 0,
       queryFn: () => {
-        if (!team_id) {
-          throw new Error("Missing team_id for team detail query")
+        if (!teamId) {
+          throw new Error("Missing teamId for team detail query")
         }
-        return fetchTeamByIdFn({ data: team_id })
+        return fetchTeamByIdFn({ data: teamId })
       },
     }),
 }
@@ -50,21 +50,21 @@ export const useTeamMutations = () => {
   })
 
   const update = useMutation({
-    mutationFn: (data: { team_id: string; payload: any }) =>
+    mutationFn: (data: { teamId: string; payload: any }) =>
       updateTeamFn({ data }),
     onSuccess: async (_, variables) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["teams", "list"] }),
         queryClient.invalidateQueries({ queryKey: ["teams", "me"] }),
         queryClient.invalidateQueries({
-          queryKey: ["teams", "detail", variables.team_id],
+          queryKey: ["teams", "detail", variables.teamId],
         }),
       ])
     },
   })
 
   const remove = useMutation({
-    mutationFn: (team_id: string) => deleteTeamFn({ data: team_id }),
+    mutationFn: (teamId: string) => deleteTeamFn({ data: teamId }),
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["teams", "list"] }),

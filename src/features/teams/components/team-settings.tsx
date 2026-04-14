@@ -73,7 +73,7 @@ export const TeamSettings = ({ teamId }: ITeamSettingsProps) => {
     try {
       const value = form.getFieldValue(fieldName)
       await update.mutateAsync({
-        team_id: teamId,
+        teamId: teamId,
         payload: { [fieldName]: value },
       })
 

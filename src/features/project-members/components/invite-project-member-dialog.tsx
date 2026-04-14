@@ -1,10 +1,10 @@
-import { userQueries, type TUserSearchResult } from "@/features/users"
 import { useQuery } from "@tanstack/react-query"
-import { Loader2, UserPlus } from "lucide-react"
+import { Loader2, Plus } from "lucide-react"
 import { useDeferredValue, useState } from "react"
 import { toast } from "sonner"
-import { useTeamMemberMutations } from "../queries"
-import type { TTeamRole } from "../schemas"
+import { useProjectMemberMutations } from "../queries"
+import type { TProjectRole } from "../schemas"
+import { userQueries, type TUserSearchResult } from "@/features/users"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -38,28 +38,30 @@ import {
 } from "@/components/ui/select"
 import { ASSIGNABLE_ROLES } from "@/constants/team-roles"
 
-interface IInviteMemberDialogProps {
-  teamId: string
+interface IInviteProjectMemberDialogProps {
+  projectId: string
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export const InviteMemberDialog = ({
-  teamId,
+export const InviteProjectMemberDialog = ({
+  projectId,
   open,
   onOpenChange,
-}: IInviteMemberDialogProps) => {
+}: IInviteProjectMemberDialogProps) => {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedUsers, setSelectedUsers] = useState<TUserSearchResult[]>([])
-  const [selectedRole, setSelectedRole] = useState<TTeamRole>("member")
+  const [selectedRole, setSelectedRole] = useState<TProjectRole>("member")
   const deferredQuery = useDeferredValue(searchQuery)
 
   const anchor = useComboboxAnchor()
+
+  // Use global user search with smart exclusion
   const { data: users = [], isLoading } = useQuery(
-    userQueries.search(deferredQuery, teamId)
+    userQueries.search(deferredQuery, { excludeProjectId: projectId })
   )
 
-  const { add } = useTeamMemberMutations()
+  const { addMember } = useProjectMemberMutations()
 
   const handleAdd = async () => {
     if (selectedUsers.length === 0) return
@@ -67,14 +69,14 @@ export const InviteMemberDialog = ({
     try {
       await Promise.all(
         selectedUsers.map((user) =>
-          add.mutateAsync({
-            team_id: teamId,
+          addMember.mutateAsync({
+            projectId: projectId,
             payload: { user_id: user.id, role: selectedRole },
           })
         )
       )
       toast.success(
-        `${selectedUsers.length} members have been added to the team`
+        `${selectedUsers.length} members have been added to the project`
       )
       handleReset()
       onOpenChange(false)
@@ -102,7 +104,7 @@ export const InviteMemberDialog = ({
         <DialogHeader>
           <DialogTitle>Invite member</DialogTitle>
           <DialogDescription>
-            Search by name or email to find and invite a member to your team.
+            Search by name or email to find and invite a user to your project.
           </DialogDescription>
         </DialogHeader>
 
@@ -174,16 +176,16 @@ export const InviteMemberDialog = ({
             <FieldLabel>Role</FieldLabel>
             <Select
               value={selectedRole}
-              onValueChange={(val) => setSelectedRole(val as TTeamRole)}
+              onValueChange={(val) => setSelectedRole(val as TProjectRole)}
             >
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="p-1">
                 {ASSIGNABLE_ROLES.map((role) => (
                   <SelectItem key={role.value} value={role.value}>
                     <div className="flex items-center gap-2">
-                      <role.icon className="size-4" />
+                      <role.icon className="size-3.5" />
                       {role.label}
                     </div>
                   </SelectItem>
@@ -198,23 +200,23 @@ export const InviteMemberDialog = ({
             type="button"
             variant="ghost"
             onClick={() => handleOpenChange(false)}
-            disabled={add.isPending}
+            disabled={addMember.isPending}
           >
             Cancel
           </Button>
           <Button
             type="button"
             onClick={handleAdd}
-            disabled={selectedUsers.length === 0 || add.isPending}
+            disabled={selectedUsers.length === 0 || addMember.isPending}
           >
-            {add.isPending ? (
+            {addMember.isPending ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
                 <span>Adding...</span>
               </>
             ) : (
               <>
-                <UserPlus className="size-4" />
+                <Plus className="size-4" />
                 <span>Invite Member</span>
               </>
             )}

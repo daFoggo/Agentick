@@ -3,7 +3,7 @@ import { createServerFn } from "@tanstack/react-start"
 import { SearchUsersInputSchema } from "./schemas"
 import { getUserMe, searchUsers } from "./server"
 
-export const getUserMeFn = createServerFn({ method: "POST" })
+export const getUserMeFn = createServerFn({ method: "GET" })
   .middleware([requestLoggerMiddleware])
   .handler(() => getUserMe())
 

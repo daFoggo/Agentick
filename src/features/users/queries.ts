@@ -11,10 +11,26 @@ export const userQueries = {
       queryFn: () => getUserMeFn(),
     }),
 
-  search: (q: string, teamId?: string) =>
+  search: (
+    q: string,
+    options?: {
+      teamId?: string
+      excludeTeamId?: string
+      excludeProjectId?: string
+    }
+  ) =>
     queryOptions({
-      queryKey: ["users", "search", q, teamId],
-      queryFn: () => searchUsersFn({ data: { q, team_id: teamId, limit: 10 } }),
+      queryKey: ["users", "search", q, options],
+      queryFn: () =>
+        searchUsersFn({
+          data: {
+            q,
+            teamId: options?.teamId,
+            excludeTeamId: options?.excludeTeamId,
+            excludeProjectId: options?.excludeProjectId,
+            limit: 10,
+          },
+        }),
       enabled: q.length >= 1,
     }),
 }

@@ -1,20 +1,20 @@
-import { teamMembersQueryOptions } from "../queries"
+import { projectMembersQueryOptions } from "../queries"
 import { useQuery } from "@tanstack/react-query"
 import { Loader2 } from "lucide-react"
 import { DataTable } from "@/components/common/data-table"
-import type { TTeamMember } from "../schemas"
-import { teamMemberColumns } from "./columns"
+import type { TProjectMember } from "../schemas"
+import { projectMemberColumns } from "./columns"
 
-interface ITeamMemberListProps {
-  teamId: string
+interface IProjectMemberListProps {
+  projectId: string
 }
 
-export const TeamMemberList = ({ teamId }: ITeamMemberListProps) => {
+export const ProjectMemberList = ({ projectId }: IProjectMemberListProps) => {
   const {
     data: membersData,
     isLoading,
     error,
-  } = useQuery(teamMembersQueryOptions(teamId))
+  } = useQuery(projectMembersQueryOptions(projectId))
 
   const members = membersData?.founds ?? []
 
@@ -35,9 +35,9 @@ export const TeamMemberList = ({ teamId }: ITeamMemberListProps) => {
   }
 
   return (
-    <DataTable<TTeamMember>
+    <DataTable<TProjectMember>
       data={members}
-      columns={teamMemberColumns}
+      columns={projectMemberColumns}
       getRowId={(row) => row.id}
       showPagination={false}
       enablePagination={false}
