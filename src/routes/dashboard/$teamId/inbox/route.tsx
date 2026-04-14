@@ -33,8 +33,8 @@ function RouteComponent() {
         catalog={INBOX_VIEW_MODE_CATALOG}
         scope="inbox"
         params={{ teamId }}
-        allowCustomization={false}
         badgeMap={badgeMap}
+        allowCustomization={false}
       />
       <Outlet />
     </div>

@@ -17,6 +17,8 @@ interface IDataTableHeaderCellProps<TData> {
   table: Table<TData>
   /** The shared DragDropManager from DataTable */
   manager: DragDropManager | null
+  enableColumnReorder?: boolean
+  enableColumnPinning?: boolean
 }
 
 export const DataTableHeaderCell = <TData,>({
@@ -24,6 +26,8 @@ export const DataTableHeaderCell = <TData,>({
   index,
   table,
   manager,
+  enableColumnReorder = true,
+  enableColumnPinning = true,
 }: IDataTableHeaderCellProps<TData>) => {
   const column = header.column
   const isPinned = column.getIsPinned()
@@ -53,12 +57,16 @@ export const DataTableHeaderCell = <TData,>({
   const canPinToRight = isLastUnpinned && !hasActionsColumn
 
   const canShowPinButton =
+    enableColumnPinning &&
     !isDisplayColumn &&
     !header.isPlaceholder &&
     (isPinned || canPinToLeft || canPinToRight)
 
   // Drag & drop: only unpinned, non-display columns can be reordered
-  const canReorder = !isPinned && column.columnDef.meta?.enableReorder !== false
+  const canReorder =
+    enableColumnReorder &&
+    !isPinned &&
+    column.columnDef.meta?.enableReorder !== false
 
   // Ref to the actual <th> DOM element
   const thRef = useRef<HTMLTableCellElement | null>(null)

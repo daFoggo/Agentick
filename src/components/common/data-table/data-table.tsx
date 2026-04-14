@@ -1,6 +1,8 @@
-import { cn } from "@/lib/utils"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Table, TableBody, TableHeader, TableRow } from "@/components/ui/table"
+import { cn } from "@/lib/utils"
+import { DragDropManager } from "@dnd-kit/dom"
+import { isSortable, SortableDraggable } from "@dnd-kit/dom/sortable"
 import {
   getCoreRowModel,
   getExpandedRowModel,
@@ -8,21 +10,19 @@ import {
   getPaginationRowModel,
   useReactTable,
   type ColumnDef,
-  type ExpandedState,
-  type GroupingState,
   type ColumnOrderState,
   type ColumnPinningState,
+  type ExpandedState,
+  type GroupingState,
   type PaginationState,
   type RowSelectionState,
 } from "@tanstack/react-table"
-import { DragDropManager } from "@dnd-kit/dom"
-import { isSortable, SortableDraggable } from "@dnd-kit/dom/sortable"
 import { memo, useEffect, useMemo, useState } from "react"
-import { DataTableHeaderCell } from "./data-table-header-cell"
-import { DataTableRow } from "./data-table-row"
-import { DataTablePagination } from "./data-table-pagination"
-import { DataTableGroupRow } from "./data-table-group-row"
 import "./data-table"
+import { DataTableGroupRow } from "./data-table-group-row"
+import { DataTableHeaderCell } from "./data-table-header-cell"
+import { DataTablePagination } from "./data-table-pagination"
+import { DataTableRow } from "./data-table-row"
 
 export interface IDataTableProps<TData> {
   data: TData[]
@@ -38,11 +38,13 @@ export interface IDataTableProps<TData> {
   defaultPageSize?: number
   pageSizeOptions?: number[]
   showPagination?: boolean
-  enablePagination?: boolean
   showRowCount?: boolean
   showRowsPerPage?: boolean
   showSelectedCount?: boolean
+  enablePagination?: boolean
   enableRowSelection?: boolean
+  enableColumnReorder?: boolean
+  enableColumnPinning?: boolean
   className?: string
   wrapperClassName?: string
   getRowId?: (row: TData) => string
@@ -66,6 +68,8 @@ const DataTableInner = <TData,>({
   className,
   wrapperClassName,
   getRowId,
+  enableColumnReorder = true,
+  enableColumnPinning = true,
 }: IDataTableProps<TData>) => {
   // ── State ────────────────────────────────────────────────────────────────
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
@@ -245,6 +249,8 @@ const DataTableInner = <TData,>({
                       index={unpinnedIndex === -1 ? 0 : unpinnedIndex}
                       table={table}
                       manager={manager}
+                      enableColumnReorder={enableColumnReorder}
+                      enableColumnPinning={enableColumnPinning}
                     />
                   )
                 })}
@@ -269,7 +275,11 @@ const DataTableInner = <TData,>({
                     return renderGroupRow(row, totalCols, table)
                   }
                   return (
-                    <DataTableGroupRow key={row.id} row={row} totalCols={totalCols} />
+                    <DataTableGroupRow
+                      key={row.id}
+                      row={row}
+                      totalCols={totalCols}
+                    />
                   )
                 }
                 return <DataTableRow key={row.id} row={row} />

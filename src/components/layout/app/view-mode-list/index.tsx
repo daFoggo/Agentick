@@ -7,6 +7,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   resolveViewModes,
   useViewModeListHydrated,
@@ -54,7 +55,7 @@ export const ViewModeList = ({
     badge: badgeMap?.[mode.value] ?? mode.badge,
     render: () => null,
   }))
-  
+
   const toByValue = Object.fromEntries(
     catalog.map((mode) => [mode.value, mode.to])
   ) as Record<string, string | undefined>
@@ -74,12 +75,7 @@ export const ViewModeList = ({
 
     const active = modes.find((mode) => mode.value === activeMode)
     if (active && !active.isVisible) {
-      updateMode(
-        viewModeScope,
-        activeMode,
-        { isVisible: true },
-        navDefinitions
-      )
+      updateMode(viewModeScope, activeMode, { isVisible: true }, navDefinitions)
     }
   }, [activeMode, modes, navDefinitions, updateMode, viewModeScope])
 
@@ -97,26 +93,19 @@ export const ViewModeList = ({
 
   return (
     <div className="flex items-center justify-between gap-2">
-      <div className="inline-flex w-fit items-center rounded-lg bg-muted p-0.75 text-muted-foreground">
-        {displayModes.map((mode) => {
-          const to = toByValue[mode.value]
-          if (!to) return null
+      <Tabs value={activeMode}>
+        <TabsList>
+          {displayModes.map((mode) => {
+            const to = toByValue[mode.value]
+            if (!to) return null
 
-          return (
-            <Link
-              key={mode.value}
-              to={to as any}
-              params={params as any}
-              onClick={() => setActiveMode(viewModeScope, mode.value)}
-            >
-              {({ isActive }) => (
-                <span
-                  className={[
-                    "inline-flex h-[calc(100%-1px)] items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-colors",
-                    isActive
-                      ? "bg-background text-foreground shadow-sm"
-                      : "text-foreground/60 hover:text-foreground",
-                  ].join(" ")}
+            return (
+              <TabsTrigger key={mode.value} value={mode.value} asChild>
+                <Link
+                  to={to as any}
+                  params={params as any}
+                  onClick={() => setActiveMode(viewModeScope, mode.value)}
+                  className="px-2"
                 >
                   <mode.icon className="size-4" />
                   {mode.label}
@@ -125,12 +114,12 @@ export const ViewModeList = ({
                       {mode.badge}
                     </span>
                   ) : null}
-                </span>
-              )}
-            </Link>
-          )
-        })}
-      </div>
+                </Link>
+              </TabsTrigger>
+            )
+          })}
+        </TabsList>
+      </Tabs>
 
       {allowViewModeCustomization ? (
         <DropdownMenu>
@@ -160,7 +149,7 @@ export const ViewModeList = ({
                     }}
                   >
                     <span className="flex items-center gap-2">
-                      <mode.icon />
+                      <mode.icon className="size-4" />
                       {mode.label}
                     </span>
                   </DropdownMenuCheckboxItem>

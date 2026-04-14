@@ -1,6 +1,8 @@
 import ky, { type Options } from "ky"
 import { API_ENDPOINTS } from "@/configs/env"
 
+const AUTH_RETRY_HEADER = "x-auth-retry"
+
 /**
  * @description Cấu hình cơ sở cho Ky.
  */
@@ -9,34 +11,53 @@ const baseOptions: Options = {
   hooks: {
     beforeRequest: [
       async ({ request }) => {
-        const { getAuthToken } = await import("./auth-token")
-        const token = await getAuthToken()
+        const { getAuthTokenForRequest } = await import("./auth-token")
+        const token = await getAuthTokenForRequest()
         if (token) {
           request.headers.set("Authorization", `Bearer ${token}`)
         }
       },
     ],
     afterResponse: [
-      async ({ response }) => {
-        // Xử lý lỗi tập trung (ví dụ 401 Unauthorized)
-        if (response.status === 401) {
-          // Tránh redirect vô hạn nếu đang ở trang auth
-          if (typeof window !== "undefined" && window.location.pathname.startsWith("/auth/")) {
-            return response
-          }
-          console.warn("Unauthorized access - redirecting to login")
-          const { deleteAuthToken } = await import("./auth-token")
-          await deleteAuthToken()
+      async ({ request, options, response }) => {
+        if (response.status !== 401) {
+          return response
+        }
 
+        const alreadyRetried = request.headers.get(AUTH_RETRY_HEADER) === "1"
+        const isOnAuthPage =
+          typeof window !== "undefined" &&
+          window.location.pathname.startsWith("/auth/")
+
+        if (!alreadyRetried && !isOnAuthPage) {
+          const { refreshAuthToken } = await import("./auth-token")
+          const nextToken = await refreshAuthToken()
+
+          if (nextToken) {
+            const retryHeaders = new Headers(request.headers)
+            retryHeaders.set("Authorization", `Bearer ${nextToken}`)
+            retryHeaders.set(AUTH_RETRY_HEADER, "1")
+
+            return ky(request, {
+              ...options,
+              headers: retryHeaders,
+            })
+          }
+        }
+
+        const { deleteAuthToken } = await import("./auth-token")
+        await deleteAuthToken()
+
+        if (typeof window !== "undefined") {
           const { redirect } = await import("@tanstack/react-router")
           throw redirect({
             to: "/auth/sign-in",
             search: {
-              // Có thể thêm redirect back sau khi login thành công
-              redirect: typeof window !== "undefined" ? window.location.href : undefined,
+              redirect: window.location.href,
             },
           })
         }
+
         return response
       },
     ],

@@ -223,7 +223,7 @@ export const taskColumns = generateColumns<TTask>([
         <div className="flex min-w-0 items-center gap-2">
           <Avatar className="size-5 shrink-0">
             <AvatarImage src={assignee.user?.avatar_url} />
-            <AvatarFallback className="text-[10px]">
+            <AvatarFallback className="text-xs">
               {assignee.user?.name?.charAt(0)}
             </AvatarFallback>
           </Avatar>

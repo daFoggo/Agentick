@@ -40,9 +40,7 @@ export const SignInForm = ({ redirect }: ISignInFormProps) => {
     onSubmit: async ({ value }) => {
       try {
         const response = await signInMutation.mutateAsync(value)
-        // Store auth data in localStorage
-        localStorage.setItem("access_token", response.access_token)
-        localStorage.setItem("refresh_token", response.refresh_token)
+        // Lưu metadata thời gian hết hạn để dễ theo dõi phiên ở client.
         localStorage.setItem("expiration", response.expiration)
         localStorage.setItem("refresh_expiration", response.refresh_expiration)
 

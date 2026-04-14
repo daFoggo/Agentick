@@ -23,10 +23,16 @@ export const teamQueries = {
       queryKey: ["teams", "me"],
       queryFn: () => fetchMyTeamsFn(),
     }),
-  detail: (team_id: string) =>
+  detail: (team_id?: string) =>
     queryOptions({
-      queryKey: ["teams", "detail", team_id],
-      queryFn: () => fetchTeamByIdFn({ data: team_id }),
+      queryKey: ["teams", "detail", team_id ?? null],
+      enabled: typeof team_id === "string" && team_id.length > 0,
+      queryFn: () => {
+        if (!team_id) {
+          throw new Error("Missing team_id for team detail query")
+        }
+        return fetchTeamByIdFn({ data: team_id })
+      },
     }),
 }
 

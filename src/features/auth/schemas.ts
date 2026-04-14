@@ -1,8 +1,6 @@
 import { z } from "zod"
 import { UserSchema } from "../users"
 
-export type TUser = z.infer<typeof UserSchema>
-
 /**
  * @description Sign In Business Logic
  */

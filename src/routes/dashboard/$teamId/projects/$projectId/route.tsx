@@ -34,7 +34,6 @@ function RouteComponent() {
         catalog={PROJECT_VIEW_MODE_CATALOG}
         scope="project"
         params={{ teamId, projectId }}
-        allowCustomization={false}
       />
       <Outlet />
     </div>

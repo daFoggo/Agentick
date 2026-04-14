@@ -1,5 +1,5 @@
 import { queryOptions } from "@tanstack/react-query"
-import { getUserMeFn } from "./functions"
+import { getUserMeFn, searchUsersFn } from "./functions"
 
 /**
  * @description Query options cho tính năng Users
@@ -9,5 +9,12 @@ export const userQueries = {
     queryOptions({
       queryKey: ["users", "me"],
       queryFn: () => getUserMeFn(),
+    }),
+
+  search: (q: string, teamId?: string) =>
+    queryOptions({
+      queryKey: ["users", "search", q, teamId],
+      queryFn: () => searchUsersFn({ data: { q, team_id: teamId, limit: 10 } }),
+      enabled: q.length >= 1,
     }),
 }

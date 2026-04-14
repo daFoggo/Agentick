@@ -1,3 +1,4 @@
+
 import type { TTeamMember } from "./schemas"
 import { SAMPLE_USER_1, SAMPLE_USER_2 } from "../users"
 
@@ -8,6 +9,7 @@ export const SAMPLE_TEAM_MEMBERS: TTeamMember[] = [
     user_id: SAMPLE_USER_1.id,
     user: SAMPLE_USER_1,
     role: "member",
+    joined_at: "2026-01-01T00:00:00.000Z",
   },
   {
     id: "team-member-2",
@@ -15,5 +17,6 @@ export const SAMPLE_TEAM_MEMBERS: TTeamMember[] = [
     user_id: SAMPLE_USER_2.id,
     user: SAMPLE_USER_2,
     role: "member",
+    joined_at: "2026-01-02T00:00:00.000Z",
   },
 ]

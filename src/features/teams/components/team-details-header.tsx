@@ -8,8 +8,10 @@ import {
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { TTeamMember } from "@/features/team-members"
+import { InviteMemberDialog } from "@/features/team-members"
 import { teamQueries } from "@/features/teams"
 import { useQuery } from "@tanstack/react-query"
+import { useState } from "react"
 import { UserPlus, Users } from "lucide-react"
 
 export interface ITeamDetailsHeaderProps {
@@ -17,6 +19,7 @@ export interface ITeamDetailsHeaderProps {
 }
 
 export function TeamDetailsHeader({ teamId }: ITeamDetailsHeaderProps) {
+  const [inviteOpen, setInviteOpen] = useState(false)
   const { data: team, isLoading, error } = useQuery(teamQueries.detail(teamId))
 
   if (isLoading) {
@@ -28,7 +31,7 @@ export function TeamDetailsHeader({ teamId }: ITeamDetailsHeaderProps) {
         </div>
         <div className="flex items-center gap-2">
           <Skeleton className="h-8 w-24 rounded-full" />
-          <Skeleton className="h-10 w-24 rounded-md" />
+          <Skeleton className="h-8 w-24 rounded-md" />
         </div>
       </div>
     )
@@ -67,10 +70,16 @@ export function TeamDetailsHeader({ teamId }: ITeamDetailsHeaderProps) {
           )}
         </AvatarGroup>
 
-        <Button>
+        <Button onClick={() => setInviteOpen(true)}>
           Invite
           <UserPlus />
         </Button>
+
+        <InviteMemberDialog
+          teamId={teamId}
+          open={inviteOpen}
+          onOpenChange={setInviteOpen}
+        />
       </div>
     </div>
   )
