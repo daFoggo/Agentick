@@ -1,5 +1,6 @@
 import { z } from "zod"
 import { UserSchema } from "../users"
+import type { TBaseFindResponse, TBaseSearchOptions } from "@/types/api"
 
 export const ProjectRoleSchema = z.enum([
   "owner",
@@ -44,17 +45,12 @@ export const RemoveProjectMemberSchema = z.object({
   user_id: z.string(),
 })
 
-export interface TProjectMemberSearchOptions {
-  page: number
-  page_size: number
-  ordering: string
-  total_count: number
-}
+export type TProjectMemberSearchOptions = TBaseSearchOptions<number, string>
 
-export interface TProjectMembersResponse {
-  founds: TProjectMember[]
-  search_options: TProjectMemberSearchOptions
-}
+export type TProjectMembersResponse = TBaseFindResponse<
+  TProjectMember,
+  TProjectMemberSearchOptions
+>
 
 export type TProjectRole = z.infer<typeof ProjectRoleSchema>
 export type TProjectMember = z.infer<typeof ProjectMemberSchema>

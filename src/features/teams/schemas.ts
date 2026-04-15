@@ -1,6 +1,7 @@
 import { z } from "zod"
 import type { TProject } from "../projects"
 import type { TTeamMember } from "../team-members"
+import type { TBaseFindResponse, TBaseSearchOptions } from "@/types/api"
 
 export const TeamSchema = z.object({
   id: z.string(),
@@ -40,17 +41,9 @@ export const UpdateTeamInputSchema = z.object({
   payload: UpdateTeamSchema,
 })
 
-export interface TTeamSearchOptions {
-  ordering: string | null
-  page: number
-  page_size: number
-  total_count: number
-}
+export type TTeamSearchOptions = TBaseSearchOptions<number, string | null>
 
-export interface TTeamsResponse {
-  founds: TTeam[]
-  search_options: TTeamSearchOptions
-}
+export type TTeamsResponse = TBaseFindResponse<TTeam, TTeamSearchOptions>
 
 export type TTeam = z.infer<typeof TeamSchema> & {
   members?: TTeamMember[]

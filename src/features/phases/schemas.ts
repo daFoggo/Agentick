@@ -1,6 +1,11 @@
 import { z } from "zod"
-
-const ApiDateSchema = z.iso.datetime().or(z.date())
+import {
+  ApiDateSchema,
+  FindOrderingSchema,
+  FindPageSchema,
+  FindPageSizeWithAllSchema,
+} from "@/lib/zod-common"
+import type { TBaseFindResponse, TBaseSearchOptions } from "@/types/api"
 
 export const PhaseSchema = z.object({
   id: z.string(),
@@ -31,23 +36,15 @@ export const PhaseFindSchema = z
   .object({
     id__eq: z.string().optional(),
     name__ilike: z.string().optional(),
-    page: z.number().int().positive().optional(),
-    page_size: z.union([z.number().int().positive(), z.literal("all")]).optional(),
-    ordering: z.string().optional(),
+    page: FindPageSchema,
+    page_size: FindPageSizeWithAllSchema,
+    ordering: FindOrderingSchema,
   })
   .optional()
 
-export interface TPhaseSearchOptions {
-  page: number
-  page_size: number | "all"
-  ordering: string
-  total_count: number
-}
+export type TPhaseSearchOptions = TBaseSearchOptions<number | "all", string>
 
-export interface TPhasesResponse {
-  founds: TPhase[]
-  search_options: TPhaseSearchOptions
-}
+export type TPhasesResponse = TBaseFindResponse<TPhase, TPhaseSearchOptions>
 
 export type TPhase = z.infer<typeof PhaseSchema>
 export type TPhaseCreateInput = z.infer<typeof PhaseCreateSchema>

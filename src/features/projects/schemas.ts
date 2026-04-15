@@ -1,6 +1,7 @@
 import { z } from "zod"
 import type { TProjectMember } from "../project-members"
 import type { TTask } from "../tasks"
+import type { TBaseFindResponse, TBaseSearchOptions } from "@/types/api"
 
 export const ProjectSchema = z.object({
   id: z.string(),
@@ -40,17 +41,9 @@ export const GetProjectSchema = z.object({
   projectId: z.string(),
 })
 
-export interface TProjectSearchOptions {
-  page: number
-  page_size: number
-  ordering: string
-  total_count: number
-}
+export type TProjectSearchOptions = TBaseSearchOptions<number, string>
 
-export interface TProjectsResponse {
-  founds: TProject[]
-  search_options: TProjectSearchOptions
-}
+export type TProjectsResponse = TBaseFindResponse<TProject, TProjectSearchOptions>
 
 export type TProject = z.infer<typeof ProjectSchema> & {
   members?: TProjectMember[]
