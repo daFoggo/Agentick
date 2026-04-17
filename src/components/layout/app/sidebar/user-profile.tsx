@@ -14,7 +14,7 @@ import { queryClient } from "@/lib/query-client"
 import { useDashboardStore } from "@/stores/use-dashboard-store"
 import { useViewModeListStore } from "@/stores/use-view-mode-list-store"
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query"
-import { useNavigate } from "@tanstack/react-router"
+import { useNavigate, useParams } from "@tanstack/react-router"
 import {
   ChevronsUpDown,
   Loader2,
@@ -26,6 +26,7 @@ import { toast } from "sonner"
 
 export const UserProfile = () => {
   const navigate = useNavigate()
+  const params = useParams({ from: "/dashboard/$teamId" })
   const { data: user } = useSuspenseQuery(userQueries.me())
   const logoutMutation = useMutation(authMutationOptions.signOut())
 
@@ -89,7 +90,12 @@ export const UserProfile = () => {
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem className="cursor-pointer">
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => {
+                navigate({ to: "/dashboard/$teamId/profile", params })
+              }}
+            >
               <SquareUserRound />
               My Profile
             </DropdownMenuItem>

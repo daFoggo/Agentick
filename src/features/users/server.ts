@@ -13,6 +13,23 @@ export async function getUserMe(): Promise<TUser> {
 }
 
 /**
+ * Lấy danh sách team của người dùng hiện tại.
+ */
+export async function getMyTeams(): Promise<any[]> {
+  const response = await api.get("teams/me").json<TBaseResponse<any[]>>()
+  return response.data ?? []
+}
+
+
+/**
+ * Lấy danh sách dự án của người dùng hiện tại.
+ */
+export async function getMyProjects(): Promise<any[]> {
+  const response = await api.get("projects/me").json<TBaseResponse<any[]>>()
+  return response.data ?? []
+}
+
+/**
  * Tìm kiếm người dùng theo tên hoặc email.
  * Hỗ trợ các bộ lọc loại trừ theo Team hoặc Project (Exclusion filters) để phục vụ việc mời thành viên.
  */
@@ -45,3 +62,4 @@ export async function searchUsers(
 
   return response.data
 }
+
