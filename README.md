@@ -54,27 +54,55 @@ src/
 │   └── ...
 ├── hooks/               # Global React hooks
 ├── lib/                 # Third-party library initializations (Axios, etc.)
-├── routes/              # TanStack Router route definitions
+├── routes/              # TanStack Router route definitions (Orchestration Layer)
 ├── stores/              # Global state management (Zustand)
 └── types/               # Global TypeScript definitions
 ```
 
 ## 🛠️ 4. Development Patterns
 
-### Scoping: Global vs. Feature
+### 🧩 4.1 Orchestration Pattern (Route-Level Composition)
+
+When a page requires data or UI from multiple features (e.g., a Dashboard showing profile, tasks, and projects), **do not** write all that code inside a single feature.
+
+- **Features** provide "Widgets" (e.g., `MyTasksList`, `ProfileCard`).
+- **Routes** act as the **Orchestrator**: They import components from various features and arrange them into a layout.
+- **Rule**: If Feature A needs to display data from Feature B, the composition happens in `src/routes/`, not inside `src/features/A/`.
+
+### ⚡ 4.2 Data Fetching Strategy (Prefetching)
+
+To ensure a smooth, zero-latency user experience, use the **Loader Prefetching** pattern:
+
+1. **Define Query Options**: In your feature's `queries.ts`, export query options using TanStack Query.
+2. **Prefetch in Loader**: In the corresponding `route.tsx`, use `context.queryClient.ensureQueryData()` inside the `loader` function.
+3. **Consume in Component**: Use `useQuery` or `useSuspenseQuery` inside your component. Since the data is already in the cache from the loader, it will render instantly without a loading spinner.
+
+> [!TIP]
+> This pattern prevents "Waterfall" loading where components fetch data sequentially after they mount.
+
+### 🎨 4.3 UI Consistency & Design Rules
+
+To maintain a premium, state-of-the-art aesthetic, follow these visual rules:
+
+- **Reference Existing Patterns**: Before building a UI element (like an Avatar or a List Item), check established components like the `Sidebar` or `TeamSwitcher`. Mirror their padding, icon sizes (`size-4`), and colors.
+- **Bento Grid Layout**: Avoid simple 50/50 splits. Use the 12-column grid system (`md:grid-cols-12`) to create asymmetrical, modern layouts (e.g., 4-span for info, 8-span for lists).
+- **Dynamic Sizing**: Avoid hard-coding heights (e.g., `h-[400px]`). Use `flex-1` and `min-h` with internal scrolling (`overflow-y-auto`) so the UI adapts naturally to data.
+- **Micro-interactions**: Use `bg-muted/50` for lists and `hover:bg-accent` or `hover:bg-muted/80` for interactive cards to make the app feel alive.
+
+### ⚖️ 4.4 Scoping: Global vs. Feature
 
 Maintaining a clean separation between global and feature-specific code is crucial for maintainability.
 
 | Scope | When to use? | Real Examples |
 | :--- | :--- | :--- |
-| **Feature** | Code that belongs to a specific business domain (Auth, Project, Team). | `ProjectSettings`, `authSchema`, `useTeamsQuery` |
+| **Feature** | Code that belongs to a specific business domain (Auth, Project, Team). | `ProjectSettings`, `authSchema`, `getTaskPrioritiesFn` |
 | **Common / Global** | Reusable logic used across 2+ features or core system entities. | `RoleBadge`, `DataTable`, `MarkdownRenderer` |
 | **Layout** | Core structural components shared across the entire application shell. | `ViewModeList`, `Sidebar`, `AppHeader` |
 
 #### Comparison Example:
 - **Feature Component**: `src/features/projects/components/project-settings.tsx` - This component is tightly coupled with the Project entity and its update logic.
 - **Common Component**: `src/components/common/role-badge.tsx` - While it handles user roles, it is used across Teams, Projects, and User profiles, making it a "Common" utility.
-- **Layout Component**: `src/components/layout/app/view-mode-list/` - This is a structural part of the dashboard that affects how all project-related data is displayed.
+- **Layout Component**: `src/components/layout/app/user-profile.tsx` - This is a structural part of the dashboard that handles user context globally.
 
 ### Creating a New Feature
 
