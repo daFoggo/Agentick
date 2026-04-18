@@ -27,7 +27,6 @@ import { Route as DashboardTeamIdInboxIndexRouteImport } from './routes/dashboar
 import { Route as DashboardTeamIdTeamSettingsRouteImport } from './routes/dashboard/$teamId/team/settings'
 import { Route as DashboardTeamIdTeamOverviewRouteImport } from './routes/dashboard/$teamId/team/overview'
 import { Route as DashboardTeamIdTeamMembersRouteImport } from './routes/dashboard/$teamId/team/members'
-import { Route as DashboardTeamIdProfileTasksRouteImport } from './routes/dashboard/$teamId/profile/tasks'
 import { Route as DashboardTeamIdInboxBookmarksRouteImport } from './routes/dashboard/$teamId/inbox/bookmarks'
 import { Route as DashboardTeamIdInboxArchiveRouteImport } from './routes/dashboard/$teamId/inbox/archive'
 import { Route as DashboardTeamIdInboxActiveRouteImport } from './routes/dashboard/$teamId/inbox/active'
@@ -147,12 +146,6 @@ const DashboardTeamIdTeamMembersRoute =
     path: '/members',
     getParentRoute: () => DashboardTeamIdTeamRouteRoute,
   } as any)
-const DashboardTeamIdProfileTasksRoute =
-  DashboardTeamIdProfileTasksRouteImport.update({
-    id: '/profile/tasks',
-    path: '/profile/tasks',
-    getParentRoute: () => DashboardTeamIdRoute,
-  } as any)
 const DashboardTeamIdInboxBookmarksRoute =
   DashboardTeamIdInboxBookmarksRouteImport.update({
     id: '/bookmarks',
@@ -270,7 +263,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/$teamId/inbox/active': typeof DashboardTeamIdInboxActiveRoute
   '/dashboard/$teamId/inbox/archive': typeof DashboardTeamIdInboxArchiveRoute
   '/dashboard/$teamId/inbox/bookmarks': typeof DashboardTeamIdInboxBookmarksRoute
-  '/dashboard/$teamId/profile/tasks': typeof DashboardTeamIdProfileTasksRoute
   '/dashboard/$teamId/team/members': typeof DashboardTeamIdTeamMembersRoute
   '/dashboard/$teamId/team/overview': typeof DashboardTeamIdTeamOverviewRoute
   '/dashboard/$teamId/team/settings': typeof DashboardTeamIdTeamSettingsRoute
@@ -304,7 +296,6 @@ export interface FileRoutesByTo {
   '/dashboard/$teamId/inbox/active': typeof DashboardTeamIdInboxActiveRoute
   '/dashboard/$teamId/inbox/archive': typeof DashboardTeamIdInboxArchiveRoute
   '/dashboard/$teamId/inbox/bookmarks': typeof DashboardTeamIdInboxBookmarksRoute
-  '/dashboard/$teamId/profile/tasks': typeof DashboardTeamIdProfileTasksRoute
   '/dashboard/$teamId/team/members': typeof DashboardTeamIdTeamMembersRoute
   '/dashboard/$teamId/team/overview': typeof DashboardTeamIdTeamOverviewRoute
   '/dashboard/$teamId/team/settings': typeof DashboardTeamIdTeamSettingsRoute
@@ -342,7 +333,6 @@ export interface FileRoutesById {
   '/dashboard/$teamId/inbox/active': typeof DashboardTeamIdInboxActiveRoute
   '/dashboard/$teamId/inbox/archive': typeof DashboardTeamIdInboxArchiveRoute
   '/dashboard/$teamId/inbox/bookmarks': typeof DashboardTeamIdInboxBookmarksRoute
-  '/dashboard/$teamId/profile/tasks': typeof DashboardTeamIdProfileTasksRoute
   '/dashboard/$teamId/team/members': typeof DashboardTeamIdTeamMembersRoute
   '/dashboard/$teamId/team/overview': typeof DashboardTeamIdTeamOverviewRoute
   '/dashboard/$teamId/team/settings': typeof DashboardTeamIdTeamSettingsRoute
@@ -382,7 +372,6 @@ export interface FileRouteTypes {
     | '/dashboard/$teamId/inbox/active'
     | '/dashboard/$teamId/inbox/archive'
     | '/dashboard/$teamId/inbox/bookmarks'
-    | '/dashboard/$teamId/profile/tasks'
     | '/dashboard/$teamId/team/members'
     | '/dashboard/$teamId/team/overview'
     | '/dashboard/$teamId/team/settings'
@@ -416,7 +405,6 @@ export interface FileRouteTypes {
     | '/dashboard/$teamId/inbox/active'
     | '/dashboard/$teamId/inbox/archive'
     | '/dashboard/$teamId/inbox/bookmarks'
-    | '/dashboard/$teamId/profile/tasks'
     | '/dashboard/$teamId/team/members'
     | '/dashboard/$teamId/team/overview'
     | '/dashboard/$teamId/team/settings'
@@ -453,7 +441,6 @@ export interface FileRouteTypes {
     | '/dashboard/$teamId/inbox/active'
     | '/dashboard/$teamId/inbox/archive'
     | '/dashboard/$teamId/inbox/bookmarks'
-    | '/dashboard/$teamId/profile/tasks'
     | '/dashboard/$teamId/team/members'
     | '/dashboard/$teamId/team/overview'
     | '/dashboard/$teamId/team/settings'
@@ -613,13 +600,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/$teamId/team/members'
       preLoaderRoute: typeof DashboardTeamIdTeamMembersRouteImport
       parentRoute: typeof DashboardTeamIdTeamRouteRoute
-    }
-    '/dashboard/$teamId/profile/tasks': {
-      id: '/dashboard/$teamId/profile/tasks'
-      path: '/profile/tasks'
-      fullPath: '/dashboard/$teamId/profile/tasks'
-      preLoaderRoute: typeof DashboardTeamIdProfileTasksRouteImport
-      parentRoute: typeof DashboardTeamIdRoute
     }
     '/dashboard/$teamId/inbox/bookmarks': {
       id: '/dashboard/$teamId/inbox/bookmarks'
@@ -850,7 +830,6 @@ interface DashboardTeamIdRouteChildren {
   DashboardTeamIdInboxRouteRoute: typeof DashboardTeamIdInboxRouteRouteWithChildren
   DashboardTeamIdTeamRouteRoute: typeof DashboardTeamIdTeamRouteRouteWithChildren
   DashboardTeamIdProjectsProjectIdRouteRoute: typeof DashboardTeamIdProjectsProjectIdRouteRouteWithChildren
-  DashboardTeamIdProfileTasksRoute: typeof DashboardTeamIdProfileTasksRoute
   DashboardTeamIdMyTasksIndexRoute: typeof DashboardTeamIdMyTasksIndexRoute
   DashboardTeamIdOverviewIndexRoute: typeof DashboardTeamIdOverviewIndexRoute
   DashboardTeamIdProfileIndexRoute: typeof DashboardTeamIdProfileIndexRoute
@@ -862,7 +841,6 @@ const DashboardTeamIdRouteChildren: DashboardTeamIdRouteChildren = {
   DashboardTeamIdTeamRouteRoute: DashboardTeamIdTeamRouteRouteWithChildren,
   DashboardTeamIdProjectsProjectIdRouteRoute:
     DashboardTeamIdProjectsProjectIdRouteRouteWithChildren,
-  DashboardTeamIdProfileTasksRoute: DashboardTeamIdProfileTasksRoute,
   DashboardTeamIdMyTasksIndexRoute: DashboardTeamIdMyTasksIndexRoute,
   DashboardTeamIdOverviewIndexRoute: DashboardTeamIdOverviewIndexRoute,
   DashboardTeamIdProfileIndexRoute: DashboardTeamIdProfileIndexRoute,
