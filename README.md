@@ -132,6 +132,14 @@ import { teamSchema } from "@/features/teams/schemas";
 import { teamSchema } from "@/features/teams";
 ```
 
+> [!CAUTION]
+> **Server-Only Code Protection**: Never export `server.ts` or `servers/` from your feature's `index.ts` barrel file.
+> 
+> In TanStack Start, logic marked with `"@tanstack/react-start/server-only"` is strictly prohibited in the client bundle. Re-exporting these files from the main feature entry point will cause Vite to bundle them when the client imports types or components, leading to build warnings or errors.
+> 
+> **Correct way**: Keep `server.ts` private to the feature and only access its logic via `createServerFn` (defined in `functions.ts`), or import it directly only in server-side files.
+
+
 ## 🛡️ 5. Quality Assurance (Pre-commit)
 
 To maintain codebase stability, every developer **must** ensure that the project builds successfully and passes all type checks before committing code.
