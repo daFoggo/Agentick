@@ -74,11 +74,11 @@ export function BigCalendarHeader({ className }: IBigCalendarHeaderProps) {
       <Tabs value={view} onValueChange={(v) => setView(v as TCalendarView)}>
         <TabsList>
           <TabsTrigger value="day" className="text-xs">
-            <Columns4 className="size-3.5" />
+            <Rows4 className="size-3.5" />
             <span>Day</span>
           </TabsTrigger>
           <TabsTrigger value="week" className="text-xs">
-            <Rows4 className="size-3.5" />
+            <Columns4 className="size-3.5" />
             <span>Week</span>
           </TabsTrigger>
         </TabsList>

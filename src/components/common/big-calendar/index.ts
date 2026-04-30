@@ -8,7 +8,8 @@ export { BigCalendarDayHeader } from "./components/header/big-calendar-day-heade
 export { BigCalendarWeekView } from "./components/week-view/big-calendar-week-view"
 export { BigCalendarDayColumn } from "./components/week-view/big-calendar-day-column"
 export { BigCalendarTimeGutter } from "./components/week-view/big-calendar-time-gutter"
-export { BigCalendarEventBlock } from "./components/week-view/big-calendar-event-block"
+export { BigCalendarEventBlock, BigCalendarEventContent } from "./components/week-view/big-calendar-event-block"
+export { BigCalendarEventPopover } from "./components/week-view/big-calendar-event-popover"
 export { BigCalendarNowIndicator } from "./components/week-view/big-calendar-now-indicator"
 
 // ─── Types (re-export từ global) ─────────────────────────────────────────────

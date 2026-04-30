@@ -59,7 +59,7 @@ export function BigCalendarEventBlock({
       {renderEvent ? (
         renderEvent(event, layout)
       ) : (
-        <DefaultEventContent
+        <BigCalendarEventContent
           event={event}
           accentColor={accentColor}
           height={height}
@@ -71,30 +71,31 @@ export function BigCalendarEventBlock({
 
 // ─── Default event content ────────────────────────────────────────────────────
 
-interface IDefaultEventContentProps {
+export interface IBigCalendarEventContentProps {
   event: IBigCalendarEvent
-  accentColor: string
+  accentColor?: string
   height: number
 }
 
-function DefaultEventContent({
+export function BigCalendarEventContent({
   event,
   accentColor,
   height,
-}: IDefaultEventContentProps) {
+}: IBigCalendarEventContentProps) {
+  const finalColor = accentColor ?? event.color ?? "var(--primary)"
   const isCompact = height < 32
 
   return (
     <div
       className="flex h-full w-full flex-col overflow-hidden rounded-md border px-2 py-1.5 transition-all hover:brightness-95"
       style={{
-        borderColor: `color-mix(in oklch, ${accentColor} 15%, transparent)`,
-        backgroundColor: `color-mix(in oklch, ${accentColor} 25%, transparent)`,
+        borderColor: `color-mix(in oklch, ${finalColor} 15%, transparent)`,
+        backgroundColor: `color-mix(in oklch, ${finalColor} 25%, transparent)`,
       }}
     >
       <span
         className="truncate text-xs leading-tight font-bold tracking-tight"
-        style={{ color: accentColor }}
+        style={{ color: finalColor }}
       >
         {event.title}
       </span>
@@ -103,14 +104,14 @@ function DefaultEventContent({
         <div className="mt-0.5 flex flex-col gap-0.5">
           <span
             className="truncate text-xs leading-none font-medium opacity-70"
-            style={{ color: accentColor }}
+            style={{ color: finalColor }}
           >
             {formatEventTime(event.start)}
           </span>
           {Boolean(event.meta?.location) && (
             <span
               className="truncate text-[10px] font-bold tracking-wider uppercase opacity-50"
-              style={{ color: accentColor }}
+              style={{ color: finalColor }}
             >
               {String(event.meta?.location)}
             </span>

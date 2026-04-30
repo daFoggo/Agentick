@@ -11,7 +11,7 @@ export interface IEventTypeOption {
 
 export const EVENT_TYPE_OPTIONS: IEventTypeOption[] = [
   {
-    value: "task_block",
+    value: "task",
     label: "Task",
     icon: ListTodo,
     colorClass: "text-blue-500",

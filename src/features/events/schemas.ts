@@ -2,7 +2,7 @@ import { z } from "zod"
 import { ApiDateSchema, FindOrderingSchema, FindPageSchema, FindPageSizeWithAllSchema } from "@/lib/zod-common"
 import type { TBaseFindResponse, TBaseSearchOptions } from "@/types/api"
 
-export const EventTypeSchema = z.enum(["task_block", "meeting", "focus_time", "leave"])
+export const EventTypeSchema = z.enum(["task", "meeting", "focus_time", "leave"])
 export type TEventType = z.infer<typeof EventTypeSchema>
 
 export const EventSchema = z.object({
@@ -36,13 +36,13 @@ export const CreateEventBaseSchema = z.object({
 
 export const CreateEventSchema = CreateEventBaseSchema.refine(
   (data) => {
-    if (data.type === "task_block" && !data.task_id) {
+    if (data.type === "task" && !data.task_id) {
       return false
     }
     return true
   },
   {
-    message: "task_id is required when type is task_block",
+    message: "task_id is required when type is task",
     path: ["task_id"],
   }
 )

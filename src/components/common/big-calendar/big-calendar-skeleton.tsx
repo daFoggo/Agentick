@@ -1,15 +1,28 @@
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
+import {
+  CALENDAR_DEFAULT_END_HOUR,
+  CALENDAR_DEFAULT_START_HOUR,
+  CALENDAR_HOUR_HEIGHT,
+} from "@/lib/big-calendar"
 
 interface IBigCalendarSkeletonProps {
   className?: string
   headerClassName?: string
+  startHour?: number
+  endHour?: number
+  hourHeight?: number
 }
 
 export function BigCalendarSkeleton({
   className,
   headerClassName,
+  startHour = CALENDAR_DEFAULT_START_HOUR,
+  endHour = CALENDAR_DEFAULT_END_HOUR,
+  hourHeight = CALENDAR_HOUR_HEIGHT,
 }: IBigCalendarSkeletonProps) {
+  const totalGridHeight = (endHour - startHour) * hourHeight
+
   return (
     <div
       className={cn(
@@ -24,14 +37,14 @@ export function BigCalendarSkeleton({
           headerClassName
         )}
       >
-        <Skeleton className="h-8 w-[60px]" />
+        <Skeleton className="h-9 w-[60px]" />
         <div className="flex items-center gap-1">
-          <Skeleton className="h-8 w-8" />
-          <Skeleton className="h-8 w-8" />
+          <Skeleton className="h-9 w-9" />
+          <Skeleton className="h-9 w-9" />
         </div>
         <Skeleton className="h-5 w-[150px]" />
         <div className="flex-1" />
-        <Skeleton className="h-8 w-[120px]" />
+        <Skeleton className="h-9 w-[120px]" />
       </div>
 
       {/* Skeleton Week View */}
@@ -41,40 +54,49 @@ export function BigCalendarSkeleton({
           <div className="w-14 shrink-0" />
           {Array.from({ length: 7 }).map((_, i) => (
             <div key={i} className="min-w-0 flex-1 border-l border-border/50">
-              <div className="flex flex-col items-center justify-center p-2">
-                <Skeleton className="mb-1 h-3 w-8" />
-                <Skeleton className="h-7 w-7 rounded-full" />
+              <div className="flex items-center justify-center gap-1 py-2">
+                <Skeleton className="h-4 w-7" />
+                <Skeleton className="size-5 rounded-sm" />
               </div>
             </div>
           ))}
         </div>
 
         {/* Scrollable time grid */}
-        <div className="no-scrollbar flex min-h-0 flex-1 overflow-hidden">
+        <div className="no-scrollbar flex min-h-0 flex-1 overflow-y-auto">
           {/* Time gutter */}
-          <div className="w-14 shrink-0 bg-background pt-2">
-            {Array.from({ length: 12 }).map((_, i) => (
-              <div key={i} className="flex justify-end pr-2" style={{ height: 60 }}>
-                <Skeleton className="mt-[-6px] h-3 w-8" />
+          <div
+            className="relative w-14 shrink-0 select-none"
+            style={{ height: totalGridHeight }}
+          >
+            {Array.from({ length: endHour - startHour }).map((_, i) => (
+              <div
+                key={i}
+                className="absolute right-0 flex w-full items-start justify-end pr-2"
+                style={{ top: i * hourHeight }}
+              >
+                {i !== 0 && (
+                  <Skeleton className="h-3 w-8 -translate-y-1/2" />
+                )}
               </div>
             ))}
           </div>
 
           {/* Day columns */}
-          <div className="flex min-w-0 flex-1">
+          <div className="flex min-w-0 flex-1" style={{ height: totalGridHeight }}>
             {Array.from({ length: 7 }).map((_, colIdx) => (
               <div
                 key={colIdx}
                 className="relative min-w-0 flex-1 border-l border-border/50"
               >
                 {/* Giả lập time slots lines */}
-                {Array.from({ length: 12 }).map((_, rowIdx) => (
+                {Array.from({ length: endHour - startHour }).map((_, rowIdx) => (
                   <div
                     key={rowIdx}
                     className="absolute left-0 right-0 border-t border-border/50"
                     style={{
-                      top: rowIdx * 60,
-                      height: 60,
+                      top: rowIdx * hourHeight,
+                      height: hourHeight,
                     }}
                   />
                 ))}

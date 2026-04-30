@@ -1,6 +1,8 @@
 import {
   BigCalendar,
   BigCalendarSkeleton,
+  BigCalendarEventPopover,
+  BigCalendarEventContent,
 } from "@/components/common/big-calendar"
 import {
   CreateEventButton,
@@ -13,6 +15,7 @@ import { useSchedulesData } from "@/features/schedules/hooks"
 import { userQueries } from "@/features/users"
 import { createFileRoute } from "@tanstack/react-router"
 import { useState, useMemo, useEffect } from "react"
+import { ScheduleEventPopoverContent } from "@/features/schedules/components/schedule-event-popover-content"
 
 export const Route = createFileRoute("/dashboard/$teamId/schedules/")({
   loader: async ({ context }) => {
@@ -94,9 +97,26 @@ function RouteComponent() {
               endHour={22}
               headerClassName="p-4"
               slotClassName={getSlotClassName}
+              renderEvent={(event, layout) => (
+                <BigCalendarEventPopover
+                  event={event}
+                  customContent={(evt) => (
+                    <ScheduleEventPopoverContent event={evt} />
+                  )}
+                >
+                  <BigCalendarEventContent
+                    event={event}
+                    height={layout.height}
+                  />
+                </BigCalendarEventPopover>
+              )}
             />
           ) : (
-            <BigCalendarSkeleton headerClassName="p-4" />
+            <BigCalendarSkeleton
+              startHour={6}
+              endHour={22}
+              headerClassName="p-4"
+            />
           )}
         </section>
       </div>
