@@ -26,6 +26,7 @@ function AcceptInvitePage() {
   const queryClient = useQueryClient()
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
   const [errorMessage, setErrorMessage] = useState("")
+  
   const { data: invitation, isLoading: isFetchingInvitation } = useQuery(invitationQueries.getById(id))
   const { data: currentUser, isLoading: isFetchingUser } = useQuery({
     ...userQueries.me(),
