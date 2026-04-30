@@ -5,7 +5,8 @@ export interface IEventTypeOption {
   value: TEventType
   label: string
   icon: LucideIcon
-  color: string
+  colorClass: string
+  calendarColor: string
 }
 
 export const EVENT_TYPE_OPTIONS: IEventTypeOption[] = [
@@ -13,24 +14,28 @@ export const EVENT_TYPE_OPTIONS: IEventTypeOption[] = [
     value: "task_block",
     label: "Task",
     icon: ListTodo,
-    color: "text-blue-500",
+    colorClass: "text-blue-500",
+    calendarColor: "#3b82f6", // blue-500
   },
   {
     value: "meeting",
     label: "Meeting",
     icon: Video,
-    color: "text-green-500",
+    colorClass: "text-green-500",
+    calendarColor: "#22c55e", // green-500
   },
   {
     value: "focus_time",
     label: "Focus Time",
     icon: Focus,
-    color: "text-amber-500",
+    colorClass: "text-amber-500",
+    calendarColor: "#f59e0b", // amber-500
   },
   {
     value: "leave",
     label: "Leave",
     icon: Coffee,
-    color: "text-rose-500",
+    colorClass: "text-rose-500",
+    calendarColor: "#f43f5e", // rose-500
   },
 ]

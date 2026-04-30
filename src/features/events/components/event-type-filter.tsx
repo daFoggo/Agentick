@@ -11,16 +11,29 @@ import { ChevronDownIcon } from "lucide-react"
 import { useState } from "react"
 import { EVENT_TYPE_OPTIONS } from "../constants"
 
-export const EventTypeFilter = () => {
+interface IEventTypeFilterProps {
+  value?: string[]
+  onChange?: (value: string[]) => void
+}
+
+export const EventTypeFilter = ({ value, onChange }: IEventTypeFilterProps) => {
   const [isOpen, setIsOpen] = useState(true)
-  const [selectedTypes, setSelectedTypes] = useState<string[]>(
+  const [internalValue, setInternalValue] = useState<string[]>(
     EVENT_TYPE_OPTIONS.map((opt) => opt.value)
   )
 
+  const selectedTypes = value ?? internalValue
+
   const toggleType = (type: string) => {
-    setSelectedTypes((prev) =>
-      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
-    )
+    const newSelected = selectedTypes.includes(type)
+      ? selectedTypes.filter((t) => t !== type)
+      : [...selectedTypes, type]
+
+    if (onChange) {
+      onChange(newSelected)
+    } else {
+      setInternalValue(newSelected)
+    }
   }
 
   return (
@@ -55,7 +68,7 @@ export const EventTypeFilter = () => {
                 htmlFor={`filter-${option.value}`}
                 className="flex flex-1 cursor-pointer items-center gap-2.5 text-sm font-medium select-none"
               >
-                <option.icon className={cn("size-3.5", option.color)} />
+                <option.icon className={cn("size-3.5", option.colorClass)} />
                 <span className="text-foreground/70 transition-colors group-hover:text-foreground">
                   {option.label}
                 </span>

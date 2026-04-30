@@ -34,10 +34,10 @@ export const SIDEBAR_PERSONAL: ISidebarGroup = {
 }
 
 export const SIDEBAR_TEAM: ISidebarGroup = {
-  label: "Team",
+  label: "Teams",
   items: [
     {
-      title: "Team",
+      title: "My Team",
       to: "/dashboard/$teamId/team",
       icon: Users,
     },

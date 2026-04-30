@@ -72,7 +72,7 @@ export const WorkTimePattern = () => {
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Configure Work Hours</DialogTitle>
+          <DialogTitle>Configure Work Days</DialogTitle>
         </DialogHeader>
         <div className="py-4">
           <WorkTimePatternEditor
