@@ -19,10 +19,10 @@ import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
 import { Route as DashboardTeamIdTeamRouteRouteImport } from './routes/dashboard/$teamId/team/route'
 import { Route as DashboardTeamIdInboxRouteRouteImport } from './routes/dashboard/$teamId/inbox/route'
 import { Route as DashboardTeamIdTeamIndexRouteImport } from './routes/dashboard/$teamId/team/index'
+import { Route as DashboardTeamIdSchedulesIndexRouteImport } from './routes/dashboard/$teamId/schedules/index'
 import { Route as DashboardTeamIdProjectsIndexRouteImport } from './routes/dashboard/$teamId/projects/index'
 import { Route as DashboardTeamIdProfileIndexRouteImport } from './routes/dashboard/$teamId/profile/index'
 import { Route as DashboardTeamIdOverviewIndexRouteImport } from './routes/dashboard/$teamId/overview/index'
-import { Route as DashboardTeamIdMyTasksIndexRouteImport } from './routes/dashboard/$teamId/my-tasks/index'
 import { Route as DashboardTeamIdInboxIndexRouteImport } from './routes/dashboard/$teamId/inbox/index'
 import { Route as DashboardTeamIdTeamSettingsRouteImport } from './routes/dashboard/$teamId/team/settings'
 import { Route as DashboardTeamIdTeamOverviewRouteImport } from './routes/dashboard/$teamId/team/overview'
@@ -98,6 +98,12 @@ const DashboardTeamIdTeamIndexRoute =
     path: '/',
     getParentRoute: () => DashboardTeamIdTeamRouteRoute,
   } as any)
+const DashboardTeamIdSchedulesIndexRoute =
+  DashboardTeamIdSchedulesIndexRouteImport.update({
+    id: '/schedules/',
+    path: '/schedules/',
+    getParentRoute: () => DashboardTeamIdRoute,
+  } as any)
 const DashboardTeamIdProjectsIndexRoute =
   DashboardTeamIdProjectsIndexRouteImport.update({
     id: '/projects/',
@@ -114,12 +120,6 @@ const DashboardTeamIdOverviewIndexRoute =
   DashboardTeamIdOverviewIndexRouteImport.update({
     id: '/overview/',
     path: '/overview/',
-    getParentRoute: () => DashboardTeamIdRoute,
-  } as any)
-const DashboardTeamIdMyTasksIndexRoute =
-  DashboardTeamIdMyTasksIndexRouteImport.update({
-    id: '/my-tasks/',
-    path: '/my-tasks/',
     getParentRoute: () => DashboardTeamIdRoute,
   } as any)
 const DashboardTeamIdInboxIndexRoute =
@@ -267,10 +267,10 @@ export interface FileRoutesByFullPath {
   '/dashboard/$teamId/team/overview': typeof DashboardTeamIdTeamOverviewRoute
   '/dashboard/$teamId/team/settings': typeof DashboardTeamIdTeamSettingsRoute
   '/dashboard/$teamId/inbox/': typeof DashboardTeamIdInboxIndexRoute
-  '/dashboard/$teamId/my-tasks/': typeof DashboardTeamIdMyTasksIndexRoute
   '/dashboard/$teamId/overview/': typeof DashboardTeamIdOverviewIndexRoute
   '/dashboard/$teamId/profile/': typeof DashboardTeamIdProfileIndexRoute
   '/dashboard/$teamId/projects/': typeof DashboardTeamIdProjectsIndexRoute
+  '/dashboard/$teamId/schedules/': typeof DashboardTeamIdSchedulesIndexRoute
   '/dashboard/$teamId/team/': typeof DashboardTeamIdTeamIndexRoute
   '/dashboard/$teamId/projects/$projectId/board': typeof DashboardTeamIdProjectsProjectIdBoardRoute
   '/dashboard/$teamId/projects/$projectId/dashboard': typeof DashboardTeamIdProjectsProjectIdDashboardRoute
@@ -300,10 +300,10 @@ export interface FileRoutesByTo {
   '/dashboard/$teamId/team/overview': typeof DashboardTeamIdTeamOverviewRoute
   '/dashboard/$teamId/team/settings': typeof DashboardTeamIdTeamSettingsRoute
   '/dashboard/$teamId/inbox': typeof DashboardTeamIdInboxIndexRoute
-  '/dashboard/$teamId/my-tasks': typeof DashboardTeamIdMyTasksIndexRoute
   '/dashboard/$teamId/overview': typeof DashboardTeamIdOverviewIndexRoute
   '/dashboard/$teamId/profile': typeof DashboardTeamIdProfileIndexRoute
   '/dashboard/$teamId/projects': typeof DashboardTeamIdProjectsIndexRoute
+  '/dashboard/$teamId/schedules': typeof DashboardTeamIdSchedulesIndexRoute
   '/dashboard/$teamId/team': typeof DashboardTeamIdTeamIndexRoute
   '/dashboard/$teamId/projects/$projectId/board': typeof DashboardTeamIdProjectsProjectIdBoardRoute
   '/dashboard/$teamId/projects/$projectId/dashboard': typeof DashboardTeamIdProjectsProjectIdDashboardRoute
@@ -337,10 +337,10 @@ export interface FileRoutesById {
   '/dashboard/$teamId/team/overview': typeof DashboardTeamIdTeamOverviewRoute
   '/dashboard/$teamId/team/settings': typeof DashboardTeamIdTeamSettingsRoute
   '/dashboard/$teamId/inbox/': typeof DashboardTeamIdInboxIndexRoute
-  '/dashboard/$teamId/my-tasks/': typeof DashboardTeamIdMyTasksIndexRoute
   '/dashboard/$teamId/overview/': typeof DashboardTeamIdOverviewIndexRoute
   '/dashboard/$teamId/profile/': typeof DashboardTeamIdProfileIndexRoute
   '/dashboard/$teamId/projects/': typeof DashboardTeamIdProjectsIndexRoute
+  '/dashboard/$teamId/schedules/': typeof DashboardTeamIdSchedulesIndexRoute
   '/dashboard/$teamId/team/': typeof DashboardTeamIdTeamIndexRoute
   '/dashboard/$teamId/projects/$projectId/board': typeof DashboardTeamIdProjectsProjectIdBoardRoute
   '/dashboard/$teamId/projects/$projectId/dashboard': typeof DashboardTeamIdProjectsProjectIdDashboardRoute
@@ -376,10 +376,10 @@ export interface FileRouteTypes {
     | '/dashboard/$teamId/team/overview'
     | '/dashboard/$teamId/team/settings'
     | '/dashboard/$teamId/inbox/'
-    | '/dashboard/$teamId/my-tasks/'
     | '/dashboard/$teamId/overview/'
     | '/dashboard/$teamId/profile/'
     | '/dashboard/$teamId/projects/'
+    | '/dashboard/$teamId/schedules/'
     | '/dashboard/$teamId/team/'
     | '/dashboard/$teamId/projects/$projectId/board'
     | '/dashboard/$teamId/projects/$projectId/dashboard'
@@ -409,10 +409,10 @@ export interface FileRouteTypes {
     | '/dashboard/$teamId/team/overview'
     | '/dashboard/$teamId/team/settings'
     | '/dashboard/$teamId/inbox'
-    | '/dashboard/$teamId/my-tasks'
     | '/dashboard/$teamId/overview'
     | '/dashboard/$teamId/profile'
     | '/dashboard/$teamId/projects'
+    | '/dashboard/$teamId/schedules'
     | '/dashboard/$teamId/team'
     | '/dashboard/$teamId/projects/$projectId/board'
     | '/dashboard/$teamId/projects/$projectId/dashboard'
@@ -445,10 +445,10 @@ export interface FileRouteTypes {
     | '/dashboard/$teamId/team/overview'
     | '/dashboard/$teamId/team/settings'
     | '/dashboard/$teamId/inbox/'
-    | '/dashboard/$teamId/my-tasks/'
     | '/dashboard/$teamId/overview/'
     | '/dashboard/$teamId/profile/'
     | '/dashboard/$teamId/projects/'
+    | '/dashboard/$teamId/schedules/'
     | '/dashboard/$teamId/team/'
     | '/dashboard/$teamId/projects/$projectId/board'
     | '/dashboard/$teamId/projects/$projectId/dashboard'
@@ -545,6 +545,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardTeamIdTeamIndexRouteImport
       parentRoute: typeof DashboardTeamIdTeamRouteRoute
     }
+    '/dashboard/$teamId/schedules/': {
+      id: '/dashboard/$teamId/schedules/'
+      path: '/schedules'
+      fullPath: '/dashboard/$teamId/schedules/'
+      preLoaderRoute: typeof DashboardTeamIdSchedulesIndexRouteImport
+      parentRoute: typeof DashboardTeamIdRoute
+    }
     '/dashboard/$teamId/projects/': {
       id: '/dashboard/$teamId/projects/'
       path: '/projects'
@@ -564,13 +571,6 @@ declare module '@tanstack/react-router' {
       path: '/overview'
       fullPath: '/dashboard/$teamId/overview/'
       preLoaderRoute: typeof DashboardTeamIdOverviewIndexRouteImport
-      parentRoute: typeof DashboardTeamIdRoute
-    }
-    '/dashboard/$teamId/my-tasks/': {
-      id: '/dashboard/$teamId/my-tasks/'
-      path: '/my-tasks'
-      fullPath: '/dashboard/$teamId/my-tasks/'
-      preLoaderRoute: typeof DashboardTeamIdMyTasksIndexRouteImport
       parentRoute: typeof DashboardTeamIdRoute
     }
     '/dashboard/$teamId/inbox/': {
@@ -830,10 +830,10 @@ interface DashboardTeamIdRouteChildren {
   DashboardTeamIdInboxRouteRoute: typeof DashboardTeamIdInboxRouteRouteWithChildren
   DashboardTeamIdTeamRouteRoute: typeof DashboardTeamIdTeamRouteRouteWithChildren
   DashboardTeamIdProjectsProjectIdRouteRoute: typeof DashboardTeamIdProjectsProjectIdRouteRouteWithChildren
-  DashboardTeamIdMyTasksIndexRoute: typeof DashboardTeamIdMyTasksIndexRoute
   DashboardTeamIdOverviewIndexRoute: typeof DashboardTeamIdOverviewIndexRoute
   DashboardTeamIdProfileIndexRoute: typeof DashboardTeamIdProfileIndexRoute
   DashboardTeamIdProjectsIndexRoute: typeof DashboardTeamIdProjectsIndexRoute
+  DashboardTeamIdSchedulesIndexRoute: typeof DashboardTeamIdSchedulesIndexRoute
 }
 
 const DashboardTeamIdRouteChildren: DashboardTeamIdRouteChildren = {
@@ -841,10 +841,10 @@ const DashboardTeamIdRouteChildren: DashboardTeamIdRouteChildren = {
   DashboardTeamIdTeamRouteRoute: DashboardTeamIdTeamRouteRouteWithChildren,
   DashboardTeamIdProjectsProjectIdRouteRoute:
     DashboardTeamIdProjectsProjectIdRouteRouteWithChildren,
-  DashboardTeamIdMyTasksIndexRoute: DashboardTeamIdMyTasksIndexRoute,
   DashboardTeamIdOverviewIndexRoute: DashboardTeamIdOverviewIndexRoute,
   DashboardTeamIdProfileIndexRoute: DashboardTeamIdProfileIndexRoute,
   DashboardTeamIdProjectsIndexRoute: DashboardTeamIdProjectsIndexRoute,
+  DashboardTeamIdSchedulesIndexRoute: DashboardTeamIdSchedulesIndexRoute,
 }
 
 const DashboardTeamIdRouteWithChildren = DashboardTeamIdRoute._addFileChildren(

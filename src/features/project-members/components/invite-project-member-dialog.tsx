@@ -8,18 +8,7 @@ import { userQueries, type TUserSearchResult } from "@/features/users"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import {
-  Combobox,
-  ComboboxChip,
-  ComboboxChips,
-  ComboboxChipsInput,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxItem,
-  ComboboxList,
-  ComboboxValue,
-  useComboboxAnchor,
-} from "@/components/ui/combobox"
+import { MultiSelectCombobox } from "@/components/common/multi-select-combobox"
 import {
   Dialog,
   DialogContent,
@@ -58,7 +47,6 @@ export const InviteProjectMemberDialog = ({
   const [selectedRole, setSelectedRole] = useState<TProjectRole>("member")
   const deferredQuery = useDeferredValue(searchQuery)
 
-  const anchor = useComboboxAnchor()
 
   // Use global user search with smart exclusion
   const { data: users = [], isLoading } = useQuery(
@@ -115,65 +103,34 @@ export const InviteProjectMemberDialog = ({
         <div className="flex flex-col gap-4">
           <Field>
             <FieldLabel>Users</FieldLabel>
-            <Combobox
-              multiple
-              autoHighlight
+            <MultiSelectCombobox
               items={users}
-              itemToStringValue={(user) => user.name}
               value={selectedUsers}
               onValueChange={(vals) => {
-                setSelectedUsers(vals as TUserSearchResult[])
+                setSelectedUsers(vals)
               }}
               onInputValueChange={setSearchQuery}
-            >
-              <ComboboxChips ref={anchor} className="w-full">
-                <ComboboxValue>
-                  {(values: TUserSearchResult[]) => (
-                    <>
-                      {values.map((user) => (
-                        <ComboboxChip key={user.id}>{user.name}</ComboboxChip>
-                      ))}
-                      <ComboboxChipsInput
-                        placeholder="Search by name or email..."
-                        autoComplete="one-time-code"
-                      />
-                    </>
-                  )}
-                </ComboboxValue>
-              </ComboboxChips>
-              <ComboboxContent anchor={anchor}>
-                <ComboboxEmpty>
-                  {isLoading ? (
-                    <div className="flex items-center justify-center gap-2 py-2">
-                      <Loader2 className="size-4 animate-spin text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">
-                        Searching...
-                      </span>
-                    </div>
-                  ) : (
-                    "No users found."
-                  )}
-                </ComboboxEmpty>
-                <ComboboxList>
-                  {(user: TUserSearchResult) => (
-                    <ComboboxItem key={user.id} value={user}>
-                      <Avatar className="size-6">
-                        <AvatarImage src={user.avatar_url ?? undefined} />
-                        <AvatarFallback>
-                          {user.name.slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium">{user.name}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {user.email}
-                        </span>
-                      </div>
-                    </ComboboxItem>
-                  )}
-                </ComboboxList>
-              </ComboboxContent>
-            </Combobox>
+              isLoading={isLoading}
+              itemToString={(user) => user.name}
+              itemToValue={(user) => user.id}
+              placeholder="Search by name or email..."
+              renderItem={(user) => (
+                <div className="flex items-center gap-2">
+                  <Avatar className="size-6">
+                    <AvatarImage src={user.avatar_url ?? undefined} />
+                    <AvatarFallback>
+                      {user.name.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">{user.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {user.email}
+                    </span>
+                  </div>
+                </div>
+              )}
+            />
           </Field>
 
           <Field>

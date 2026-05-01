@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { MemberAvatarGroup } from "@/components/common/member-avatar-group"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -9,11 +9,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import type { TTask } from "@/features/tasks"
-import { useTaskMutations } from "@/features/tasks/queries"
 import {
   formatCalendarDate,
   type ITaskListDialogOptions,
 } from "@/features/tasks/helpers"
+import { useTaskMutations } from "@/features/tasks/queries"
 import { generateColumns } from "@/lib/data-table"
 import { ChevronDown, MoreHorizontal, Pencil, Trash2 } from "lucide-react"
 import { useState } from "react"
@@ -291,25 +291,26 @@ export const getTaskColumns = (options: ITaskListDialogOptions) =>
     },
 
     {
-      accessorKey: "assignee",
-      label: "Assignee",
+      accessorKey: "assignees",
+      label: "Assignees",
       size: 150,
       cell: ({ getValue }) => {
-        const assignee = getValue() as TTask["assignee"]
-        if (!assignee)
+        const assignees = getValue() as TTask["assignees"]
+        if (!assignees || assignees.length === 0)
           return (
             <span className="text-xs text-muted-foreground">Unassigned</span>
           )
         return (
-          <div className="flex min-w-0 items-center gap-2">
-            <Avatar className="size-5 shrink-0">
-              <AvatarImage src={assignee.user?.avatar_url} />
-              <AvatarFallback className="text-xs">
-                {assignee.user?.name?.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            <span className="truncate text-xs">{assignee.user?.name}</span>
-          </div>
+          <MemberAvatarGroup
+            items={assignees}
+            max={3}
+            size="sm"
+            getAvatarInfo={(a) => ({
+              id: a.id,
+              name: a.user?.name,
+              avatar_url: a.user?.avatar_url,
+            })}
+          />
         )
       },
     },

@@ -43,5 +43,6 @@ declare module "@tanstack/react-router" {
     viewModeScope?: string
     hideViewModes?: boolean
     allowViewModeCustomization?: boolean
+    fixedHeight?: boolean
   }
 }
