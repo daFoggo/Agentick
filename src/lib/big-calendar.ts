@@ -196,20 +196,24 @@ export function computeCalendarEventLayout(
   events: IBigCalendarEvent[],
   day: Date,
   startHour: number,
+  endHour: number,
   hourHeight: number
 ): IBigCalendarEventLayout[] {
   if (events.length === 0) return []
 
   const dayStart = new Date(day)
   dayStart.setHours(startHour, 0, 0, 0)
+  const dayEnd = new Date(day)
+  dayEnd.setHours(endHour, 0, 0, 0)
 
-  // Clamp start về đầu ngày nếu event bắt đầu trước startHour
+  // Clamp start/end về ranh giới hiển thị của ngày để tránh overflow grid
   const withInterval: IEventWithInterval[] = events
-    .map((event) => ({
-      event,
-      startMs: Math.max(event.start.getTime(), dayStart.getTime()),
-      endMs: event.end.getTime(),
-    }))
+    .map((event) => {
+      const startMs = Math.max(event.start.getTime(), dayStart.getTime())
+      const endMs = Math.min(event.end.getTime(), dayEnd.getTime())
+      return { event, startMs, endMs }
+    })
+    .filter((item) => item.startMs < item.endMs) // Loại bỏ events nằm ngoài range hiển thị
     .sort((a, b) => a.startMs - b.startMs || b.endMs - a.endMs)
 
   // Greedy column assignment: mỗi column là một mảng events đã được xếp

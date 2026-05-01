@@ -1,10 +1,5 @@
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarGroup,
-  AvatarGroupCount,
-  AvatarImage,
-} from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { MemberAvatarGroup } from "@/components/common/member-avatar-group"
 import { Button } from "@/components/ui/button"
 import {
   Tooltip,
@@ -84,7 +79,7 @@ export function ProjectDetailsHeader({
         {members.length > 0 && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <AvatarGroup
+              <div
                 className="cursor-pointer transition-all"
                 onClick={() =>
                   navigate({
@@ -93,18 +88,17 @@ export function ProjectDetailsHeader({
                   })
                 }
               >
-                {members.slice(0, 4).map((member: TProjectMember) => (
-                  <Avatar key={member.id}>
-                    <AvatarImage src={member.user?.avatar_url ?? undefined} />
-                    <AvatarFallback>
-                      {member.user?.name?.charAt(0).toUpperCase() || "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                ))}
-                {members.length > 4 && (
-                  <AvatarGroupCount>+{members.length - 4}</AvatarGroupCount>
-                )}
-              </AvatarGroup>
+                <MemberAvatarGroup
+                  items={members}
+                  max={4}
+                  size="default"
+                  getAvatarInfo={(m: TProjectMember) => ({
+                    id: m.id,
+                    name: m.user?.name,
+                    avatar_url: m.user?.avatar_url,
+                  })}
+                />
+              </div>
             </TooltipTrigger>
             <TooltipContent>View all members</TooltipContent>
           </Tooltip>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import {
   Dialog,
   DialogContent,
@@ -10,12 +10,30 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { DAYS_OF_WEEK, DISPLAY_ORDER_MON_SUN } from "@/constants/days"
 import { cn } from "@/lib/utils"
 import { CalendarRange, Settings2Icon } from "lucide-react"
-import { useSchedulesData } from "../hooks"
+import { useQuery } from "@tanstack/react-query"
+import { useParams } from "@tanstack/react-router"
+import { userQueries } from "@/features/users"
+import { 
+  mySchedulesQueryOptions, 
+  formatSchedules, 
+  useScheduleMutations 
+} from "../queries"
 import { WorkTimePatternEditor } from "./work-time-pattern-editor"
 
 export const WorkTimePattern = () => {
   const [mounted, setMounted] = useState(false)
-  const { isLoading, schedules, teamId, userId, upsert } = useSchedulesData()
+  const params = useParams({ from: "/dashboard/$teamId/schedules/" })
+  const teamId = params.teamId
+  
+  const { data: user } = useQuery(userQueries.me())
+  const { data: rawSchedules, isLoading } = useQuery(mySchedulesQueryOptions())
+  const { upsert } = useScheduleMutations()
+
+  const schedules = useMemo(
+    () => formatSchedules(rawSchedules, teamId, user?.id),
+    [rawSchedules, teamId, user?.id]
+  )
+  const userId = user?.id
 
   useEffect(() => {
     setMounted(true)
@@ -70,7 +88,7 @@ export const WorkTimePattern = () => {
           </div>
         </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:min-w-lg">
         <DialogHeader>
           <DialogTitle>Configure Work Days</DialogTitle>
         </DialogHeader>

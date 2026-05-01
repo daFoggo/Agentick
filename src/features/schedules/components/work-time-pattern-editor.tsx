@@ -1,11 +1,11 @@
-import { toast } from "sonner"
-import { cn } from "@/lib/utils"
+import { TimePicker } from "@/components/common/date-picker"
 import { Field, FieldGroup } from "@/components/ui/field"
-import { Switch } from "@/components/ui/radix-switch"
 import { InputGroup, InputGroupText } from "@/components/ui/input-group"
+import { Switch } from "@/components/ui/radix-switch"
 import { DAYS_OF_WEEK, DISPLAY_ORDER_MON_SUN } from "@/constants/days"
-import { TimePickerButton } from "./time-picker-button"
+import { cn } from "@/lib/utils"
 import type { UseMutationResult } from "@tanstack/react-query"
+import { toast } from "sonner"
 import type { TSchedule, TUpsertScheduleInput } from "../schemas"
 
 type TScheduleView = Omit<TUpsertScheduleInput, "user_id"> & {
@@ -47,8 +47,10 @@ export const WorkTimePatternEditor = ({
     value: string
   ) => {
     const day = schedules[dayIndex]
-    const startTime = (type === "start" ? value : day.start_time) || "00:00"
-    const endTime = (type === "end" ? value : day.end_time) || "00:00"
+    const startTime = (type === "start" ? value : day.start_time) || ""
+    const endTime = (type === "end" ? value : day.end_time) || ""
+
+    if (!startTime || !endTime) return
 
     if (startTime >= endTime) {
       toast.error("End time must be after start time")
@@ -96,27 +98,29 @@ export const WorkTimePatternEditor = ({
               </label>
             </div>
 
-            <div className="flex w-[130px] shrink-0 items-center justify-end">
+            <div className="flex w-60 shrink-0 items-center justify-end">
               {!day.is_off ? (
-                <InputGroup className="w-full border-none bg-muted shadow-none ring-0">
-                  <TimePickerButton
+                <InputGroup className="w-full gap-1 overflow-hidden border-none bg-muted p-1 shadow-none ring-0">
+                  <TimePicker
                     value={day.start_time || "09:00"}
                     onChange={(val) => handleTimeChange(dayIndex, "start", val)}
+                    className="flex-1"
+                    size="sm"
                   />
-                  <InputGroupText className="flex-1 justify-center px-0 text-xs font-medium text-muted-foreground/40">
+                  <InputGroupText className="shrink-0 px-1 text-xs font-bold text-muted-foreground/30 uppercase select-none">
                     to
                   </InputGroupText>
-                  <TimePickerButton
+                  <TimePicker
                     value={day.end_time || "18:00"}
                     onChange={(val) => handleTimeChange(dayIndex, "end", val)}
+                    className="flex-1"
+                    size="sm"
                   />
                 </InputGroup>
               ) : (
-                <InputGroup className="w-full border-none bg-muted/40 shadow-none ring-0">
-                  <InputGroupText className="w-full justify-center text-xs font-medium tracking-widest text-muted-foreground/60 uppercase">
-                    Day Off
-                  </InputGroupText>
-                </InputGroup>
+                <div className="px-4text-xs flex h-8 w-full items-center justify-center rounded-lg bg-muted/50 font-bold tracking-widest text-muted-foreground/40 uppercase select-none">
+                  Day Off
+                </div>
               )}
             </div>
           </Field>

@@ -28,7 +28,7 @@ export function MyTasksList() {
   const tasksQueries = useQueries({
     queries: projects.map((p) =>
       taskQueries.list(p.id, {
-        assignee_id__eq: userId,
+        assignee_ids__contains: userId ? [userId] : [],
         is_deleted__eq: false,
         page: 1,
         page_size: "all",

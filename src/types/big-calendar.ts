@@ -124,6 +124,8 @@ export interface IBigCalendarProps {
   startHour?: number
   /** Giờ kết thúc hiển thị trong grid. Default: 24 */
   endHour?: number
+  /** Giờ tự động cuộn tới khi khởi tạo. Default: none */
+  scrollToHour?: number
   /** Pixel per hour — quyết định chiều cao của mỗi giờ. Default: 60 */
   hourHeight?: number
 

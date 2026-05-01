@@ -45,7 +45,7 @@ export function BigCalendarTimeSlots({
 
   return (
     <div
-      className={cn("relative w-full", className)}
+      className={cn("relative w-full border-b border-border/50", className)}
       style={{ height: (endHour - startHour) * hourHeight }}
     >
       {slots.map(({ hour }) => (

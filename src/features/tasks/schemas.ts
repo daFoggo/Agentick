@@ -51,10 +51,10 @@ export const ProjectTaskSchema = z.object({
   type_id: z.string(),
   priority_id: z.string(),
   assigner_id: z.string(),
-  assignee_id: z.string().nullable(),
+  assignee_ids: z.array(z.string()).optional(),
   phase_id: z.string().nullable(),
-  start_date: ApiDateSchema,
-  due_date: ApiDateSchema,
+  start_date: ApiDateSchema.nullable().optional(),
+  due_date: ApiDateSchema.nullable().optional(),
   order: z.number(),
   is_archived: z.boolean(),
   is_deleted: z.boolean(),
@@ -72,7 +72,7 @@ export const ProjectTaskSchema = z.object({
 export type TTask = z.infer<typeof ProjectTaskSchema> & {
   tags?: TTag[]
   phase?: TPhase
-  assignee?: TProjectMember
+  assignees?: TProjectMember[]
 }
 
 /**
@@ -87,7 +87,7 @@ export const CreateTaskSchema = z.object({
   type_id: z.string(),
   priority_id: z.string(),
   assigner_id: z.string(),
-  assignee_id: z.string().nullable().optional(),
+  assignee_ids: z.array(z.string()).optional(),
   phase_id: z.string().nullable().optional(),
   start_date: ApiDateSchema,
   due_date: ApiDateSchema,
@@ -116,8 +116,9 @@ export const FindTasksSchema = z
   .object({
     id__eq: z.string().optional(),
     title__ilike: z.string().optional(),
+    team_id__eq: z.string().optional(),
     status_id__eq: z.string().optional(),
-    assignee_id__eq: z.string().optional(),
+    assignee_ids__contains: z.array(z.string()).optional(),
     is_archived__eq: z.boolean().optional(),
     is_deleted__eq: z.boolean().optional(),
     page: FindPageSchema,

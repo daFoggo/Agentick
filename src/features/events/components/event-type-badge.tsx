@@ -24,11 +24,12 @@ export function EventTypeBadge({ type, className }: IEventTypeBadgeProps) {
   return (
     <Badge
       variant="outline"
-      className={cn("gap-1.5 border-transparent capitalize font-medium", className)}
-      style={{
-        backgroundColor: `${option.calendarColor}1A`, // 10% opacity background
-        color: option.calendarColor,
-      }}
+      className={cn(
+        "gap-1.5 border-transparent font-medium capitalize",
+        option.bgClass,
+        option.colorClass,
+        className
+      )}
     >
       <Icon className="size-3.5" />
       {option.label}

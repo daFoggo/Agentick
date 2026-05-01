@@ -31,6 +31,7 @@ interface IBigCalendarWeekViewProps {
     layout: IBigCalendarEventLayout
   ) => React.ReactNode
   slotClassName?: (date: Date, hour: number) => string
+  scrollToHour?: number
   className?: string
 }
 
@@ -56,14 +57,28 @@ export function BigCalendarWeekView({
   renderEvent,
   slotClassName,
   className,
+  scrollToHour,
 }: IBigCalendarWeekViewProps) {
   const currentDate = useCalendarCurrentDate()
   const weekStartsOn = useCalendarWeekStartsOn()
   const weekDays = getCalendarWeekDays(currentDate, weekStartsOn)
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null)
 
-  // Chiều cao tổng của grid — dùng để set explicit height cho day columns container
-  // để border-l của từng column kéo dài đúng toàn bộ grid (không bị cắt bởi flex)
+  // Chiều cao tổng của grid
   const totalGridHeight = (endHour - startHour) * hourHeight
+
+  // Auto scroll khi mount hoặc khi scrollToHour thay đổi
+  React.useEffect(() => {
+    if (
+      scrollToHour !== undefined &&
+      scrollContainerRef.current &&
+      scrollToHour >= startHour &&
+      scrollToHour <= endHour
+    ) {
+      const scrollOffset = (scrollToHour - startHour) * hourHeight
+      scrollContainerRef.current.scrollTop = scrollOffset
+    }
+  }, [scrollToHour, startHour, endHour, hourHeight])
 
   return (
     <div
@@ -85,7 +100,10 @@ export function BigCalendarWeekView({
       </div>
 
       {/* ── Scrollable time grid ── */}
-      <div className="no-scrollbar flex min-h-0 flex-1 overflow-y-auto">
+      <div
+        ref={scrollContainerRef}
+        className="no-scrollbar flex min-h-0 flex-1 overflow-y-auto"
+      >
         {/* Time gutter */}
         <BigCalendarTimeGutter
           startHour={startHour}

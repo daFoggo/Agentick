@@ -36,6 +36,7 @@ export function BigCalendar({
   weekStartsOn,
   startHour = CALENDAR_DEFAULT_START_HOUR,
   endHour = CALENDAR_DEFAULT_END_HOUR,
+  scrollToHour,
   hourHeight = CALENDAR_HOUR_HEIGHT,
   onSelectEvent,
   onSelectSlot,
@@ -78,6 +79,7 @@ export function BigCalendar({
           events={events}
           startHour={startHour}
           endHour={endHour}
+          scrollToHour={scrollToHour}
           hourHeight={hourHeight}
           onSelectEvent={onSelectEvent}
           onSelectSlot={onSelectSlot}
@@ -90,6 +92,7 @@ export function BigCalendar({
           events={events}
           startHour={startHour}
           endHour={endHour}
+          scrollToHour={scrollToHour}
           hourHeight={hourHeight}
           onSelectEvent={onSelectEvent}
           onSelectSlot={onSelectSlot}

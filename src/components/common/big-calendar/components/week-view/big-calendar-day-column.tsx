@@ -58,6 +58,7 @@ export function BigCalendarDayColumn({
     dayEvents,
     day,
     startHour,
+    endHour,
     hourHeight,
   )
 

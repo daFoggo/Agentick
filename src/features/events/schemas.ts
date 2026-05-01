@@ -1,13 +1,17 @@
-import { z } from "zod"
-import { ApiDateSchema, FindOrderingSchema, FindPageSchema, FindPageSizeWithAllSchema } from "@/lib/zod-common"
+import {
+  ApiDateSchema,
+  FindOrderingSchema,
+  FindPageSchema,
+  FindPageSizeWithAllSchema,
+} from "@/lib/zod-common"
 import type { TBaseFindResponse, TBaseSearchOptions } from "@/types/api"
+import { z } from "zod"
 
-export const EventTypeSchema = z.enum(["task", "meeting", "focus_time", "leave"])
+export const EventTypeSchema = z.enum(["meeting", "focus_time", "leave", "task"])
 export type TEventType = z.infer<typeof EventTypeSchema>
 
 export const EventSchema = z.object({
   id: z.string(),
-  calendar_id: z.string(),
   user_id: z.string(),
   team_id: z.string(),
   type: EventTypeSchema,
@@ -15,15 +19,18 @@ export const EventSchema = z.object({
   description: z.string().optional().nullable(),
   start_time: ApiDateSchema,
   end_time: ApiDateSchema,
-  task_id: z.string().optional().nullable(),
+  participant_ids: z.array(z.string()).optional(),
   created_at: ApiDateSchema.optional(),
   updated_at: ApiDateSchema.optional().nullable(),
 })
 
-export type TEvent = z.infer<typeof EventSchema>
+import { TeamMemberSchema } from "../team-members/schemas"
+
+export type TEvent = z.infer<typeof EventSchema> & {
+  participants?: z.infer<typeof TeamMemberSchema>[]
+}
 
 export const CreateEventBaseSchema = z.object({
-  calendar_id: z.string(),
   user_id: z.string(),
   team_id: z.string(),
   type: EventTypeSchema,
@@ -31,19 +38,18 @@ export const CreateEventBaseSchema = z.object({
   description: z.string().optional(),
   start_time: ApiDateSchema,
   end_time: ApiDateSchema,
-  task_id: z.string().optional(),
+  participant_ids: z.array(z.string()).optional(),
 })
 
 export const CreateEventSchema = CreateEventBaseSchema.refine(
   (data) => {
-    if (data.type === "task" && !data.task_id) {
-      return false
-    }
-    return true
+    const start = new Date(data.start_time)
+    const end = new Date(data.end_time)
+    return end > start
   },
   {
-    message: "task_id is required when type is task",
-    path: ["task_id"],
+    message: "Thời gian kết thúc phải sau thời gian bắt đầu",
+    path: ["end_time"],
   }
 )
 
@@ -56,15 +62,16 @@ export type TUpdateEventInput = {
   payload: z.infer<typeof UpdateEventSchema>
 }
 
-export const FindEventsSchema = z.object({
-  calendar_id__eq: z.string().optional(),
-  user_id__eq: z.string().optional(),
-  team_id__eq: z.string().optional(),
-  type__eq: EventTypeSchema.optional(),
-  page: FindPageSchema,
-  page_size: FindPageSizeWithAllSchema,
-  ordering: FindOrderingSchema,
-}).optional()
+export const FindEventsSchema = z
+  .object({
+    user_id__eq: z.string().optional(),
+    team_id__eq: z.string().optional(),
+    type__eq: EventTypeSchema.optional(),
+    page: FindPageSchema,
+    page_size: FindPageSizeWithAllSchema,
+    ordering: FindOrderingSchema,
+  })
+  .optional()
 
 export type TFindEventsInput = z.infer<typeof FindEventsSchema>
 

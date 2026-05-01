@@ -1,28 +1,69 @@
 import { api } from "@/lib/ky"
 import type { TBaseResponse } from "@/types/api"
 import "@tanstack/react-start/server-only"
-import type { TCreateEventInput, TEvent, TEventsResponse, TFindEventsInput, TUpdateEventInput } from "./schemas"
+import type {
+  TCreateEventInput,
+  TEvent,
+  TEventsResponse,
+  TFindEventsInput,
+  TUpdateEventInput,
+} from "./schemas"
 
-export async function fetchEvents(params?: TFindEventsInput): Promise<TEventsResponse> {
+export async function fetchEvents(
+  params?: TFindEventsInput
+): Promise<TEventsResponse> {
+  if (!params?.team_id__eq) {
+    throw new Error("team_id__eq is required to fetch events")
+  }
+  const { team_id__eq, ...rest } = params
   const response = await api
-    .get("events", { searchParams: params as Record<string, string> })
+    .get(`events/teams/${team_id__eq}`, {
+      searchParams: rest as Record<string, string>,
+    })
     .json<TBaseResponse<TEventsResponse>>()
   return response.data
 }
 
 export async function fetchEventById(eventId: string): Promise<TEvent> {
-  const response = await api.get(`events/${eventId}`).json<TBaseResponse<TEvent>>()
+  const response = await api
+    .get(`events/${eventId}`)
+    .json<TBaseResponse<TEvent>>()
   return response.data
 }
 
 export async function createEvent(payload: TCreateEventInput): Promise<TEvent> {
-  const response = await api.post("events", { json: payload }).json<TBaseResponse<TEvent>>()
-  return response.data
+  try {
+    const response = await api
+      .post("events", { json: payload })
+      .json<TBaseResponse<TEvent>>()
+    return response.data
+  } catch (error: any) {
+    if (error.response) {
+      const errorText = await error.response.clone().text()
+      console.error("Backend Error Response:", errorText)
+      throw new Error(`Backend Error: ${errorText}`)
+    }
+    throw error
+  }
 }
 
-export async function updateEvent({ eventId, payload }: TUpdateEventInput): Promise<TEvent> {
-  const response = await api.patch(`events/${eventId}`, { json: payload }).json<TBaseResponse<TEvent>>()
-  return response.data
+export async function updateEvent({
+  eventId,
+  payload,
+}: TUpdateEventInput): Promise<TEvent> {
+  try {
+    const response = await api
+      .patch(`events/${eventId}`, { json: payload })
+      .json<TBaseResponse<TEvent>>()
+    return response.data
+  } catch (error: any) {
+    if (error.response) {
+      const errorText = await error.response.clone().text()
+      console.error("Backend Update Error Response:", errorText)
+      throw new Error(`Backend Error: ${errorText}`)
+    }
+    throw error
+  }
 }
 
 export async function deleteEvent(eventId: string): Promise<void> {

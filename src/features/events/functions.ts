@@ -1,7 +1,17 @@
 import { createServerFn } from "@tanstack/react-start"
 import { requestLoggerMiddleware } from "@/lib/middleware"
-import { CreateEventSchema, FindEventsSchema, UpdateEventSchema } from "./schemas"
-import { createEvent, deleteEvent, fetchEventById, fetchEvents, updateEvent } from "./server"
+import {
+  CreateEventSchema,
+  FindEventsSchema,
+  UpdateEventSchema,
+} from "./schemas"
+import {
+  createEvent,
+  deleteEvent,
+  fetchEventById,
+  fetchEvents,
+  updateEvent,
+} from "./server"
 import { z } from "zod"
 
 export const getEventsFn = createServerFn({ method: "GET" })

@@ -102,7 +102,9 @@ export function BigCalendarEventPopover({
       <PopoverContent
         className={cn("w-80", className)}
         align="start"
-        sideOffset={4}
+        side="right"
+        sideOffset={8}
+        collisionPadding={16}
         onClick={(e) => e.stopPropagation()} // Ngăn click lan ra ngoài làm trigger các action khác của calendar
       >
         <PopoverHeader className="gap-2">

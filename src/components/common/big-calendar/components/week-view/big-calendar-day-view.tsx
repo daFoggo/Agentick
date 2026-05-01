@@ -27,6 +27,7 @@ interface IBigCalendarDayViewProps {
     layout: IBigCalendarEventLayout
   ) => React.ReactNode
   slotClassName?: (date: Date, hour: number) => string
+  scrollToHour?: number
   className?: string
 }
 
@@ -44,9 +45,24 @@ export function BigCalendarDayView({
   renderEvent,
   slotClassName,
   className,
+  scrollToHour,
 }: IBigCalendarDayViewProps) {
   const currentDate = useCalendarCurrentDate()
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null)
   const totalGridHeight = (endHour - startHour) * hourHeight
+
+  // Auto scroll khi mount hoặc khi scrollToHour thay đổi
+  React.useEffect(() => {
+    if (
+      scrollToHour !== undefined &&
+      scrollContainerRef.current &&
+      scrollToHour >= startHour &&
+      scrollToHour <= endHour
+    ) {
+      const scrollOffset = (scrollToHour - startHour) * hourHeight
+      scrollContainerRef.current.scrollTop = scrollOffset
+    }
+  }, [scrollToHour, startHour, endHour, hourHeight])
 
   return (
     <div
@@ -66,7 +82,10 @@ export function BigCalendarDayView({
       </div>
 
       {/* ── Scrollable grid ── */}
-      <div className="no-scrollbar flex min-h-0 flex-1 overflow-y-auto">
+      <div
+        ref={scrollContainerRef}
+        className="no-scrollbar flex min-h-0 flex-1 overflow-y-auto"
+      >
         <BigCalendarTimeGutter
           startHour={startHour}
           endHour={endHour}

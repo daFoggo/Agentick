@@ -1,10 +1,5 @@
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarGroup,
-  AvatarGroupCount,
-  AvatarImage,
-} from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { MemberAvatarGroup } from "@/components/common/member-avatar-group"
 import { Button } from "@/components/ui/button"
 import { InviteTeamMemberDialog } from "@/features/team-members"
 import type { TTeam } from "@/features/teams"
@@ -48,19 +43,16 @@ export function TeamDetailsHeader({ team }: ITeamDetailsHeaderProps) {
       </div>
 
       <div className="flex items-center gap-2">
-        <AvatarGroup>
-          {members.slice(0, 2).map((member: TTeamMember) => (
-            <Avatar key={member.id}>
-              <AvatarImage src={member?.user?.avatar_url} />
-              <AvatarFallback>
-                {member.user?.name?.charAt(0)?.toUpperCase() || "U"}
-              </AvatarFallback>
-            </Avatar>
-          ))}
-          {members.length > 2 && (
-            <AvatarGroupCount>+{members.length - 2}</AvatarGroupCount>
-          )}
-        </AvatarGroup>
+        <MemberAvatarGroup
+          items={members}
+          max={4}
+          size="default"
+          getAvatarInfo={(m: TTeamMember) => ({
+            id: m.id,
+            name: m.user?.name,
+            avatar_url: m.user?.avatar_url,
+          })}
+        />
 
         <Button onClick={() => setInviteOpen(true)}>
           Invite

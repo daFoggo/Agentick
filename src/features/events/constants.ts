@@ -6,6 +6,7 @@ export interface IEventTypeOption {
   label: string
   icon: LucideIcon
   colorClass: string
+  bgClass: string
   calendarColor: string
 }
 
@@ -15,6 +16,7 @@ export const EVENT_TYPE_OPTIONS: IEventTypeOption[] = [
     label: "Task",
     icon: ListTodo,
     colorClass: "text-blue-500",
+    bgClass: "bg-blue-500/20",
     calendarColor: "#3b82f6", // blue-500
   },
   {
@@ -22,6 +24,7 @@ export const EVENT_TYPE_OPTIONS: IEventTypeOption[] = [
     label: "Meeting",
     icon: Video,
     colorClass: "text-green-500",
+    bgClass: "bg-green-500/20",
     calendarColor: "#22c55e", // green-500
   },
   {
@@ -29,6 +32,7 @@ export const EVENT_TYPE_OPTIONS: IEventTypeOption[] = [
     label: "Focus Time",
     icon: Focus,
     colorClass: "text-amber-500",
+    bgClass: "bg-amber-500/20",
     calendarColor: "#f59e0b", // amber-500
   },
   {
@@ -36,6 +40,7 @@ export const EVENT_TYPE_OPTIONS: IEventTypeOption[] = [
     label: "Leave",
     icon: Coffee,
     colorClass: "text-rose-500",
+    bgClass: "bg-rose-500/20",
     calendarColor: "#f43f5e", // rose-500
   },
 ]

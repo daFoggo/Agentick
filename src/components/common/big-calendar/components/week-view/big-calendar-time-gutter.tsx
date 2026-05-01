@@ -22,7 +22,7 @@ export function BigCalendarTimeGutter({
 
   return (
     <div
-      className={cn("relative w-14 shrink-0 select-none", className)}
+      className={cn("relative w-14 shrink-0 select-none border-b border-border/50", className)}
       style={{ height: (endHour - startHour) * hourHeight }}
     >
       {slots.map(({ hour, label }) => (
