@@ -4,6 +4,7 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
@@ -60,6 +61,11 @@ export const SidebarGroupSection = ({
                     >
                       {item.title}
                     </span>
+                    {item.badge !== undefined && item.badge !== 0 && (
+                      <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground shadow-sm">
+                        {item.badge}
+                      </span>
+                    )}
                   </SidebarMenuButton>
                 )}
               </Link>

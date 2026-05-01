@@ -1,8 +1,8 @@
 import { AppPageHeader } from "@/components/layout/app/page-header"
 import { AppSidebar } from "@/components/layout/app/sidebar"
-import { NotificationBell } from "@/components/layout/app/notification-bell"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { userQueries } from "@/features/users"
+import { inboxStatsQueryOptions } from "@/features/inbox/queries"
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/dashboard")({
@@ -19,7 +19,10 @@ export const Route = createFileRoute("/dashboard")({
     }
   },
   loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(userQueries.me())
+    await Promise.all([
+      context.queryClient.ensureQueryData(userQueries.me()),
+      context.queryClient.ensureQueryData(inboxStatsQueryOptions()),
+    ])
   },
   component: DashboardLayout,
   staticData: {
@@ -35,7 +38,6 @@ function DashboardLayout() {
         <main className="flex flex-1 flex-col gap-4 p-4">
           <div className="flex w-full items-center justify-between">
             <AppPageHeader />
-            <NotificationBell />
           </div>
           <Outlet />
         </main>

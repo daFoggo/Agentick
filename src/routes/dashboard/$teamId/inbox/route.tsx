@@ -6,9 +6,9 @@ import { useSuspenseQuery } from "@tanstack/react-query"
 import { Outlet, createFileRoute } from "@tanstack/react-router"
 
 const toInboxBadgeMap = (stats: TInboxStats) => ({
-  active: stats.activeCount,
-  bookmarks: stats.bookmarksCount,
-  archive: stats.archiveCount,
+  active: stats.active_count,
+  bookmarks: stats.bookmarks_count,
+  archive: stats.archive_count,
 })
 
 export const Route = createFileRoute("/dashboard/$teamId/inbox")({
