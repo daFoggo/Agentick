@@ -33,6 +33,8 @@ export function BigCalendarTimeSlots({
 
   // startAnchor: điểm click chuột đầu tiên
   const [startAnchor, setStartAnchor] = useState<Date | null>(null)
+  const [startPointerY, setStartPointerY] = useState<number | null>(null)
+  const [hasDraggedSelection, setHasDraggedSelection] = useState(false)
   // selection: range thực tế (đã sắp xếp start < end)
   const [selection, setSelection] = useState<{ start: Date; end: Date } | null>(
     null
@@ -51,6 +53,8 @@ export function BigCalendarTimeSlots({
     )
 
     setStartAnchor(startDate)
+    setStartPointerY(y)
+    setHasDraggedSelection(false)
     setSelection({ start: startDate, end: addMinutes(startDate, 15) })
   }
 
@@ -65,6 +69,10 @@ export function BigCalendarTimeSlots({
       startHour,
       hourHeight
     )
+
+    if (startPointerY !== null && Math.abs(y - startPointerY) > 4) {
+      setHasDraggedSelection(true)
+    }
 
     if (isBefore(currentDate, startAnchor)) {
       setSelection({ start: currentDate, end: startAnchor })
@@ -83,18 +91,22 @@ export function BigCalendarTimeSlots({
     if (!selection || !startAnchor) {
       setSelection(null)
       setStartAnchor(null)
+      setStartPointerY(null)
+      setHasDraggedSelection(false)
       return
     }
 
-    // Nếu chỉ là click (không kéo), tạo 1 block 1h hoặc 15p tùy ý
-    // Ở đây ta dùng selection đã tính
-    onSelectSlot?.({
-      ...selection,
-      dayOfWeek: day.getDay(),
-    })
+    if (hasDraggedSelection) {
+      onSelectSlot?.({
+        ...selection,
+        dayOfWeek: day.getDay(),
+      })
+    }
 
     setSelection(null)
     setStartAnchor(null)
+    setStartPointerY(null)
+    setHasDraggedSelection(false)
   }
 
   return (
