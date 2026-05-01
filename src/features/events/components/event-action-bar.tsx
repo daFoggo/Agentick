@@ -39,13 +39,12 @@ export const EventActionBar = ({
   event,
   onSuccess,
 }: IEventActionBarProps) => {
-  const mode: TMode = event ? "edit" : "create"
+  const mode: TMode = event && !event.id.startsWith("new") ? "edit" : "create"
   const { create, update } = useEventMutations()
   const params = useParams({ strict: false }) as { teamId?: string }
   const teamId = params.teamId || ""
   const { data: me } = useQuery(userQueries.me())
   const titleRef = useRef<HTMLInputElement>(null)
-
 
   const { data: teamMembersData } = useQuery(teamMembersQueryOptions(teamId))
   const teamMembers = teamMembersData?.founds || []
@@ -67,6 +66,12 @@ export const EventActionBar = ({
         : CreateEventBaseSchema) as any,
     },
     onSubmit: async ({ value }) => {
+      // Manual check to be 100% sure title is present before sending to API
+      if (!value.title || value.title.trim() === "") {
+        toast.error("Tiêu đề không được để trống")
+        return
+      }
+
       try {
         const payload = {
           ...value,
@@ -103,7 +108,7 @@ export const EventActionBar = ({
 
   useEffect(() => {
     if (open) {
-      if (mode === "edit" && event) {
+      if (event) {
         form.reset({
           team_id: teamId,
           user_id: me?.id || "",
@@ -135,7 +140,6 @@ export const EventActionBar = ({
   }, [open, event?.id])
 
   const isPending = create.isPending || update.isPending
-
 
   useEffect(() => {
     if (!open) return
@@ -189,7 +193,9 @@ export const EventActionBar = ({
                         className="justify-start"
                       >
                         <TabsList variant="line">
-                          {EVENT_TYPE_OPTIONS.map((opt) => {
+                          {EVENT_TYPE_OPTIONS.filter(
+                            (opt) => opt.value !== "task"
+                          ).map((opt) => {
                             const Icon = opt.icon
                             return (
                               <TabsTrigger key={opt.value} value={opt.value}>
@@ -221,6 +227,15 @@ export const EventActionBar = ({
                     name="title"
                     children={(field) => (
                       <div className="px-1">
+                        {(() => {
+                          const titleError = field.state.meta.errors[0]
+                          const titleErrorMessage =
+                            typeof titleError === "string"
+                              ? titleError
+                              : titleError?.message
+
+                          return (
+                            <>
                         <input
                           ref={titleRef}
                           name={field.name}
@@ -231,9 +246,19 @@ export const EventActionBar = ({
                           className={cn(
                             "w-full bg-transparent text-base font-semibold",
                             "placeholder:text-muted-foreground/50",
-                            "border-0 ring-0 outline-none"
+                            "border-0 ring-0 outline-none",
+                            field.state.meta.errors.length > 0 &&
+                              "text-destructive placeholder:text-destructive/50"
                           )}
                         />
+                              {titleErrorMessage && (
+                                <span className="text-[10px] font-medium text-destructive">
+                                  {titleErrorMessage}
+                                </span>
+                              )}
+                            </>
+                          )
+                        })()}
                       </div>
                     )}
                   />

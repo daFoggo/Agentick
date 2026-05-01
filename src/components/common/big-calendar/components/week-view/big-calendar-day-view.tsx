@@ -1,6 +1,17 @@
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core"
+import { restrictToFirstScrollableAncestor } from "@dnd-kit/modifiers"
+import { format } from "date-fns"
 import React from "react"
 import { cn } from "@/lib/utils"
 import {
+  getCalendarDateFromOffset,
   CALENDAR_DEFAULT_END_HOUR,
   CALENDAR_DEFAULT_START_HOUR,
   CALENDAR_HOUR_HEIGHT,
@@ -11,7 +22,6 @@ import type {
   IBigCalendarEventLayout,
   IBigCalendarSlotInfo,
 } from "@/types/big-calendar"
-import { format } from "date-fns"
 import { BigCalendarDayColumn } from "./big-calendar-day-column"
 import { BigCalendarTimeGutter } from "./big-calendar-time-gutter"
 
@@ -28,6 +38,8 @@ interface IBigCalendarDayViewProps {
   ) => React.ReactNode
   slotClassName?: (date: Date, hour: number) => string
   scrollToHour?: number
+  onEventDrop?: (event: IBigCalendarEvent, start: Date, end: Date) => void
+  onEventResize?: (event: IBigCalendarEvent, start: Date, end: Date) => void
   className?: string
 }
 
@@ -46,6 +58,8 @@ export function BigCalendarDayView({
   slotClassName,
   className,
   scrollToHour,
+  onEventDrop,
+  onEventResize,
 }: IBigCalendarDayViewProps) {
   const currentDate = useCalendarCurrentDate()
   const scrollContainerRef = React.useRef<HTMLDivElement>(null)
@@ -63,6 +77,71 @@ export function BigCalendarDayView({
       scrollContainerRef.current.scrollTop = scrollOffset
     }
   }, [scrollToHour, startHour, endHour, hourHeight])
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor)
+  )
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over, delta } = event
+    if (!over) return
+
+    const activeData = active.data.current
+    const overData = over.data.current
+
+    if (!activeData) return
+
+    if (activeData.type === "event") {
+      const targetDay = overData?.type === "day" ? (overData.day as Date) : null
+      if (!targetDay) return
+
+      const layout = activeData.layout as IBigCalendarEventLayout
+      const calendarEvent = activeData.event as IBigCalendarEvent
+
+      const newTop = layout.top + delta.y
+      const durationMs =
+        calendarEvent.end.getTime() - calendarEvent.start.getTime()
+
+      const newStart = getCalendarDateFromOffset(
+        newTop,
+        targetDay,
+        startHour,
+        hourHeight
+      )
+
+      const snappedStart = new Date(
+        Math.round(newStart.getTime() / (15 * 60 * 1000)) * (15 * 60 * 1000)
+      )
+      const snappedEnd = new Date(snappedStart.getTime() + durationMs)
+
+      onEventDrop?.(calendarEvent, snappedStart, snappedEnd)
+    } else if (activeData.type === "resize") {
+      const layout = activeData.layout as IBigCalendarEventLayout
+      const calendarEvent = activeData.event as IBigCalendarEvent
+
+      const newHeight = layout.height + delta.y
+      const newEnd = getCalendarDateFromOffset(
+        layout.top + newHeight,
+        calendarEvent.start,
+        startHour,
+        hourHeight
+      )
+
+      const snappedEnd = new Date(
+        Math.round(newEnd.getTime() / (15 * 60 * 1000)) * (15 * 60 * 1000)
+      )
+
+      if (snappedEnd.getTime() - calendarEvent.start.getTime() < 15 * 60 * 1000)
+        return
+
+      onEventResize?.(calendarEvent, calendarEvent.start, snappedEnd)
+    }
+  }
 
   return (
     <div
@@ -82,32 +161,38 @@ export function BigCalendarDayView({
       </div>
 
       {/* ── Scrollable grid ── */}
-      <div
-        ref={scrollContainerRef}
-        className="no-scrollbar flex min-h-0 flex-1 overflow-y-auto"
+      <DndContext
+        sensors={sensors}
+        onDragEnd={handleDragEnd}
+        modifiers={[restrictToFirstScrollableAncestor]}
       >
-        <BigCalendarTimeGutter
-          startHour={startHour}
-          endHour={endHour}
-          hourHeight={hourHeight}
-        />
         <div
-          className="flex min-w-0 flex-1"
-          style={{ height: totalGridHeight }}
+          ref={scrollContainerRef}
+          className="no-scrollbar flex min-h-0 flex-1 overflow-y-auto"
         >
-          <BigCalendarDayColumn
-            day={currentDate}
-            events={events}
+          <BigCalendarTimeGutter
             startHour={startHour}
             endHour={endHour}
             hourHeight={hourHeight}
-            onSelectEvent={onSelectEvent}
-            onSelectSlot={onSelectSlot}
-            renderEvent={renderEvent}
-            slotClassName={slotClassName}
           />
+          <div
+            className="flex min-w-0 flex-1"
+            style={{ height: totalGridHeight }}
+          >
+            <BigCalendarDayColumn
+              day={currentDate}
+              events={events}
+              startHour={startHour}
+              endHour={endHour}
+              hourHeight={hourHeight}
+              onSelectEvent={onSelectEvent}
+              onSelectSlot={onSelectSlot}
+              renderEvent={renderEvent}
+              slotClassName={slotClassName}
+            />
+          </div>
         </div>
-      </div>
+      </DndContext>
     </div>
   )
 }

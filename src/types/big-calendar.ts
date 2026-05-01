@@ -61,6 +61,10 @@ export interface IBigCalendarEventLayout {
   column: number
   /** Tổng số cột trong nhóm overlap */
   totalColumns: number
+  /** Callback khi event được kéo thả */
+  onDrop?: (event: IBigCalendarEvent, start: Date, end: Date) => void
+  /** Callback khi event được resize */
+  onResize?: (event: IBigCalendarEvent, start: Date, end: Date) => void
 }
 
 // ─── Store State ──────────────────────────────────────────────────────────────
@@ -101,6 +105,8 @@ export interface IBigCalendarProps {
   onSelectEvent?: (event: IBigCalendarEvent) => void
   onSelectSlot?: (slot: IBigCalendarSlotInfo) => void
   onNavigate?: (date: Date, view: TCalendarView) => void
+  onEventDrop?: (event: IBigCalendarEvent, start: Date, end: Date) => void
+  onEventResize?: (event: IBigCalendarEvent, start: Date, end: Date) => void
 
   // ── Render Customization ─────────────────────────────────────────────────
   /**

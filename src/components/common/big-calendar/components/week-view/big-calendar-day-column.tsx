@@ -1,3 +1,4 @@
+import { useDroppable } from "@dnd-kit/core"
 import React from "react"
 import { cn } from "@/lib/utils"
 import {
@@ -62,9 +63,22 @@ export function BigCalendarDayColumn({
     hourHeight,
   )
 
+  const { setNodeRef, isOver } = useDroppable({
+    id: `day-${day.toISOString()}`,
+    data: {
+      type: "day",
+      day,
+    },
+  })
+
   return (
     <div
-      className={cn("relative min-w-0 flex-1 border-l border-border/50", className)}
+      ref={setNodeRef}
+      className={cn(
+        "relative min-w-0 flex-1 border-l border-border/50 transition-colors",
+        isOver && "bg-primary/5",
+        className
+      )}
     >
       {/* Clickable time slots background */}
       <BigCalendarTimeSlots
@@ -91,6 +105,7 @@ export function BigCalendarDayColumn({
           layout={layout}
           onClick={onSelectEvent}
           renderEvent={renderEvent}
+          hourHeight={hourHeight}
         />
       ))}
     </div>

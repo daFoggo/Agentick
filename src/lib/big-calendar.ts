@@ -133,6 +133,36 @@ export function getCalendarEventHeight(
   return Math.max((durationMinutes / 60) * hourHeight, hourHeight / 4)
 }
 
+/**
+ * Tính Date từ top offset (px) trong day column.
+ */
+export function getCalendarDateFromOffset(
+  top: number,
+  day: Date,
+  startHour: number,
+  hourHeight: number
+): Date {
+  const totalMinutes = (top / hourHeight) * 60
+  const hours = Math.floor(totalMinutes / 60) + startHour
+  const minutes = Math.round(totalMinutes % 60)
+
+  const date = new Date(day)
+  date.setHours(hours, minutes, 0, 0)
+  return date
+}
+
+/**
+ * Snap pixel value vào lưới (mặc định 15 phút).
+ */
+export function snapToGrid(
+  value: number,
+  hourHeight: number,
+  stepMinutes = 15
+): number {
+  const pixelsPerStep = (stepMinutes / 60) * hourHeight
+  return Math.round(value / pixelsPerStep) * pixelsPerStep
+}
+
 // ─── Event Filtering ──────────────────────────────────────────────────────────
 
 /**

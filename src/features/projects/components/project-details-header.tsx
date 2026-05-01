@@ -1,4 +1,3 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { MemberAvatarGroup } from "@/components/common/member-avatar-group"
 import { Button } from "@/components/ui/button"
 import {

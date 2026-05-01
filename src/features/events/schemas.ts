@@ -17,6 +17,7 @@ export const EventSchema = z.object({
   type: EventTypeSchema,
   title: z.string().min(1, "Tiêu đề không được để trống"),
   description: z.string().optional().nullable(),
+  task_id: z.string().optional().nullable(),
   start_time: ApiDateSchema,
   end_time: ApiDateSchema,
   participant_ids: z.array(z.string()).optional(),

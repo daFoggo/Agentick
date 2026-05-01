@@ -1,8 +1,11 @@
+import { useDraggable } from "@dnd-kit/core"
+import { CSS } from "@dnd-kit/utilities"
 import { cn } from "@/lib/utils"
 import type {
   IBigCalendarEvent,
   IBigCalendarEventLayout,
 } from "@/types/big-calendar"
+import { snapToGrid, CALENDAR_HOUR_HEIGHT } from "@/lib/big-calendar"
 import React from "react"
 
 interface IBigCalendarEventBlockProps {
@@ -12,6 +15,7 @@ interface IBigCalendarEventBlockProps {
     event: IBigCalendarEvent,
     layout: IBigCalendarEventLayout
   ) => React.ReactNode
+  hourHeight?: number
 }
 
 // Padding giữa các event overlap (px)
@@ -26,8 +30,43 @@ export function BigCalendarEventBlock({
   layout,
   onClick,
   renderEvent,
+  hourHeight = CALENDAR_HOUR_HEIGHT,
 }: IBigCalendarEventBlockProps) {
   const { event, top, height, column, totalColumns } = layout
+  const isTask = event.meta?.type === "task"
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform: moveTransform,
+    isDragging,
+    setActivatorNodeRef,
+  } = useDraggable({
+    id: `event-${event.id}`,
+    data: {
+      type: "event",
+      event,
+      layout,
+    },
+    disabled: isTask,
+  })
+
+  const {
+    setNodeRef: setResizeRef,
+    attributes: resizeAttributes,
+    listeners: resizeListeners,
+    isDragging: isResizing,
+    transform: resizeTransform,
+  } = useDraggable({
+    id: `resize-${event.id}`,
+    data: {
+      type: "resize",
+      event,
+      layout,
+    },
+    disabled: isTask,
+  })
 
   const widthPercent = 100 / totalColumns
   const leftPercent = widthPercent * column
@@ -35,34 +74,71 @@ export function BigCalendarEventBlock({
   // Dùng color từ event hoặc fallback về primary
   const accentColor = event.color ?? "var(--primary)"
 
+  const style: React.CSSProperties = {
+    top,
+    height: isResizing
+      ? Math.max(
+          snapToGrid(height + (resizeTransform?.y ?? 0), hourHeight) - 1,
+          4
+        )
+      : Math.max(height - 1, 4),
+    left: `calc(${leftPercent}% + ${COLUMN_GAP}px)`,
+    width: `calc(${widthPercent}% - ${COLUMN_GAP * 2}px)`,
+    transform:
+      isDragging && moveTransform
+        ? CSS.Translate.toString({
+            ...moveTransform,
+            y: snapToGrid(moveTransform.y, hourHeight),
+          })
+        : undefined,
+    opacity: isDragging ? 0.4 : 1,
+    zIndex: isDragging || isResizing ? 50 : 1,
+  }
+
   return (
     <div
-      role="button"
-      tabIndex={0}
-      aria-label={event.title}
-      onClick={() => onClick?.(event)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") onClick?.(event)
-      }}
+      ref={setNodeRef}
+      style={style}
       className={cn(
         "absolute overflow-hidden rounded-md focus-visible:outline-none",
-        "transition-opacity duration-150 hover:opacity-90 focus-visible:ring-1 focus-visible:ring-ring",
-        onClick ? "cursor-pointer" : "cursor-default"
+        "transition-opacity duration-150 focus-visible:ring-1 focus-visible:ring-ring",
+        onClick ? "cursor-pointer" : "cursor-default",
+        isDragging && "pointer-events-none ring-2 ring-primary ring-offset-2",
+        (isDragging || isResizing) && "border-2 border-dashed border-primary"
       )}
-      style={{
-        top,
-        height: Math.max(height - 1, 4),
-        left: `calc(${leftPercent}% + ${COLUMN_GAP}px)`,
-        width: `calc(${widthPercent}% - ${COLUMN_GAP * 2}px)`,
-      }}
+      {...attributes}
     >
-      {renderEvent ? (
-        renderEvent(event, layout)
-      ) : (
-        <BigCalendarEventContent
-          event={event}
-          accentColor={accentColor}
-          height={height}
+      {/* Draggable handle (body) */}
+      <div
+        ref={setActivatorNodeRef}
+        {...listeners}
+        className="h-full w-full"
+        onClick={() => !isDragging && onClick?.(event)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") onClick?.(event)
+        }}
+      >
+        {renderEvent ? (
+          renderEvent(event, layout)
+        ) : (
+          <BigCalendarEventContent
+            event={event}
+            accentColor={accentColor}
+            height={height}
+          />
+        )}
+      </div>
+
+      {/* Resize handle */}
+      {!isTask && (
+        <div
+          ref={setResizeRef}
+          {...resizeAttributes}
+          {...resizeListeners}
+          className={cn(
+            "absolute right-0 bottom-0 left-0 h-1.5 cursor-ns-resize transition-colors hover:bg-primary/30",
+            isResizing && "bg-primary/50"
+          )}
         />
       )}
     </div>
@@ -106,7 +182,7 @@ export function BigCalendarEventContent({
             className="truncate text-xs leading-none font-medium opacity-70"
             style={{ color: finalColor }}
           >
-            {formatEventTime(event.start)}
+            {formatEventTimeRange(event.start, event.end)}
           </span>
           {Boolean(event.meta?.location) && (
             <span
@@ -130,4 +206,17 @@ function formatEventTime(date: Date): string {
   return m === 0
     ? `${hour} ${ampm}`
     : `${hour}:${String(m).padStart(2, "0")} ${ampm}`
+}
+
+function formatEventTimeRange(start: Date, end: Date): string {
+  const isSameDay =
+    start.getFullYear() === end.getFullYear() &&
+    start.getMonth() === end.getMonth() &&
+    start.getDate() === end.getDate()
+
+  if (isSameDay) {
+    return `${formatEventTime(start)} - ${formatEventTime(end)}`
+  }
+
+  return `${start.toLocaleDateString()} ${formatEventTime(start)} - ${end.toLocaleDateString()} ${formatEventTime(end)}`
 }

@@ -13,7 +13,10 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.4.0",
+    "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/dom": "^0.3.2",
+    "@dnd-kit/modifiers": "^9.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@fontsource-variable/google-sans": "^5.2.1",
     "@fontsource-variable/google-sans-code": "^5.2.3",
     "@fontsource-variable/inter": "^5.2.8",
@@ -27,6 +30,7 @@
     "@tanstack/react-start": "^1.166.15",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/router-plugin": "^1.166.13",
+    "@tanstack/zod-form-adapter": "^0.42.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

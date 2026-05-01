@@ -45,6 +45,8 @@ export function BigCalendar({
   renderToolbar,
   headerClassName,
   slotClassName,
+  onEventDrop,
+  onEventResize,
   className,
 }: IBigCalendarProps) {
   const view = useCalendarView()
@@ -85,6 +87,8 @@ export function BigCalendar({
           onSelectSlot={onSelectSlot}
           renderEvent={renderEvent}
           slotClassName={slotClassName}
+          onEventDrop={onEventDrop}
+          onEventResize={onEventResize}
         />
       )}
       {view === "day" && (
@@ -98,6 +102,8 @@ export function BigCalendar({
           onSelectSlot={onSelectSlot}
           renderEvent={renderEvent}
           slotClassName={slotClassName}
+          onEventDrop={onEventDrop}
+          onEventResize={onEventResize}
         />
       )}
     </div>

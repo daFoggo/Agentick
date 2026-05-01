@@ -11,6 +11,7 @@ import {
   DeleteEventDialog,
   EventActionBar,
   eventsQueryOptions,
+  useEventMutations,
 } from "@/features/events"
 import type { IBigCalendarEvent } from "@/types/big-calendar"
 import {
@@ -19,7 +20,7 @@ import {
   formatSchedules,
 } from "@/features/schedules"
 import { userQueries } from "@/features/users"
-import { taskQueries } from "@/features/tasks"
+import { taskQueries, useTaskMutations } from "@/features/tasks"
 import { createFileRoute } from "@tanstack/react-router"
 import { useQuery } from "@tanstack/react-query"
 import { useState, useMemo, useEffect } from "react"
@@ -59,6 +60,9 @@ function RouteComponent() {
   const [eventToDelete, setEventToDelete] = useState<IBigCalendarEvent | null>(
     null
   )
+
+  const { update: updateEvent } = useEventMutations()
+  const { update: updateTask } = useTaskMutations()
 
   // Action bar state
   const [actionBarOpen, setActionBarOpen] = useState(false)
@@ -138,6 +142,19 @@ function RouteComponent() {
     setActionBarOpen(true)
   }
 
+  const openCreateWithSlot = (slot: any) => {
+    setActionBarEvent({
+      id: `new-${Date.now()}`,
+      title: "",
+      start: slot.start,
+      end: slot.end,
+      meta: {
+        type: "meeting",
+      },
+    } as any)
+    setActionBarOpen(true)
+  }
+
   const openEdit = (event: IBigCalendarEvent) => {
     setActionBarEvent(event)
     setActionBarOpen(true)
@@ -146,6 +163,33 @@ function RouteComponent() {
   const closeActionBar = (open: boolean) => {
     setActionBarOpen(open)
     if (!open) setActionBarEvent(null)
+  }
+
+  const handleEventChange = (
+    event: IBigCalendarEvent,
+    start: Date,
+    end: Date
+  ) => {
+    const type = event.meta?.type as string
+    if (type === "task") {
+      const task = event.meta as any
+      updateTask.mutate({
+        projectId: task.project_id,
+        taskId: event.id,
+        payload: {
+          start_date: start.toISOString(),
+          due_date: end.toISOString(),
+        },
+      })
+    } else {
+      updateEvent.mutate({
+        eventId: event.id,
+        payload: {
+          start_time: start.toISOString(),
+          end_time: end.toISOString(),
+        },
+      })
+    }
   }
 
   return (
@@ -179,6 +223,9 @@ function RouteComponent() {
               scrollToHour={6}
               headerClassName="p-4"
               slotClassName={getSlotClassName}
+              onEventDrop={handleEventChange}
+              onEventResize={handleEventChange}
+              onSelectSlot={openCreateWithSlot}
               renderEvent={(event, layout) => (
                 <BigCalendarEventPopover
                   event={event}

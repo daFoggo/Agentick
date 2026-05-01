@@ -1,9 +1,13 @@
-import { cn } from "@/lib/utils"
 import {
   CALENDAR_HOUR_HEIGHT,
+  getCalendarDateFromOffset,
   getCalendarTimeSlots,
+  snapToGrid,
 } from "@/lib/big-calendar"
+import { cn } from "@/lib/utils"
 import type { IBigCalendarSlotInfo } from "@/types/big-calendar"
+import { addMinutes, isBefore } from "date-fns"
+import React, { useRef, useState } from "react"
 
 interface IBigCalendarTimeSlotsProps {
   day: Date
@@ -15,10 +19,6 @@ interface IBigCalendarTimeSlotsProps {
   className?: string
 }
 
-/**
- * Lưới các ô giờ trong một ngày.
- * Mỗi ô = 1 giờ. Click vào ô → trigger onSelectSlot.
- */
 export function BigCalendarTimeSlots({
   day,
   startHour = 0,
@@ -29,38 +29,89 @@ export function BigCalendarTimeSlots({
   className,
 }: IBigCalendarTimeSlotsProps) {
   const slots = getCalendarTimeSlots(startHour, endHour)
+  const containerRef = useRef<HTMLDivElement>(null)
 
-  const handleSlotClick = (hour: number) => {
-    if (!onSelectSlot) return
-    const start = new Date(day)
-    start.setHours(hour, 0, 0, 0)
-    const end = new Date(day)
-    end.setHours(hour + 1, 0, 0, 0)
-    onSelectSlot({
-      start,
-      end,
+  // startAnchor: điểm click chuột đầu tiên
+  const [startAnchor, setStartAnchor] = useState<Date | null>(null)
+  // selection: range thực tế (đã sắp xếp start < end)
+  const [selection, setSelection] = useState<{ start: Date; end: Date } | null>(
+    null
+  )
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return
+    const rect = e.currentTarget.getBoundingClientRect()
+    const y = e.clientY - rect.top
+    const snappedY = snapToGrid(y, hourHeight)
+    const startDate = getCalendarDateFromOffset(
+      snappedY,
+      day,
+      startHour,
+      hourHeight
+    )
+
+    setStartAnchor(startDate)
+    setSelection({ start: startDate, end: addMinutes(startDate, 15) })
+  }
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!startAnchor) return
+    const rect = e.currentTarget.getBoundingClientRect()
+    const y = e.clientY - rect.top
+    const snappedY = snapToGrid(y, hourHeight)
+    const currentDate = getCalendarDateFromOffset(
+      snappedY,
+      day,
+      startHour,
+      hourHeight
+    )
+
+    if (isBefore(currentDate, startAnchor)) {
+      setSelection({ start: currentDate, end: startAnchor })
+    } else {
+      setSelection({
+        start: startAnchor,
+        end:
+          currentDate.getTime() === startAnchor.getTime()
+            ? addMinutes(startAnchor, 15)
+            : currentDate,
+      })
+    }
+  }
+
+  const handleMouseUp = () => {
+    if (!selection || !startAnchor) {
+      setSelection(null)
+      setStartAnchor(null)
+      return
+    }
+
+    // Nếu chỉ là click (không kéo), tạo 1 block 1h hoặc 15p tùy ý
+    // Ở đây ta dùng selection đã tính
+    onSelectSlot?.({
+      ...selection,
       dayOfWeek: day.getDay(),
     })
+
+    setSelection(null)
+    setStartAnchor(null)
   }
 
   return (
     <div
+      ref={containerRef}
       className={cn("relative w-full border-b border-border/50", className)}
       style={{ height: (endHour - startHour) * hourHeight }}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      // Không nên set null ở onMouseLeave vì user có thể kéo ra ngoài rồi quay lại
     >
       {slots.map(({ hour }) => (
         <div
           key={hour}
-          role={onSelectSlot ? "button" : undefined}
-          tabIndex={onSelectSlot ? 0 : undefined}
-          onClick={() => handleSlotClick(hour)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") handleSlotClick(hour)
-          }}
           className={cn(
-            "absolute left-0 right-0 border-t border-border/50",
-            onSelectSlot &&
-              "cursor-pointer transition-colors hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:outline-none",
+            "pointer-events-none absolute right-0 left-0 border-t border-border/50",
             slotClassName?.(day, hour)
           )}
           style={{
@@ -69,6 +120,26 @@ export function BigCalendarTimeSlots({
           }}
         />
       ))}
+
+      {/* Selection Preview Overlay */}
+      {selection && (
+        <div
+          className="pointer-events-none absolute right-0 left-0 z-20 rounded-md border-2 border-dashed border-primary bg-primary/15"
+          style={{
+            top:
+              ((selection.start.getHours() - startHour) * 60 +
+                selection.start.getMinutes()) *
+              (hourHeight / 60),
+            height:
+              Math.max(
+                (selection.end.getTime() - selection.start.getTime()) /
+                  (60 * 1000),
+                1
+              ) *
+              (hourHeight / 60),
+          }}
+        />
+      )}
     </div>
   )
 }
