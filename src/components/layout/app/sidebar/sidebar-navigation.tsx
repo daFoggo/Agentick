@@ -4,12 +4,12 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 import type { ISidebarGroup } from "@/types/sidebar"
+import { InboxBadge } from "./inbox-badge"
 
 interface ISidebarGroupSectionProps {
   group: ISidebarGroup
@@ -61,11 +61,9 @@ export const SidebarGroupSection = ({
                     >
                       {item.title}
                     </span>
-                    {item.badge !== undefined && item.badge !== 0 && (
-                      <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground shadow-sm">
-                        {item.badge}
-                      </span>
-                    )}
+                    {item.title === "Inbox" && item.badge !== undefined && item.badge !== 0 ? (
+                      <InboxBadge count={item.badge as number} />
+                    ) : null}
                   </SidebarMenuButton>
                 )}
               </Link>

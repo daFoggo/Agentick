@@ -28,7 +28,7 @@ function RouteComponent() {
   const badgeMap = toInboxBadgeMap(stats)
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 h-full">
       <ViewModeList
         catalog={INBOX_VIEW_MODE_CATALOG}
         scope="inbox"
@@ -36,7 +36,9 @@ function RouteComponent() {
         badgeMap={badgeMap}
         allowCustomization={false}
       />
-      <Outlet />
+      <div className="flex-1 overflow-hidden">
+        <Outlet />
+      </div>
     </div>
   )
 }

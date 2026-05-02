@@ -1,17 +1,17 @@
-import { NotificationList, notificationsQueryOptions } from "@/features/inbox"
+import { InboxView, inboxListQueryOptions } from "@/features/inbox"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/dashboard/$teamId/inbox/bookmarks")({
   loader: ({ context }) =>
-    context.queryClient.ensureQueryData(notificationsQueryOptions("ACTIVE", true)),
-  component: BookmarksInboxView,
+    context.queryClient.ensureQueryData(inboxListQueryOptions("BOOKMARKED")),
+  component: BookmarkedInboxView,
 })
 
-function BookmarksInboxView() {
-  const { data: notifications } = useSuspenseQuery(
-    notificationsQueryOptions("ACTIVE", true)
+function BookmarkedInboxView() {
+  const { data: items } = useSuspenseQuery(
+    inboxListQueryOptions("BOOKMARKED")
   )
 
-  return <NotificationList notifications={notifications} />
+  return <InboxView items={items} />
 }

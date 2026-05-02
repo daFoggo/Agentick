@@ -3,7 +3,7 @@ import { UserSchema } from "@/features/users"
 import { TeamSchema } from "@/features/teams"
 import { ProjectSchema } from "@/features/projects"
 
-export const InvitationStatusSchema = z.enum(["pending", "accepted", "declined"])
+export const InvitationStatusSchema = z.enum(["PENDING", "ACCEPTED", "DECLINED"])
 
 export const InvitationSchema = z.object({
   id: z.string(),

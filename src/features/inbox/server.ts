@@ -1,5 +1,5 @@
 import { api } from "@/lib/ky"
-import type { TInboxStats, TNotification, TNotificationStatus } from "./schemas"
+import type { TInboxStats, TInboxItem, TInboxStatus } from "./schemas"
 import type { TBaseResponse } from "@/types/api"
 
 export const fetchInboxStats = async (): Promise<TInboxStats> => {
@@ -7,42 +7,43 @@ export const fetchInboxStats = async (): Promise<TInboxStats> => {
   return response.data
 }
 
-export const fetchNotifications = async (
-  status: TNotificationStatus = "ACTIVE",
+export const fetchInboxList = async (
+  status: TInboxStatus = "ACTIVE",
   isRead?: boolean,
   isBookmarked?: boolean
-): Promise<TNotification[]> => {
+): Promise<TInboxItem[]> => {
   const response = await api.get("notifications/me", {
     searchParams: { 
       status,
       ...(isRead !== undefined && { is_read: isRead }),
       ...(isBookmarked !== undefined && { is_bookmarked: isBookmarked })
     }
-  }).json<TBaseResponse<TNotification[]>>()
+  }).json<TBaseResponse<TInboxItem[]>>()
   return response.data
 }
 
-export const toggleBookmark = async (notificationId: string): Promise<TNotification> => {
-  const response = await api.patch(`notifications/${notificationId}/bookmark`).json<TBaseResponse<TNotification>>()
+export const toggleInboxBookmark = async (inboxItemId: string): Promise<TInboxItem> => {
+  const response = await api.patch(`notifications/${inboxItemId}/bookmark`).json<TBaseResponse<TInboxItem>>()
   return response.data
 }
 
-export const markAsRead = async (notificationId: string): Promise<TNotification> => {
-  const response = await api.patch(`notifications/${notificationId}/read`).json<TBaseResponse<TNotification>>()
+export const markInboxAsRead = async (inboxItemId: string): Promise<TInboxItem> => {
+  const response = await api.patch(`notifications/${inboxItemId}/read`).json<TBaseResponse<TInboxItem>>()
   return response.data
 }
 
-export const archiveNotification = async (notification_id: string): Promise<TNotification> => {
-  const response = await api.patch(`notifications/${notification_id}/archive`).json<TBaseResponse<TNotification>>()
+export const archiveInboxItem = async (inboxItemId: string): Promise<TInboxItem> => {
+  const response = await api.patch(`notifications/${inboxItemId}/archive`).json<TBaseResponse<TInboxItem>>()
   return response.data
 }
 
-export const unarchiveNotification = async (notification_id: string): Promise<TNotification> => {
-  const response = await api.patch(`notifications/${notification_id}/unarchive`).json<TBaseResponse<TNotification>>()
+export const unarchiveInboxItem = async (inboxItemId: string): Promise<TInboxItem> => {
+  const response = await api.patch(`notifications/${inboxItemId}/unarchive`).json<TBaseResponse<TInboxItem>>()
   return response.data
 }
 
-export const deleteNotification = async (notificationId: string): Promise<boolean> => {
-  const response = await api.delete(`notifications/${notificationId}`).json<TBaseResponse<boolean>>()
+export const deleteInboxItem = async (inboxItemId: string): Promise<boolean> => {
+  const response = await api.delete(`notifications/${inboxItemId}`).json<TBaseResponse<boolean>>()
   return response.data
 }
+

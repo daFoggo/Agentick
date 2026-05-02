@@ -1,18 +1,18 @@
 import { z } from "zod"
 
-export const NotificationStatusSchema = z.enum(["ACTIVE", "ARCHIVED", "DELETED"])
-export type TNotificationStatus = z.infer<typeof NotificationStatusSchema>
+export const InboxStatusSchema = z.enum(["ACTIVE", "ARCHIVED", "BOOKMARKED", "DELETED"])
+export type TInboxStatus = z.infer<typeof InboxStatusSchema>
 
-export const NotificationTypeSchema = z.enum(["SYSTEM", "INVITATION", "TASK_ASSIGNED", "PROJECT_UPDATE"])
-export type TNotificationType = z.infer<typeof NotificationTypeSchema>
+export const InboxTypeSchema = z.enum(["SYSTEM", "INVITATION", "TASK_ASSIGNED", "PROJECT_UPDATE"])
+export type TInboxType = z.infer<typeof InboxTypeSchema>
 
-export const NotificationSchema = z.object({
+export const InboxSchema = z.object({
   id: z.string(),
   user_id: z.string(),
   title: z.string(),
   content: z.string().nullish(),
-  type: NotificationTypeSchema,
-  status: NotificationStatusSchema,
+  type: InboxTypeSchema,
+  status: InboxStatusSchema,
   is_read: z.boolean(),
   is_bookmarked: z.boolean(),
   resource_id: z.string().nullish(),
@@ -22,7 +22,7 @@ export const NotificationSchema = z.object({
   updated_at: z.string(),
 })
 
-export type TNotification = z.infer<typeof NotificationSchema>
+export type TInboxItem = z.infer<typeof InboxSchema>
 
 export const InboxStatsSchema = z.object({
   active_count: z.number(),
