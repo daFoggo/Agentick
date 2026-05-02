@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 import type { ISidebarGroup } from "@/types/sidebar"
+import { InboxBadge } from "./inbox-badge"
 
 interface ISidebarGroupSectionProps {
   group: ISidebarGroup
@@ -60,6 +61,9 @@ export const SidebarGroupSection = ({
                     >
                       {item.title}
                     </span>
+                    {item.title === "Inbox" && item.badge !== undefined && item.badge !== 0 ? (
+                      <InboxBadge count={item.badge as number} />
+                    ) : null}
                   </SidebarMenuButton>
                 )}
               </Link>

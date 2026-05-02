@@ -5,12 +5,16 @@ import {
   AddProjectMemberInputSchema,
   UpdateProjectMemberRoleInputSchema,
   RemoveProjectMemberSchema,
+  ProjectInviteGenerateRequestSchema,
+  ProjectInviteAcceptRequestSchema,
 } from "./schemas"
 import {
-  fetchProjectMembers,
   addProjectMember,
   updateProjectMemberRole,
   removeProjectMember,
+  generateProjectInvite,
+  acceptProjectInvite,
+  fetchProjectMembers,
 } from "./server"
 
 export const getProjectMembersFn = createServerFn({ method: "GET" })
@@ -39,4 +43,18 @@ export const removeProjectMemberFn = createServerFn({ method: "POST" })
   .inputValidator(RemoveProjectMemberSchema)
   .handler(async ({ data }) => {
     return await removeProjectMember(data.projectId, data.user_id)
+  })
+
+export const generateProjectInviteFn = createServerFn({ method: "POST" })
+  .middleware([requestLoggerMiddleware])
+  .inputValidator(z.object({ projectId: z.string(), payload: ProjectInviteGenerateRequestSchema }))
+  .handler(async ({ data }) => {
+    return await generateProjectInvite(data.projectId, data.payload)
+  })
+
+export const acceptProjectInviteFn = createServerFn({ method: "POST" })
+  .middleware([requestLoggerMiddleware])
+  .inputValidator(ProjectInviteAcceptRequestSchema)
+  .handler(async ({ data }) => {
+    return await acceptProjectInvite(data)
   })

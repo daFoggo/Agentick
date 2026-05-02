@@ -6,6 +6,9 @@ import type {
   TTeamMember,
   TTeamMembersResponse,
   TUpdateTeamMemberRolePayload,
+  TTeamInviteGenerateRequest,
+  TTeamInviteTokenResponse,
+  TTeamInviteAcceptRequest,
 } from "./schemas"
 
 /**
@@ -78,4 +81,23 @@ export async function getMemberProjectCount(
     .get(`teams/${teamId}/members/${userId}/project-count`)
     .json<TBaseResponse<{ count: number }>>()
   return response.data.count
+}
+
+export async function generateTeamInvite(
+  teamId: string,
+  payload: TTeamInviteGenerateRequest
+): Promise<TTeamInviteTokenResponse> {
+  const response = await api
+    .post(`teams/${teamId}/invitations/generate`, { json: payload })
+    .json<TBaseResponse<TTeamInviteTokenResponse>>()
+  return response.data
+}
+
+export async function acceptTeamInvite(
+  payload: TTeamInviteAcceptRequest
+): Promise<TTeamMember> {
+  const response = await api
+    .post(`teams/invitations/accept`, { json: payload })
+    .json<TBaseResponse<TTeamMember>>()
+  return response.data
 }

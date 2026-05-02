@@ -23,6 +23,8 @@ import { TeamSwitcher } from "./team-switcher"
 import { ThemeToggleWrapper } from "./theme-toggle-wrapper"
 import { TimezoneViewer } from "./timezone-viewer"
 import { UserProfile } from "./user-profile"
+import { useQuery } from "@tanstack/react-query"
+import { inboxStatsQueryOptions } from "@/features/inbox/queries"
 
 /**
  * Thành phần Sidebar chính của ứng dụng Dashboard.
@@ -34,11 +36,24 @@ export const AppSidebar = () => {
   const routeParams = useSidebarContextStore((state) => state.routeParams)
   const syncWithPathname = useSidebarContextStore((state) => state.syncWithPathname)
 
+  const { data: inboxStats } = useQuery(inboxStatsQueryOptions())
+  const unreadCount = inboxStats?.unread_count ?? 0
+
   useEffect(() => {
     syncWithPathname(pathname)
   }, [pathname, syncWithPathname])
 
   const isProjectSettingsContext = activeContextId === "project-settings"
+
+  const personalNavigation = {
+    ...SIDEBAR_PERSONAL,
+    items: SIDEBAR_PERSONAL.items.map((item) => {
+      if (item.title === "Inbox") {
+        return { ...item, badge: unreadCount }
+      }
+      return item
+    }),
+  }
 
   return (
     <Sidebar variant="inset">
@@ -60,7 +75,7 @@ export const AppSidebar = () => {
           />
         ) : (
           <>
-            <SidebarGroupSection group={SIDEBAR_PERSONAL} />
+            <SidebarGroupSection group={personalNavigation} />
 
             <SidebarProjectList />
 

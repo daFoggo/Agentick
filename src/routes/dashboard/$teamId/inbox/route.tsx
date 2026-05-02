@@ -6,9 +6,9 @@ import { useSuspenseQuery } from "@tanstack/react-query"
 import { Outlet, createFileRoute } from "@tanstack/react-router"
 
 const toInboxBadgeMap = (stats: TInboxStats) => ({
-  active: stats.activeCount,
-  bookmarks: stats.bookmarksCount,
-  archive: stats.archiveCount,
+  active: stats.active_count,
+  bookmarks: stats.bookmarks_count,
+  archive: stats.archive_count,
 })
 
 export const Route = createFileRoute("/dashboard/$teamId/inbox")({
@@ -28,7 +28,7 @@ function RouteComponent() {
   const badgeMap = toInboxBadgeMap(stats)
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 h-full">
       <ViewModeList
         catalog={INBOX_VIEW_MODE_CATALOG}
         scope="inbox"
@@ -36,7 +36,9 @@ function RouteComponent() {
         badgeMap={badgeMap}
         allowCustomization={false}
       />
-      <Outlet />
+      <div className="flex-1 overflow-hidden">
+        <Outlet />
+      </div>
     </div>
   )
 }

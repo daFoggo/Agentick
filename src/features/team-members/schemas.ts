@@ -45,6 +45,15 @@ export const RemoveTeamMemberSchema = z.object({
   user_id: z.string(),
 })
 
+export const TeamInviteGenerateRequestSchema = z.object({
+  email: z.string().email(),
+  role: TeamRoleSchema,
+})
+
+export const TeamInviteAcceptRequestSchema = z.object({
+  token: z.string(),
+})
+
 export type TTeamMemberSearchOptions = TBaseSearchOptions<number, string | null>
 
 export type TTeamMembersResponse = TBaseFindResponse<
@@ -58,3 +67,7 @@ export type TAddTeamMemberPayload = z.infer<typeof AddTeamMemberSchema>
 export type TUpdateTeamMemberRolePayload = z.infer<typeof UpdateTeamMemberRoleSchema>
 export type TAddTeamMemberInput = z.infer<typeof AddTeamMemberInputSchema>
 export type TUpdateTeamMemberRoleInput = z.infer<typeof UpdateTeamMemberRoleInputSchema>
+
+export type TTeamInviteGenerateRequest = z.infer<typeof TeamInviteGenerateRequestSchema>
+export type TTeamInviteTokenResponse = { token: string }
+export type TTeamInviteAcceptRequest = z.infer<typeof TeamInviteAcceptRequestSchema>

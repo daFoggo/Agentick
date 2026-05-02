@@ -45,6 +45,15 @@ export const RemoveProjectMemberSchema = z.object({
   user_id: z.string(),
 })
 
+export const ProjectInviteGenerateRequestSchema = z.object({
+  email: z.string().email(),
+  role: ProjectRoleSchema,
+})
+
+export const ProjectInviteAcceptRequestSchema = z.object({
+  token: z.string(),
+})
+
 export type TProjectMemberSearchOptions = TBaseSearchOptions<number, string>
 
 export type TProjectMembersResponse = TBaseFindResponse<
@@ -62,3 +71,7 @@ export type TAddProjectMemberInput = z.infer<typeof AddProjectMemberInputSchema>
 export type TUpdateProjectMemberRoleInput = z.infer<
   typeof UpdateProjectMemberRoleInputSchema
 >
+
+export type TProjectInviteGenerateRequest = z.infer<typeof ProjectInviteGenerateRequestSchema>
+export type TProjectInviteTokenResponse = { token: string }
+export type TProjectInviteAcceptRequest = z.infer<typeof ProjectInviteAcceptRequestSchema>

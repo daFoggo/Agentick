@@ -7,6 +7,7 @@ export interface ISidebarNavigationItem {
   children?: ISidebarNavigationItem[]
   isActive?: boolean
   exactActive?: boolean
+  badge?: number | string
 }
 
 export interface ISidebarGroup {

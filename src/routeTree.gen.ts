@@ -13,6 +13,7 @@ import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as AuthIndexRouteImport } from './routes/auth/index'
+import { Route as InviteAcceptRouteImport } from './routes/invite/accept'
 import { Route as DashboardTeamIdRouteImport } from './routes/dashboard/$teamId'
 import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
 import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
@@ -63,6 +64,11 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
 const AuthIndexRoute = AuthIndexRouteImport.update({
   id: '/auth/',
   path: '/auth/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InviteAcceptRoute = InviteAcceptRouteImport.update({
+  id: '/invite/accept',
+  path: '/invite/accept',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardTeamIdRoute = DashboardTeamIdRouteImport.update({
@@ -255,6 +261,7 @@ export interface FileRoutesByFullPath {
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/dashboard/$teamId': typeof DashboardTeamIdRouteWithChildren
+  '/invite/accept': typeof InviteAcceptRoute
   '/auth/': typeof AuthIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/$teamId/inbox': typeof DashboardTeamIdInboxRouteRouteWithChildren
@@ -291,6 +298,7 @@ export interface FileRoutesByTo {
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/dashboard/$teamId': typeof DashboardTeamIdRouteWithChildren
+  '/invite/accept': typeof InviteAcceptRoute
   '/auth': typeof AuthIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/dashboard/$teamId/inbox/active': typeof DashboardTeamIdInboxActiveRoute
@@ -325,6 +333,7 @@ export interface FileRoutesById {
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/dashboard/$teamId': typeof DashboardTeamIdRouteWithChildren
+  '/invite/accept': typeof InviteAcceptRoute
   '/auth/': typeof AuthIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/$teamId/inbox': typeof DashboardTeamIdInboxRouteRouteWithChildren
@@ -364,6 +373,7 @@ export interface FileRouteTypes {
     | '/auth/sign-in'
     | '/auth/sign-up'
     | '/dashboard/$teamId'
+    | '/invite/accept'
     | '/auth/'
     | '/dashboard/'
     | '/dashboard/$teamId/inbox'
@@ -400,6 +410,7 @@ export interface FileRouteTypes {
     | '/auth/sign-in'
     | '/auth/sign-up'
     | '/dashboard/$teamId'
+    | '/invite/accept'
     | '/auth'
     | '/dashboard'
     | '/dashboard/$teamId/inbox/active'
@@ -433,6 +444,7 @@ export interface FileRouteTypes {
     | '/auth/sign-in'
     | '/auth/sign-up'
     | '/dashboard/$teamId'
+    | '/invite/accept'
     | '/auth/'
     | '/dashboard/'
     | '/dashboard/$teamId/inbox'
@@ -470,6 +482,7 @@ export interface RootRouteChildren {
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   AuthSignInRoute: typeof AuthSignInRoute
   AuthSignUpRoute: typeof AuthSignUpRoute
+  InviteAcceptRoute: typeof InviteAcceptRoute
   AuthIndexRoute: typeof AuthIndexRoute
 }
 
@@ -501,6 +514,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth/'
       preLoaderRoute: typeof AuthIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invite/accept': {
+      id: '/invite/accept'
+      path: '/invite/accept'
+      fullPath: '/invite/accept'
+      preLoaderRoute: typeof InviteAcceptRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/$teamId': {
@@ -870,6 +890,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
   AuthSignInRoute: AuthSignInRoute,
   AuthSignUpRoute: AuthSignUpRoute,
+  InviteAcceptRoute: InviteAcceptRoute,
   AuthIndexRoute: AuthIndexRoute,
 }
 export const routeTree = rootRouteImport

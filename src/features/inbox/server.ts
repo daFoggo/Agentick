@@ -1,18 +1,49 @@
-import "@tanstack/react-start/server-only"
+import { api } from "@/lib/ky"
+import type { TInboxStats, TInboxItem, TInboxStatus } from "./schemas"
+import type { TBaseResponse } from "@/types/api"
 
-import type { GetInboxStatsInput, TInboxStats } from "./schemas"
-
-/**
- * Gọi API trả về thông số thống kê của Inbox (active, bookmarks, archive).
- */
-export async function fetchInboxStats(
-  _params: GetInboxStatsInput
-): Promise<TInboxStats> {
-  await new Promise((resolve) => setTimeout(resolve, 300))
-
-  return {
-    activeCount: 12,
-    bookmarksCount: 5,
-    archiveCount: 3,
-  }
+export const fetchInboxStats = async (): Promise<TInboxStats> => {
+  const response = await api.get("notifications/stats").json<TBaseResponse<TInboxStats>>()
+  return response.data
 }
+
+export const fetchInboxList = async (
+  status: TInboxStatus = "ACTIVE",
+  isRead?: boolean,
+  isBookmarked?: boolean
+): Promise<TInboxItem[]> => {
+  const response = await api.get("notifications/me", {
+    searchParams: { 
+      status,
+      ...(isRead !== undefined && { is_read: isRead }),
+      ...(isBookmarked !== undefined && { is_bookmarked: isBookmarked })
+    }
+  }).json<TBaseResponse<TInboxItem[]>>()
+  return response.data
+}
+
+export const toggleInboxBookmark = async (inboxItemId: string): Promise<TInboxItem> => {
+  const response = await api.patch(`notifications/${inboxItemId}/bookmark`).json<TBaseResponse<TInboxItem>>()
+  return response.data
+}
+
+export const markInboxAsRead = async (inboxItemId: string): Promise<TInboxItem> => {
+  const response = await api.patch(`notifications/${inboxItemId}/read`).json<TBaseResponse<TInboxItem>>()
+  return response.data
+}
+
+export const archiveInboxItem = async (inboxItemId: string): Promise<TInboxItem> => {
+  const response = await api.patch(`notifications/${inboxItemId}/archive`).json<TBaseResponse<TInboxItem>>()
+  return response.data
+}
+
+export const unarchiveInboxItem = async (inboxItemId: string): Promise<TInboxItem> => {
+  const response = await api.patch(`notifications/${inboxItemId}/unarchive`).json<TBaseResponse<TInboxItem>>()
+  return response.data
+}
+
+export const deleteInboxItem = async (inboxItemId: string): Promise<boolean> => {
+  const response = await api.delete(`notifications/${inboxItemId}`).json<TBaseResponse<boolean>>()
+  return response.data
+}
+

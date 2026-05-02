@@ -8,10 +8,14 @@ import {
   addProjectMemberFn,
   updateProjectMemberRoleFn,
   removeProjectMemberFn,
+  generateProjectInviteFn,
+  acceptProjectInviteFn,
 } from "./functions"
 import type {
   TAddProjectMemberInput,
   TUpdateProjectMemberRoleInput,
+  TProjectInviteGenerateRequest,
+  TProjectInviteAcceptRequest,
 } from "./schemas"
 
 export const projectMemberKeys = {
@@ -75,5 +79,24 @@ export const useProjectMemberMutations = () => {
     },
   })
 
-  return { addMember, updateRole, removeMember }
+  const generateInvite = useMutation({
+    mutationFn: (data: { projectId: string; payload: TProjectInviteGenerateRequest }) =>
+      generateProjectInviteFn({ data }),
+  })
+
+  const acceptInvite = useMutation({
+    mutationFn: (data: TProjectInviteAcceptRequest) => acceptProjectInviteFn({ data }),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: projectMemberKeys.all,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["teamMembers"],
+        }),
+      ])
+    },
+  })
+
+  return { addMember, updateRole, removeMember, generateInvite, acceptInvite }
 }

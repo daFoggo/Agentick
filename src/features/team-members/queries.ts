@@ -9,8 +9,10 @@ import {
   updateTeamMemberRoleFn,
   removeTeamMemberFn,
   getMemberProjectCountFn,
+  generateTeamInviteFn,
+  acceptTeamInviteFn,
 } from "./functions"
-import type { TAddTeamMemberInput, TUpdateTeamMemberRoleInput } from "./schemas"
+import type { TAddTeamMemberInput, TUpdateTeamMemberRoleInput, TTeamInviteGenerateRequest, TTeamInviteAcceptRequest } from "./schemas"
 
 export const teamMemberKeys = {
   all: ["teamMembers"] as const,
@@ -63,5 +65,19 @@ export const useTeamMemberMutations = () => {
     },
   })
 
-  return { addMember, updateRole, removeMember }
+  const generateInvite = useMutation({
+    mutationFn: (data: { teamId: string; payload: TTeamInviteGenerateRequest }) =>
+      generateTeamInviteFn({ data }),
+  })
+
+  const acceptInvite = useMutation({
+    mutationFn: (data: TTeamInviteAcceptRequest) => acceptTeamInviteFn({ data }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: teamMemberKeys.all,
+      })
+    },
+  })
+
+  return { addMember, updateRole, removeMember, generateInvite, acceptInvite }
 }

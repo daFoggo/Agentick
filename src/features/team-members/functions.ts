@@ -6,13 +6,18 @@ import {
   updateTeamMemberRole,
   removeTeamMember,
   getMemberProjectCount,
+  generateTeamInvite,
+  acceptTeamInvite,
 } from "./server"
 import {
   FetchTeamMembersSchema,
   AddTeamMemberInputSchema,
   UpdateTeamMemberRoleInputSchema,
   RemoveTeamMemberSchema,
+  TeamInviteGenerateRequestSchema,
+  TeamInviteAcceptRequestSchema,
 } from "./schemas"
+import { z } from "zod"
 
 export const fetchTeamMembersFn = createServerFn({ method: "GET" })
   .middleware([requestLoggerMiddleware])
@@ -40,3 +45,13 @@ export const getMemberProjectCountFn = createServerFn({ method: "GET" })
   .middleware([requestLoggerMiddleware])
   .inputValidator(RemoveTeamMemberSchema) // Reusing RemoveTeamMemberSchema since it has teamId and user_id
   .handler(({ data }) => getMemberProjectCount(data.teamId, data.user_id))
+
+export const generateTeamInviteFn = createServerFn({ method: "POST" })
+  .middleware([requestLoggerMiddleware])
+  .inputValidator(z.object({ teamId: z.string(), payload: TeamInviteGenerateRequestSchema }))
+  .handler(({ data }) => generateTeamInvite(data.teamId, data.payload))
+
+export const acceptTeamInviteFn = createServerFn({ method: "POST" })
+  .middleware([requestLoggerMiddleware])
+  .inputValidator(TeamInviteAcceptRequestSchema)
+  .handler(({ data }) => acceptTeamInvite(data))

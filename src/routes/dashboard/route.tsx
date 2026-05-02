@@ -2,6 +2,7 @@ import { AppPageHeader } from "@/components/layout/app/page-header"
 import { AppSidebar } from "@/components/layout/app/sidebar"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { userQueries } from "@/features/users"
+import { inboxStatsQueryOptions } from "@/features/inbox/queries"
 import { cn } from "@/lib/utils"
 import { createFileRoute, Outlet, redirect, useMatches } from "@tanstack/react-router"
 
@@ -19,7 +20,10 @@ export const Route = createFileRoute("/dashboard")({
     }
   },
   loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(userQueries.me())
+    await Promise.all([
+      context.queryClient.ensureQueryData(userQueries.me()),
+      context.queryClient.ensureQueryData(inboxStatsQueryOptions()),
+    ])
   },
   component: DashboardLayout,
   staticData: {

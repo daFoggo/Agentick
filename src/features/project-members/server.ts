@@ -6,6 +6,9 @@ import type {
   TProjectMember,
   TProjectMembersResponse,
   TUpdateProjectMemberRoleInput,
+  TProjectInviteGenerateRequest,
+  TProjectInviteTokenResponse,
+  TProjectInviteAcceptRequest,
 } from "./schemas"
 
 /**
@@ -60,5 +63,24 @@ export async function removeProjectMember(
     .delete(`projects/${projectId}/members/${userId}`)
     .json<TBaseResponse<boolean>>()
 
+  return response.data
+}
+
+export async function generateProjectInvite(
+  projectId: string,
+  payload: TProjectInviteGenerateRequest
+): Promise<TProjectInviteTokenResponse> {
+  const response = await api
+    .post(`projects/${projectId}/invitations/generate`, { json: payload })
+    .json<TBaseResponse<TProjectInviteTokenResponse>>()
+  return response.data
+}
+
+export async function acceptProjectInvite(
+  payload: TProjectInviteAcceptRequest
+): Promise<TProjectMember> {
+  const response = await api
+    .post(`projects/invitations/accept`, { json: payload })
+    .json<TBaseResponse<TProjectMember>>()
   return response.data
 }
