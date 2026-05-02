@@ -1,22 +1,14 @@
-import { useState, useMemo } from "react"
-import { Loader2, UserPlus, Mail } from "lucide-react"
+import { userQueries, type TUserSearchResult } from "@/features/users"
+import { useQuery } from "@tanstack/react-query"
+import { Loader2, UserPlus } from "lucide-react"
+import { useDeferredValue, useState } from "react"
 import { toast } from "sonner"
 import { useTeamMemberMutations } from "../queries"
 import type { TTeamRole } from "../schemas"
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import {
-  Combobox,
-  ComboboxChip,
-  ComboboxChips,
-  ComboboxChipsInput,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxItem,
-  ComboboxList,
-  ComboboxValue,
-  useComboboxAnchor,
-} from "@/components/ui/combobox"
+import { MultiSelectCombobox } from "@/components/common/multi-select-combobox"
 import {
   Dialog,
   DialogContent,
@@ -47,46 +39,41 @@ export const InviteTeamMemberDialog = ({
   onOpenChange,
 }: IInviteTeamMemberDialogProps) => {
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedEmails, setSelectedEmails] = useState<string[]>([])
+  const [selectedUsers, setSelectedUsers] = useState<TUserSearchResult[]>([])
   const [selectedRole, setSelectedRole] = useState<TTeamRole>("member")
+  const deferredQuery = useDeferredValue(searchQuery)
 
-  const anchor = useComboboxAnchor()
-  const { generateInvite } = useTeamMemberMutations()
+  const { data: users = [], isLoading } = useQuery(
+    userQueries.search(deferredQuery, { excludeTeamId: teamId })
+  )
 
-  const isEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-  const isValidEmail = isEmail(searchQuery)
-
-  const items = useMemo(() => {
-    if (isValidEmail) {
-      return [searchQuery]
-    }
-    return []
-  }, [searchQuery, isValidEmail])
+  const { addMember } = useTeamMemberMutations()
 
   const handleAdd = async () => {
-    if (selectedEmails.length === 0) return
+    if (selectedUsers.length === 0) return
 
     try {
       await Promise.all(
-        selectedEmails.map((email) =>
-          generateInvite.mutateAsync({
-            teamId,
-            payload: { email, role: selectedRole },
+        selectedUsers.map((user) =>
+          addMember.mutateAsync({
+            teamId: teamId,
+            payload: { user_id: user.id, role: selectedRole },
           })
         )
       )
-
-      toast.success(`Sent ${selectedEmails.length} invitations.`)
+      toast.success(
+        `${selectedUsers.length} members have been added to the team`
+      )
       handleReset()
       onOpenChange(false)
     } catch (error) {
-      toast.error("Failed to send invitations")
+      toast.error("Failed to add some members")
     }
   }
 
   const handleReset = () => {
     setSearchQuery("")
-    setSelectedEmails([])
+    setSelectedUsers([])
     setSelectedRole("member")
   }
 
@@ -109,54 +96,35 @@ export const InviteTeamMemberDialog = ({
 
         <div className="flex flex-col gap-4">
           <Field>
-            <FieldLabel>Invite by email</FieldLabel>
-            <Combobox
-              multiple
-              autoHighlight
-              items={items}
-              itemToStringValue={(item) => item}
-              value={selectedEmails}
+            <FieldLabel>Users</FieldLabel>
+            <MultiSelectCombobox
+              items={users}
+              value={selectedUsers}
               onValueChange={(vals) => {
-                setSelectedEmails(vals as string[])
+                setSelectedUsers(vals)
               }}
               onInputValueChange={setSearchQuery}
-            >
-              <ComboboxChips ref={anchor} className="w-full">
-                <ComboboxValue>
-                  {(values: string[]) => (
-                    <>
-                      {values.map((email) => (
-                        <ComboboxChip key={email}>{email}</ComboboxChip>
-                      ))}
-                      <ComboboxChipsInput
-                        placeholder="Type email and press enter..."
-                        autoComplete="off"
-                      />
-                    </>
-                  )}
-                </ComboboxValue>
-              </ComboboxChips>
-              <ComboboxContent anchor={anchor}>
-                <ComboboxEmpty>
-                  {searchQuery && !isValidEmail ? "User not found or invalid email" : "Type an email to invite"}
-                </ComboboxEmpty>
-                <ComboboxList>
-                  {(item: string) => (
-                    <ComboboxItem key={item} value={item}>
-                      <Mail className="mr-2 size-4 text-muted-foreground" />
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium">
-                          Invite {item}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          From email
-                        </span>
-                      </div>
-                    </ComboboxItem>
-                  )}
-                </ComboboxList>
-              </ComboboxContent>
-            </Combobox>
+              isLoading={isLoading}
+              itemToString={(user) => user.name}
+              itemToValue={(user) => user.id}
+              placeholder="Search by name or email..."
+              renderItem={(user) => (
+                <div className="flex items-center gap-2">
+                  <Avatar className="size-6">
+                    <AvatarImage src={user.avatar_url ?? undefined} />
+                    <AvatarFallback>
+                      {user.name.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">{user.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {user.email}
+                    </span>
+                  </div>
+                </div>
+              )}
+            />
           </Field>
 
           <Field>
@@ -187,19 +155,19 @@ export const InviteTeamMemberDialog = ({
             type="button"
             variant="ghost"
             onClick={() => handleOpenChange(false)}
-            disabled={generateInvite.isPending}
+            disabled={addMember.isPending}
           >
             Cancel
           </Button>
           <Button
             type="button"
             onClick={handleAdd}
-            disabled={selectedEmails.length === 0 || generateInvite.isPending}
+            disabled={selectedUsers.length === 0 || addMember.isPending}
           >
-            {generateInvite.isPending ? (
+            {addMember.isPending ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
-                <span>Processing...</span>
+                <span>Adding...</span>
               </>
             ) : (
               <>

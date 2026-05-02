@@ -12,15 +12,16 @@ import {
 } from "./schemas"
 
 /**
- * Xây dựng đường dẫn API cho Task theo ProjectId
+ * Xây dựng đường dẫn API cho Task. Nếu có projectId thì lấy theo project, ngược lại lấy global.
  */
-const buildTaskPath = (projectId: string) => `projects/${projectId}/tasks`
+const buildTaskPath = (projectId?: string) =>
+  projectId ? `projects/${projectId}/tasks` : `tasks`
 
 /**
- * Lấy danh sách các Task trong một Project (có hỗ trợ filter và pagination).
+ * Lấy danh sách các Task (có hỗ trợ filter và pagination).
  */
 export async function fetchTasks(
-  projectId: string,
+  projectId?: string,
   params?: TFindTasksInput
 ): Promise<TTasksResponse> {
   const response = await api

@@ -17,7 +17,7 @@ export const fetchTasksFn = createServerFn({ method: "GET" })
   .middleware([requestLoggerMiddleware])
   .inputValidator(
     z.object({
-      projectId: z.string(),
+      projectId: z.string().optional(),
       params: FindTasksSchema,
     })
   )

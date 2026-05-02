@@ -18,7 +18,7 @@ import type { TFindTasksInput } from "./schemas"
 export const taskKeys = {
   all: ["tasks"] as const,
   lists: () => [...taskKeys.all, "list"] as const,
-  list: (projectId: string, params?: TFindTasksInput) =>
+  list: (projectId?: string, params?: TFindTasksInput) =>
     [...taskKeys.lists(), projectId, params] as const,
   details: () => [...taskKeys.all, "detail"] as const,
   detail: (projectId: string, taskId: string) =>
@@ -29,7 +29,7 @@ export const taskKeys = {
  * Các Query Object dùng cho việc Fetch data (React Query)
  */
 export const taskQueries = {
-  list: (projectId: string, params?: TFindTasksInput) =>
+  list: (projectId?: string, params?: TFindTasksInput) =>
     queryOptions({
       queryKey: taskKeys.list(projectId, params),
       queryFn: () => fetchTasksFn({ data: { projectId, params } }),

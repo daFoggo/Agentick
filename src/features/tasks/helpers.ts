@@ -30,7 +30,7 @@ export const toCalendarDateValue = (value?: string | Date | null): Date | undefi
  */
 export const toIsoDateTime = (
   value?: Date,
-  options?: { endOfDay?: boolean }
+  options?: { endOfDay?: boolean; startOfDay?: boolean }
 ): string | undefined => {
   if (!value || Number.isNaN(value.getTime())) return undefined
 
@@ -38,7 +38,7 @@ export const toIsoDateTime = (
 
   if (options?.endOfDay) {
     date.setHours(23, 59, 59, 999)
-  } else {
+  } else if (options?.startOfDay) {
     date.setHours(0, 0, 0, 0)
   }
 
@@ -46,7 +46,7 @@ export const toIsoDateTime = (
 }
 
 /**
- * Định dạng Date hiển thị theo chuẩn Việt Nam (DD/MM/YYYY)
+ * Định dạng Date hiển thị theo chuẩn Việt Nam (DD/MM/YYYY HH:mm)
  */
 export const formatCalendarDate = (value?: Date): string => {
   if (!value || Number.isNaN(value.getTime())) return ""
@@ -55,6 +55,9 @@ export const formatCalendarDate = (value?: Date): string => {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
   }).format(value)
 }
 

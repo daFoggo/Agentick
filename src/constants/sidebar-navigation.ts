@@ -1,17 +1,16 @@
-import type { ISidebarGroup } from "@/types/sidebar"
+import type { ISidebarContextMatch, ISidebarGroup } from "@/types/sidebar"
 import {
+  CalendarHeart,
   ChevronLeft,
-  ChartNoAxesGantt,
   CircleDashed,
   Flag,
+  Form,
   Inbox,
-  ListChecks,
   LayoutTemplate,
+  ListChecks,
   Tags,
   Users,
-  Form,
 } from "lucide-react"
-import type { ISidebarContextMatch } from "@/types/sidebar"
 
 export const SIDEBAR_PERSONAL: ISidebarGroup = {
   label: "Personal",
@@ -22,9 +21,9 @@ export const SIDEBAR_PERSONAL: ISidebarGroup = {
       icon: LayoutTemplate,
     },
     {
-      title: "My Tasks",
-      to: "/dashboard/$teamId/my-tasks",
-      icon: ChartNoAxesGantt,
+      title: "Schedules",
+      to: "/dashboard/$teamId/schedules",
+      icon: CalendarHeart,
     },
     {
       title: "Inbox",
@@ -35,17 +34,20 @@ export const SIDEBAR_PERSONAL: ISidebarGroup = {
 }
 
 export const SIDEBAR_TEAM: ISidebarGroup = {
-  label: "Team",
+  label: "Teams",
   items: [
     {
-      title: "Team",
+      title: "My Team",
       to: "/dashboard/$teamId/team",
       icon: Users,
     },
   ],
 }
 
-export const SIDEBAR_NAVIGATION: ISidebarGroup[] = [SIDEBAR_PERSONAL, SIDEBAR_TEAM]
+export const SIDEBAR_NAVIGATION: ISidebarGroup[] = [
+  SIDEBAR_PERSONAL,
+  SIDEBAR_TEAM,
+]
 
 export const SIDEBAR_PROJECT_SETTINGS: ISidebarGroup = {
   items: [

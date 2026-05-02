@@ -3,7 +3,8 @@ import { AppSidebar } from "@/components/layout/app/sidebar"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { userQueries } from "@/features/users"
 import { inboxStatsQueryOptions } from "@/features/inbox/queries"
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
+import { cn } from "@/lib/utils"
+import { createFileRoute, Outlet, redirect, useMatches } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/dashboard")({
   beforeLoad: async ({ location }) => {
@@ -31,15 +32,27 @@ export const Route = createFileRoute("/dashboard")({
 })
 
 function DashboardLayout() {
+  const matches = useMatches()
+  const isFixedHeight = matches.some((m) => m.staticData?.fixedHeight)
+
   return (
-    <SidebarProvider>
+    <SidebarProvider className="h-svh overflow-hidden">
       <AppSidebar />
-      <SidebarInset>
-        <main className="flex flex-1 flex-col gap-4 p-4">
-          <div className="flex w-full items-center justify-between">
-            <AppPageHeader />
-          </div>
-          <Outlet />
+      <SidebarInset className={cn("h-full", !isFixedHeight && "overflow-y-auto")}>
+        <main
+          className={cn(
+            "flex flex-col gap-4 p-4",
+            isFixedHeight ? "h-full overflow-hidden" : "min-h-full"
+          )}
+        >
+          <AppPageHeader />
+          {isFixedHeight ? (
+            <div className="flex-1 min-h-0">
+              <Outlet />
+            </div>
+          ) : (
+            <Outlet />
+          )}
         </main>
       </SidebarInset>
     </SidebarProvider>
