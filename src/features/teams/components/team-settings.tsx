@@ -117,7 +117,7 @@ export const TeamSettings = ({ teamId }: ITeamSettingsProps) => {
 
       if (nextTeam) {
         navigate({
-          to: "/dashboard/$teamId/team/overview",
+          to: "/dashboard/$teamId/team/members",
           params: { teamId: nextTeam.id },
           replace: true,
         })
@@ -148,7 +148,7 @@ export const TeamSettings = ({ teamId }: ITeamSettingsProps) => {
     setRequiresTeamCreation(false)
     setIsCreateTeamDialogOpen(false)
     navigate({
-      to: "/dashboard/$teamId/team/overview",
+      to: "/dashboard/$teamId/team/members",
       params: { teamId: createdTeam.id },
       replace: true,
     })

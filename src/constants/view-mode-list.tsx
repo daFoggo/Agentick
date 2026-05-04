@@ -69,17 +69,11 @@ export const INBOX_VIEW_MODE_CATALOG: IViewModeCatalogItem[] = [
 
 export const TEAM_VIEW_MODE_CATALOG: IViewModeCatalogItem[] = [
   {
-    value: "overview",
-    label: "Overview",
-    icon: LayoutDashboard,
-    to: "/dashboard/$teamId/team/overview",
-    isDefault: true,
-  },
-  {
     value: "members",
     label: "Members",
     icon: Users,
     to: "/dashboard/$teamId/team/members",
+    isDefault: true,
   },
   {
     value: "settings",
