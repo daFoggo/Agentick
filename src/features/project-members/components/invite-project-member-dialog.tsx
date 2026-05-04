@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { Loader2, Plus } from "lucide-react"
-import { useDeferredValue, useState } from "react"
+import { useDeferredValue, useState, useMemo } from "react"
 import { toast } from "sonner"
 import { useProjectMemberMutations } from "../queries"
 import type { TProjectRole } from "../schemas"
@@ -49,11 +49,30 @@ export const InviteProjectMemberDialog = ({
 
 
   // Use global user search with smart exclusion
-  const { data: users = [], isLoading } = useQuery(
+  const { data: fetchedUsers = [], isLoading } = useQuery(
     userQueries.search(deferredQuery, { excludeProjectId: projectId })
   )
 
-  const { addMember } = useProjectMemberMutations()
+  const users = useMemo(() => {
+    const list = [...fetchedUsers]
+    const trimmedQuery = deferredQuery.trim()
+    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedQuery)
+
+    if (
+      trimmedQuery &&
+      isValidEmail &&
+      !list.some((u) => u.email === trimmedQuery)
+    ) {
+      list.push({
+        id: `invite-${trimmedQuery}`,
+        name: `Invite ${trimmedQuery}`,
+        email: trimmedQuery,
+      })
+    }
+    return list
+  }, [fetchedUsers, deferredQuery])
+
+  const { generateInvite } = useProjectMemberMutations()
 
   const handleAdd = async () => {
     if (selectedUsers.length === 0) return
@@ -61,19 +80,19 @@ export const InviteProjectMemberDialog = ({
     try {
       await Promise.all(
         selectedUsers.map((user) =>
-          addMember.mutateAsync({
+          generateInvite.mutateAsync({
             projectId: projectId,
-            payload: { user_id: user.id, role: selectedRole },
+            payload: { email: user.email, role: selectedRole },
           })
         )
       )
       toast.success(
-        `${selectedUsers.length} members have been added to the project`
+        `${selectedUsers.length} invitations have been sent`
       )
       handleReset()
       onOpenChange(false)
     } catch (error) {
-      toast.error("Failed to add some members")
+      toast.error("Failed to send some invitations")
     }
   }
 
@@ -113,13 +132,14 @@ export const InviteProjectMemberDialog = ({
               isLoading={isLoading}
               itemToString={(user) => user.name}
               itemToValue={(user) => user.id}
+              renderChip={(user) => user.id.startsWith("invite-") ? user.email : user.name}
               placeholder="Search by name or email..."
               renderItem={(user) => (
                 <div className="flex items-center gap-2">
                   <Avatar className="size-6">
                     <AvatarImage src={user.avatar_url ?? undefined} />
                     <AvatarFallback>
-                      {user.name.slice(0, 2).toUpperCase()}
+                      {user.id.startsWith("invite-") ? "@" : user.name.slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col">
@@ -161,19 +181,19 @@ export const InviteProjectMemberDialog = ({
             type="button"
             variant="ghost"
             onClick={() => handleOpenChange(false)}
-            disabled={addMember.isPending}
+            disabled={generateInvite.isPending}
           >
             Cancel
           </Button>
           <Button
             type="button"
             onClick={handleAdd}
-            disabled={selectedUsers.length === 0 || addMember.isPending}
+            disabled={selectedUsers.length === 0 || generateInvite.isPending}
           >
-            {addMember.isPending ? (
+            {generateInvite.isPending ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
-                <span>Adding...</span>
+                <span>Sending...</span>
               </>
             ) : (
               <>

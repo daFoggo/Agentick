@@ -13,18 +13,42 @@ import { TEAM_ROLE_CATALOG, getTeamRoleOption } from "@/constants/team-roles"
 import { ChevronDown, Loader2, MoreHorizontal, UserMinus } from "lucide-react"
 import { generateColumns } from "@/lib/data-table"
 import type { TTeamMember } from "../schemas"
-import { memberProjectCountQueryOptions, useTeamMemberMutations } from "../queries"
+import { memberProjectCountQueryOptions, useTeamMemberMutations, teamMembersQueryOptions } from "../queries"
 import type { CellContext } from "@tanstack/react-table"
 import { useState } from "react"
-import { useQueryClient } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { userQueries } from "@/features/users"
+import { useNavigate, useParams } from "@tanstack/react-router"
+import { useDashboardStore } from "@/stores/use-dashboard-store"
 import { RemoveTeamMemberDialog } from "./remove-team-member-dialog"
 
 const RoleCell = ({ row }: CellContext<TTeamMember, any>) => {
   const member = row.original
   const { updateRole } = useTeamMemberMutations()
+  const { data: currentUser } = useQuery(userQueries.me())
+  const { teamId } = useParams({ strict: false }) as { teamId?: string }
+  const { data: members } = useQuery({
+    ...teamMembersQueryOptions(teamId ?? ""),
+    enabled: !!teamId,
+  })
+
   const roleOption = getTeamRoleOption(member.role)
 
   if (!roleOption) return null
+
+  const currentUserRole = members?.founds?.find(m => m.user_id === currentUser?.id)?.role
+  
+  if (currentUserRole !== "owner" && currentUserRole !== "manager") {
+    return (
+      <Badge
+        variant={roleOption.variant}
+        className={`${roleOption.className}`}
+      >
+        <roleOption.icon className="mr-1 size-3" />
+        {roleOption.label}
+      </Badge>
+    )
+  }
 
   return (
     <DropdownMenu>
@@ -71,13 +95,29 @@ const ActionCell = ({ row }: CellContext<TTeamMember, any>) => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
   const [projectCount, setProjectCount] = useState<number>(0)
   const [isChecking, setIsChecking] = useState(false)
+  
+  const { data: currentUser } = useQuery(userQueries.me())
+  const isCurrentUser = currentUser?.id === member.user_id
+  
+  const navigate = useNavigate()
+  const { teamId } = useParams({ strict: false }) as { teamId?: string }
+  const { data: members } = useQuery({
+    ...teamMembersQueryOptions(teamId ?? ""),
+    enabled: !!teamId,
+  })
+  
+  const currentUserRole = members?.founds?.find(m => m.user_id === currentUser?.id)?.role
+
+  if (currentUserRole !== "owner" && currentUserRole !== "manager") {
+    return null
+  }
 
   const handleRemoveClick = async () => {
     setIsChecking(true)
     try {
-      const count = await queryClient.fetchQuery(
-        memberProjectCountQueryOptions(member.team_id, member.user_id)
-      )
+      const options = memberProjectCountQueryOptions(member.team_id, member.user_id)
+      await queryClient.invalidateQueries({ queryKey: options.queryKey })
+      const count = await queryClient.fetchQuery(options)
       setProjectCount(count)
       setIsConfirmOpen(true)
     } catch (error) {
@@ -94,7 +134,16 @@ const ActionCell = ({ row }: CellContext<TTeamMember, any>) => {
         user_id: member.user_id,
       },
       {
-        onSuccess: () => setIsConfirmOpen(false),
+        onSuccess: () => {
+          setIsConfirmOpen(false)
+          if (isCurrentUser) {
+            const store = useDashboardStore.getState()
+            if (store.last_team_id === member.team_id) {
+              store.reset()
+            }
+            navigate({ to: "/dashboard" })
+          }
+        },
       }
     )
   }
@@ -118,7 +167,7 @@ const ActionCell = ({ row }: CellContext<TTeamMember, any>) => {
             ) : (
               <UserMinus className="size-4" />
             )}
-            Remove from Team
+            {isCurrentUser ? "Leave Team" : "Remove from Team"}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

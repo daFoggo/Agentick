@@ -64,6 +64,7 @@ function ComboboxInput({
     <InputGroup className={cn("w-auto", className)}>
       <ComboboxPrimitive.Input
         render={<InputGroupInput disabled={disabled} />}
+        autoComplete="new-password"
         {...props}
       />
       <InputGroupAddon align="inline-end">
@@ -273,6 +274,7 @@ function ComboboxChipsInput({
     <ComboboxPrimitive.Input
       data-slot="combobox-chip-input"
       className={cn("min-w-16 flex-1 outline-none", className)}
+      autoComplete="new-password"
       {...props}
     />
   )

@@ -15,6 +15,9 @@ import { generateColumns } from "@/lib/data-table"
 import type { TProjectMember } from "../schemas"
 import { useProjectMemberMutations } from "../queries"
 import type { CellContext } from "@tanstack/react-table"
+import { useQuery } from "@tanstack/react-query"
+import { userQueries } from "@/features/users"
+import { useNavigate, useParams } from "@tanstack/react-router"
 
 export const projectMemberColumns = generateColumns<TProjectMember>([
   {
@@ -116,6 +119,11 @@ function RoleCell({ row }: CellContext<TProjectMember, any>) {
 function ActionCell({ row }: CellContext<TProjectMember, any>) {
   const member = row.original
   const { removeMember } = useProjectMemberMutations()
+  const { data: currentUser } = useQuery(userQueries.me())
+  const isCurrentUser = currentUser?.id === member.user_id
+  
+  const navigate = useNavigate()
+  const { teamId } = useParams({ strict: false }) as { teamId?: string }
 
   return (
     <DropdownMenu>
@@ -128,14 +136,27 @@ function ActionCell({ row }: CellContext<TProjectMember, any>) {
         <DropdownMenuItem
           className="text-destructive focus:bg-destructive/10 focus:text-destructive"
           onClick={() =>
-            removeMember.mutate({
-              projectId: member.project_id,
-              user_id: member.user_id,
-            })
+            removeMember.mutate(
+              {
+                projectId: member.project_id,
+                user_id: member.user_id,
+              },
+              {
+                onSuccess: () => {
+                  if (isCurrentUser) {
+                    if (teamId) {
+                      navigate({ to: "/dashboard/$teamId/projects", params: { teamId } })
+                    } else {
+                      navigate({ to: "/dashboard" })
+                    }
+                  }
+                },
+              }
+            )
           }
         >
           <UserMinus className="size-4" />
-          Remove from Project
+          {isCurrentUser ? "Leave Project" : "Remove from Project"}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

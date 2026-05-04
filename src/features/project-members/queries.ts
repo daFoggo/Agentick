@@ -75,6 +75,9 @@ export const useProjectMemberMutations = () => {
         queryClient.invalidateQueries({
           queryKey: ["teamMembers"],
         }),
+        queryClient.invalidateQueries({
+          queryKey: ["projects"],
+        }),
       ])
     },
   })
