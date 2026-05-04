@@ -1,9 +1,14 @@
-import { ProjectSettings } from "@/features/projects"
+import { ProjectSettings, projectQueryOptions } from "@/features/projects"
 import { createFileRoute } from "@tanstack/react-router"
 
 export const Route = createFileRoute(
   "/dashboard/$teamId/projects/$projectId/settings/"
 )({
+  loader: async ({ context, params }) => {
+    await context.queryClient.ensureQueryData(
+      projectQueryOptions(params.projectId)
+    )
+  },
   component: ProjectSettingsGeneralPage,
 })
 
