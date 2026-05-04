@@ -6,7 +6,6 @@ import {
   ChartNoAxesGantt,
   Inbox,
   Kanban,
-  LayoutDashboard,
   ListTree,
   Settings,
   Users,

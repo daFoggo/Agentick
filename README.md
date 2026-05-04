@@ -109,15 +109,15 @@ Maintaining a clean separation between global and feature-specific code is cruci
 When building a new feature (e.g., "Teams"), follow this standard structure:
 
 1. **Initialize Directory**: Create `src/features/teams/`.
-2. **Define Schema** (`schemas.ts`): Use Zod to define data models and form validation.
-   - *Example*: `teamSchema` for creating/updating teams.
-3. **API Logic** (`functions.ts`): Define API interaction functions.
-4. **Hooks** (`queries.ts`): Create TanStack Query hooks for caching and state management.
-   - *Example*: `useTeamsQuery`, `useUpdateTeamMutation`.
-5. **UI Components** (`components/`): Build feature-specific views.
-   - *Example*: `TeamSettings`, `CreateTeamDialog`.
-6. **Server Actions** (`server.ts`): Define server-side functions (TanStack Start specific).
-7. **Export** (`index.ts`): Use a barrel file to export the public API of the feature.
+2. **Define Schema** (`schemas.ts` or `schemas/`): Use Zod to define data models and form validation.
+3. **API Logic** (`functions.ts` or `functions/`): Define API interaction functions.
+4. **Hooks** (`queries.ts` or `queries/`): Create TanStack Query hooks for caching and state management.
+5. **UI Components** (`components/`): Build feature-specific views (Widgets).
+6. **Server Actions** (`server.ts` or `server/`): Define server-side functions.
+7. **Export** (`index.ts`): Use a barrel file to export the public API.
+
+> [!NOTE]
+> For complex features with many sub-entities (e.g., `task-config`), it is recommended to use subdirectories (e.g., `queries/task-status.ts`) and a barrel file within each subdirectory to keep the feature manageable.
 
 #### Export/Import Pattern
 To keep the internal structure of a feature private, always use the `index.ts` file as the entry point.
