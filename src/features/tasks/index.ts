@@ -5,3 +5,4 @@ export * from "./queries"
 
 export * from "./components/task-table"
 export * from "./components/my-tasks-list"
+export * from "./components/task-line"
