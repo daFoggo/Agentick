@@ -30,7 +30,6 @@ export const memberProjectCountQueryOptions = (teamId: string, userId: string) =
   queryOptions({
     queryKey: [...teamMemberKeys.list(teamId), userId, "projectCount"],
     queryFn: () => getMemberProjectCountFn({ data: { teamId, user_id: userId } }),
-    staleTime: 1000 * 30,
   })
 
 export const useTeamMemberMutations = () => {
@@ -59,9 +58,17 @@ export const useTeamMemberMutations = () => {
     mutationFn: (data: { teamId: string; user_id: string }) =>
       removeTeamMemberFn({ data }),
     onSuccess: async (_, variables) => {
-      await queryClient.invalidateQueries({
-        queryKey: teamMemberKeys.list(variables.teamId),
-      })
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: teamMemberKeys.list(variables.teamId),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["teams"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["projects"],
+        }),
+      ])
     },
   })
 
