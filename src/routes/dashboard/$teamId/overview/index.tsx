@@ -1,3 +1,4 @@
+import { MyProjectsGrid } from "@/features/projects"
 import { TaskLine } from "@/features/tasks"
 import { UserGreeting } from "@/features/users"
 import { createFileRoute } from "@tanstack/react-router"
@@ -15,10 +16,7 @@ function RouteComponent() {
       <UserGreeting />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <TaskLine />
-        {/* Placeholder for Project list/Upcoming events */}
-        <div className="h-full rounded-xl border border-dashed border-muted-foreground/20 bg-muted/5 p-12 text-center text-muted-foreground">
-          Projects and Events coming soon...
-        </div>
+        <MyProjectsGrid />
       </div>
     </div>
   )

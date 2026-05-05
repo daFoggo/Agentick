@@ -6,7 +6,10 @@ import type { TBaseFindResponse, TBaseSearchOptions } from "@/types/api"
 export const ProjectSchema = z.object({
   id: z.string(),
   team_id: z.string(),
-  name: z.string().min(3, "Tên dự án tối thiểu 3 ký tự").max(255),
+  name: z
+    .string()
+    .min(3, "Project name must be at least 3 characters")
+    .max(255),
   description: z.string().max(512).optional().nullable(),
   avatar_url: z.string().url().optional().nullable(),
   is_deleted: z.boolean().default(false),
@@ -16,7 +19,10 @@ export const ProjectSchema = z.object({
 
 export const CreateProjectSchema = z.object({
   team_id: z.string(),
-  name: z.string().min(3, "Tên dự án tối thiểu 3 ký tự").max(255),
+  name: z
+    .string()
+    .min(3, "Project name must be at least 3 characters")
+    .max(255),
   description: z.string().max(512).optional(),
   avatar_url: z.string().url().optional(),
 })
@@ -43,7 +49,10 @@ export const GetProjectSchema = z.object({
 
 export type TProjectSearchOptions = TBaseSearchOptions<number, string>
 
-export type TProjectsResponse = TBaseFindResponse<TProject, TProjectSearchOptions>
+export type TProjectsResponse = TBaseFindResponse<
+  TProject,
+  TProjectSearchOptions
+>
 
 export type TProject = z.infer<typeof ProjectSchema> & {
   members?: TProjectMember[]

@@ -15,7 +15,7 @@ export const EventSchema = z.object({
   user_id: z.string(),
   team_id: z.string(),
   type: EventTypeSchema,
-  title: z.string().min(1, "Tiêu đề không được để trống"),
+  title: z.string().min(1, "Title cannot be empty"),
   description: z.string().optional().nullable(),
   task_id: z.string().optional().nullable(),
   start_time: ApiDateSchema,
@@ -35,7 +35,7 @@ export const CreateEventBaseSchema = z.object({
   user_id: z.string(),
   team_id: z.string(),
   type: EventTypeSchema,
-  title: z.string().min(1, "Tiêu đề không được để trống"),
+  title: z.string().min(1, "Title cannot be empty"),
   description: z.string().optional(),
   start_time: ApiDateSchema,
   end_time: ApiDateSchema,
@@ -49,7 +49,7 @@ export const CreateEventSchema = CreateEventBaseSchema.refine(
     return end > start
   },
   {
-    message: "Thời gian kết thúc phải sau thời gian bắt đầu",
+    message: "End time must be after start time",
     path: ["end_time"],
   }
 )

@@ -15,8 +15,11 @@ export const TimezoneViewer = () => {
             <span className="font-medium text-muted-foreground uppercase">
               time
             </span>
-            <Badge variant="secondary" className="font-semibold">
-              {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            <Badge variant="secondary" className="font-mono font-semibold">
+              {new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
             </Badge>
           </SidebarMenuButton>
         </HoverCardTrigger>

@@ -33,7 +33,7 @@ export const TaskLine = () => {
       <Tabs defaultValue="progress" className="flex flex-1 flex-col">
         <CardHeader className="flex flex-col">
           <div className="flex items-center gap-2">
-            <Avatar size="default" className="border shadow-sm">
+            <Avatar>
               {user.avatar_url && <AvatarImage src={user.avatar_url} />}
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
