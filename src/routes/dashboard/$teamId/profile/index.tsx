@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
 import { ProfileCard, userQueries } from "@/features/users"
-import { MyTasksList } from "@/features/tasks"
 import { MyProjectsList, myProjectsQueryOptions } from "@/features/projects"
 import { MyTeamsList, teamQueries } from "@/features/teams"
 
@@ -29,7 +28,6 @@ function ProfileDashboardComponent() {
         </div>
 
         <div className="flex flex-col gap-6 md:col-span-8 lg:col-span-9">
-          <MyTasksList />
           <MyProjectsList />
         </div>
       </div>

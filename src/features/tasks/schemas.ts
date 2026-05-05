@@ -45,7 +45,7 @@ export const ProjectTaskSchema = z.object({
   updated_at: ApiDateSchema,
   project_id: z.string(),
   parent_id: z.string().nullable(),
-  title: z.string().min(1, "Tiêu đề không được để trống"),
+  title: z.string().min(1, "Title cannot be empty"),
   description: z.string().optional().nullable(),
   status_id: z.string(),
   type_id: z.string(),
@@ -81,7 +81,7 @@ export type TTask = z.infer<typeof ProjectTaskSchema> & {
 export const CreateTaskSchema = z.object({
   project_id: z.string().optional(),
   parent_id: z.string().nullable().optional(),
-  title: z.string().min(1, "Tiêu đề không được để trống"),
+  title: z.string().min(1, "Title cannot be empty"),
   description: z.string().optional().nullable(),
   status_id: z.string(),
   type_id: z.string(),

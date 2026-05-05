@@ -1,3 +1,5 @@
+import type { TTask } from "./schemas"
+
 /**
  * Catalog mặc định cho loại Task (áp dụng khi chưa load được config từ server)
  */
@@ -155,3 +157,59 @@ export const PROJECT_PHASES_ROUTE = "projects/{project_id}/phases"
  */
 export const DEFAULT_TASK_PAGE_SIZE = 20
 export const DEFAULT_TASK_ORDERING = "-id"
+
+/**
+ * Dữ liệu mock cho các tính năng Overview/Dashboard
+ */
+export const MOCK_TASKS: Partial<TTask>[] = [
+  {
+    id: "1",
+    title: "Implement Bento Grid layout for Overview page",
+    project_id: "agentick-fe",
+    status_id: "in_progress",
+    type_id: "feature",
+    due_date: "2026-05-10T00:00:00Z",
+    status: "In Progress",
+    type: "Feature",
+  },
+  {
+    id: "2",
+    title: "Fix responsive issues on mobile sidebar",
+    project_id: "agentick-fe",
+    status_id: "in_progress",
+    type_id: "bug",
+    due_date: "2026-05-06T00:00:00Z",
+    status: "In Progress",
+    type: "Bug",
+  },
+  {
+    id: "3",
+    title: "Write unit tests for Auth service",
+    project_id: "agentick-be",
+    status_id: "todo",
+    type_id: "task",
+    due_date: "2026-05-15T00:00:00Z",
+    status: "Upcoming",
+    type: "Task",
+  },
+  {
+    id: "4",
+    title: "Database migration for notification system",
+    project_id: "agentick-be",
+    status_id: "overdue",
+    type_id: "devops",
+    due_date: "2026-05-01T00:00:00Z",
+    status: "Overdue",
+    type: "DevOps",
+  },
+  {
+    id: "5",
+    title: "Research Label Studio integration",
+    project_id: "agentick-fe",
+    status_id: "todo",
+    type_id: "research",
+    due_date: "2026-05-20T00:00:00Z",
+    status: "Upcoming",
+    type: "Research",
+  },
+]

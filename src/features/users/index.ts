@@ -1,4 +1,6 @@
 export * from "./schemas"
 export * from "./functions"
 export * from "./queries"
-export * from "./components/profile-page"
+export * from "./helpers"
+export * from "./components/profile-card"
+export * from "./components/user-greeting"

@@ -4,6 +4,7 @@ import type {
   TTaskStatus as TTaskStatusOption,
   TTaskType as TTaskTypeOption,
 } from "@/features/task-config"
+import type { TTask } from "./schemas"
 
 /**
  * Interface cho các tùy chọn trong Dialog quản lý Task
@@ -18,7 +19,9 @@ export interface ITaskListDialogOptions {
 /**
  * Chuyển đổi giá trị sang đối tượng Date cho các Component lịch/ngày tháng
  */
-export const toCalendarDateValue = (value?: string | Date | null): Date | undefined => {
+export const toCalendarDateValue = (
+  value?: string | Date | null
+): Date | undefined => {
   if (!value) return undefined
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return undefined
@@ -73,9 +76,13 @@ export const resolveDefaultTaskOptionIds = (
   assignerId: string
 } => {
   const statusId =
-    options.statuses.find((item) => item.is_default)?.id ?? options.statuses[0]?.id ?? ""
+    options.statuses.find((item) => item.is_default)?.id ??
+    options.statuses[0]?.id ??
+    ""
   const typeId =
-    options.types.find((item) => item.is_default)?.id ?? options.types[0]?.id ?? ""
+    options.types.find((item) => item.is_default)?.id ??
+    options.types[0]?.id ??
+    ""
   const priorityId =
     options.priorities.find((item) => item.is_default)?.id ??
     options.priorities[0]?.id ??
@@ -88,4 +95,23 @@ export const resolveDefaultTaskOptionIds = (
     priorityId,
     assignerId,
   }
+}
+
+/**
+ * Lọc danh sách task theo trạng thái cho Dashboard Overview
+ */
+export const filterTasksForOverview = (tasks: Partial<TTask>[], today: Date) => {
+  const inProgress = tasks.filter((t) => t.status_id === "in_progress")
+  const upcoming = tasks.filter(
+    (t) =>
+      t.due_date &&
+      new Date(t.due_date) > today &&
+      t.status_id !== "in_progress"
+  )
+  const overdue = tasks.filter(
+    (t) =>
+      t.due_date && new Date(t.due_date) < today && t.status_id !== "completed"
+  )
+
+  return { inProgress, upcoming, overdue }
 }

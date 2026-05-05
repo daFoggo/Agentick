@@ -5,7 +5,7 @@ import type { TBaseFindResponse, TBaseSearchOptions } from "@/types/api"
 
 export const TeamSchema = z.object({
   id: z.string(),
-  name: z.string().min(2, "Tên team tối thiểu 2 ký tự"),
+  name: z.string().min(2, "Team name must be at least 2 characters"),
   description: z.string().optional().nullable(),
   avatar_url: z.string().optional().nullable(),
   owner_id: z.string(),
@@ -15,7 +15,7 @@ export const TeamSchema = z.object({
 })
 
 export const CreateTeamSchema = z.object({
-  name: z.string().min(2, "Tên team tối thiểu 2 ký tự"),
+  name: z.string().min(2, "Team name must be at least 2 characters"),
   description: z.string().optional(),
   avatar_url: z.string().optional(),
 })

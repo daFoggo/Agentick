@@ -13,7 +13,10 @@ export function EventTypeBadge({ type, className }: IEventTypeBadgeProps) {
 
   if (!option) {
     return (
-      <Badge variant="secondary" className={cn("capitalize", className)}>
+      <Badge
+        variant="secondary"
+        className={cn("font-mono capitalize", className)}
+      >
         {String(type).replace("_", " ")}
       </Badge>
     )
