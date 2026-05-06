@@ -20,9 +20,9 @@ export const Route = createFileRoute("/dashboard/$teamId/overview/")({
 
 function RouteComponent() {
   return (
-    <div className="flex w-full flex-col gap-6">
+    <div className="flex w-full flex-col gap-4">
       <UserGreeting />
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <TaskLine />
         <MyProjectsGrid />
       </div>

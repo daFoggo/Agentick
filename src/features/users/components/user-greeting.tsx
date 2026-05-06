@@ -26,10 +26,10 @@ export const UserGreeting = () => {
   const { data: stats } = useQuery(userQueries.stats(period))
 
   return (
-    <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-      <p className="text-2xl font-light tracking-tight">{greeting}</p>
+    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <p className="text-2xl font-light ">{greeting}</p>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <ButtonGroup className="rounded-full border-none bg-muted/40">
           <Select
             value={period}
