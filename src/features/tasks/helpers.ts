@@ -98,19 +98,29 @@ export const resolveDefaultTaskOptionIds = (
 }
 
 /**
- * Lọc danh sách task theo trạng thái cho Dashboard Overview
+ * Lọc danh sách task theo trạng thái cho Dashboard Overview.
+ * - inProgress: task chưa hoàn thành và chưa quá hạn
+ * - upcoming:   task chưa hoàn thành, còn hạn (due_date > today)
+ * - overdue:    task chưa hoàn thành, đã quá hạn (due_date < today)
  */
 export const filterTasksForOverview = (tasks: Partial<TTask>[], today: Date) => {
-  const inProgress = tasks.filter((t) => t.status_id === "in_progress")
+  const isCompleted = (t: Partial<TTask>) =>
+    (t as any).status?.is_completed === true
+
+  const inProgress = tasks.filter(
+    (t) => !isCompleted(t) && !(t.due_date && new Date(t.due_date) < today)
+  )
   const upcoming = tasks.filter(
     (t) =>
+      !isCompleted(t) &&
       t.due_date &&
-      new Date(t.due_date) > today &&
-      t.status_id !== "in_progress"
+      new Date(t.due_date) > today
   )
   const overdue = tasks.filter(
     (t) =>
-      t.due_date && new Date(t.due_date) < today && t.status_id !== "completed"
+      !isCompleted(t) &&
+      t.due_date &&
+      new Date(t.due_date) < today
   )
 
   return { inProgress, upcoming, overdue }

@@ -1,11 +1,17 @@
 import { requestLoggerMiddleware } from "@/lib/middleware"
 import { createServerFn } from "@tanstack/react-start"
-import { SearchUsersInputSchema } from "./schemas"
-import { getUserMe, searchUsers } from "./server"
+import { z } from "zod"
+import { SearchUsersInputSchema, StatsPeriodSchema } from "./schemas"
+import { fetchUserStats, getUserMe, searchUsers } from "./server"
 
 export const getUserMeFn = createServerFn({ method: "GET" })
   .middleware([requestLoggerMiddleware])
   .handler(() => getUserMe())
+
+export const fetchUserStatsFn = createServerFn({ method: "GET" })
+  .middleware([requestLoggerMiddleware])
+  .inputValidator(z.object({ period: StatsPeriodSchema.optional() }))
+  .handler(({ data }) => fetchUserStats(data.period ?? "weekly"))
 
 export const searchUsersFn = createServerFn({ method: "GET" })
   .middleware([requestLoggerMiddleware])

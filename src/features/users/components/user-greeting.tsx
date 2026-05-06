@@ -11,15 +11,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useSuspenseQuery } from "@tanstack/react-query"
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query"
 import { PackageCheck, SlidersHorizontal, Users } from "lucide-react"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { getUserGreeting } from "../helpers"
 import { userQueries } from "../queries"
+import type { TStatsPeriod } from "../schemas"
 
 export const UserGreeting = () => {
   const { data: user } = useSuspenseQuery(userQueries.me())
   const greeting = useMemo(() => getUserGreeting(user.name), [user.name])
+
+  const [period, setPeriod] = useState<TStatsPeriod>("weekly")
+  const { data: stats } = useQuery(userQueries.stats(period))
 
   return (
     <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
@@ -27,7 +31,10 @@ export const UserGreeting = () => {
 
       <div className="flex items-center gap-3">
         <ButtonGroup className="rounded-full border-none bg-muted/40">
-          <Select defaultValue="weekly">
+          <Select
+            value={period}
+            onValueChange={(val) => setPeriod(val as TStatsPeriod)}
+          >
             <SelectTrigger className="rounded-full border-none bg-transparent">
               <SelectValue placeholder="My weekly stats" />
             </SelectTrigger>
@@ -42,7 +49,9 @@ export const UserGreeting = () => {
           <ButtonGroupText className="cursor-default gap-2 border-none bg-transparent">
             <PackageCheck className="size-3.5 text-muted-foreground" />
             <div className="flex items-center gap-1">
-              <span className="font-semibold text-foreground">17</span>
+              <span className="font-semibold text-foreground">
+                {stats?.tasks_completed ?? "—"}
+              </span>
               <span className="text-sm text-muted-foreground">
                 tasks completed
               </span>
@@ -52,7 +61,9 @@ export const UserGreeting = () => {
           <ButtonGroupText className="cursor-default gap-2 border-none bg-transparent">
             <Users className="size-3.5 text-muted-foreground" />
             <div className="flex items-center gap-1">
-              <span className="font-semibold text-foreground">42</span>
+              <span className="font-semibold text-foreground">
+                {stats?.collaborated_with ?? "—"}
+              </span>
               <span className="text-sm text-muted-foreground">
                 collaborated with
               </span>

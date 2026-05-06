@@ -6,6 +6,7 @@ import {
 import {
   createTaskFn,
   deleteTaskFn,
+  fetchMyTasksFn,
   fetchTaskByIdFn,
   fetchTasksFn,
   updateTaskFn,
@@ -23,6 +24,7 @@ export const taskKeys = {
   details: () => [...taskKeys.all, "detail"] as const,
   detail: (projectId: string, taskId: string) =>
     [...taskKeys.details(), projectId, taskId] as const,
+  myTasks: () => [...taskKeys.all, "my-tasks"] as const,
 }
 
 /**
@@ -38,6 +40,12 @@ export const taskQueries = {
     queryOptions({
       queryKey: taskKeys.detail(projectId, taskId),
       queryFn: () => fetchTaskByIdFn({ data: { projectId, taskId } }),
+    }),
+  myTasks: () =>
+    queryOptions({
+      queryKey: taskKeys.myTasks(),
+      queryFn: () =>
+        fetchMyTasksFn({ data: { params: { page_size: "all" } } }),
     }),
 }
 

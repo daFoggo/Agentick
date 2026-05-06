@@ -18,6 +18,24 @@ const buildTaskPath = (projectId?: string) =>
   projectId ? `projects/${projectId}/tasks` : `tasks`
 
 /**
+ * Lấy tất cả task được assign cho current user (dùng cho Dashboard Overview).
+ * Không cần truyền projectId — API tự lấy theo token.
+ */
+export async function fetchMyTasks(
+  params?: TFindTasksInput
+): Promise<TTasksResponse> {
+  const response = await api
+    .get("users/me/tasks", {
+      searchParams: params as
+        | Record<string, string | number | boolean>
+        | undefined,
+    })
+    .json<TBaseResponse<TTasksResponse>>()
+
+  return response.data
+}
+
+/**
  * Lấy danh sách các Task (có hỗ trợ filter và pagination).
  */
 export async function fetchTasks(

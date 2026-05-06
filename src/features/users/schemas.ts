@@ -25,4 +25,14 @@ export const SearchUsersInputSchema = z.object({
   excludeProjectId: z.string().optional(),
 })
 
+export const StatsPeriodSchema = z.enum(["weekly", "monthly"])
+export type TStatsPeriod = z.infer<typeof StatsPeriodSchema>
+
+export const UserStatsSchema = z.object({
+  tasks_completed: z.number(),
+  collaborated_with: z.number(),
+  period: StatsPeriodSchema,
+})
+export type TUserStats = z.infer<typeof UserStatsSchema>
+
 export type TUserSearchResult = z.infer<typeof UserSearchResultSchema>
