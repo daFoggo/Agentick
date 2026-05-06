@@ -62,6 +62,8 @@ export const useTaskMutations = () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: taskKeys.lists() }),
         queryClient.invalidateQueries({ queryKey: taskKeys.details() }),
+        queryClient.invalidateQueries({ queryKey: taskKeys.myTasks() }),
+        queryClient.invalidateQueries({ queryKey: ["users", "stats"] }),
       ])
     },
   })
@@ -75,6 +77,8 @@ export const useTaskMutations = () => {
         queryClient.invalidateQueries({
           queryKey: taskKeys.detail(variables.projectId, variables.taskId),
         }),
+        queryClient.invalidateQueries({ queryKey: taskKeys.myTasks() }),
+        queryClient.invalidateQueries({ queryKey: ["users", "stats"] }),
       ])
     },
   })
@@ -88,6 +92,8 @@ export const useTaskMutations = () => {
         queryClient.invalidateQueries({
           queryKey: taskKeys.detail(variables.projectId, variables.taskId),
         }),
+        queryClient.invalidateQueries({ queryKey: taskKeys.myTasks() }),
+        queryClient.invalidateQueries({ queryKey: ["users", "stats"] }),
       ])
     },
   })
