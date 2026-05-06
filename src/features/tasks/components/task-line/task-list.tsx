@@ -9,11 +9,11 @@ import { ListTodo } from "lucide-react"
 import type { TTask } from "../../schemas"
 import { TaskItem } from "./task-item"
 
-interface TaskListProps {
+interface ITaskListProps {
   tasks: Partial<TTask>[]
 }
 
-export const TaskList = ({ tasks }: TaskListProps) => {
+export const TaskList = ({ tasks }: ITaskListProps) => {
   return (
     <ScrollArea className="h-64">
       <div className="flex flex-col">

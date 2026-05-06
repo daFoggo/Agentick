@@ -15,7 +15,9 @@ function mapTaskData(
     status_id: string
     type_id: string
     priority_id: string
+    assigner_id?: string | null
     assignee_id?: string | null
+    assignee_ids?: string[] | null
     phase_id?: string | null
     start_date?: string | Date | null
     due_date?: string | Date | null
@@ -32,9 +34,11 @@ function mapTaskData(
     priorities: Array<{ id: string; name: string }>
   }
 ): TTask {
-  const member = task.assignee_id
-    ? members.find((item) => item.id === task.assignee_id) ?? null
-    : null
+  const assigneeIds = (task.assignee_ids && task.assignee_ids.length > 0)
+    ? task.assignee_ids
+    : (task.assignee_id ? [task.assignee_id] : [])
+
+  const assignees = members.filter((item) => assigneeIds.includes(item.id))
 
   const display = (id: string, catalog: Array<{ id: string; name: string }>) =>
     catalog.find((item) => item.id === id)?.name ?? id
@@ -48,13 +52,13 @@ function mapTaskData(
     status_id: task.status_id,
     type_id: task.type_id,
     priority_id: task.priority_id,
-    assigner_id: "",
+    assigner_id: task.assigner_id ?? "",
     type: display(task.type_id, options.types),
     status: display(task.status_id, options.statuses),
     priority: display(task.priority_id, options.priorities),
     phase_id: task.phase_id ?? null,
-    assignee_ids: task.assignee_id ? [task.assignee_id] : [],
-    assignees: member ? [member] : [],
+    assignee_ids: assigneeIds,
+    assignees: assignees,
     start_date: task.start_date ? new Date(task.start_date).toISOString() : new Date().toISOString(),
     due_date: task.due_date ? new Date(task.due_date).toISOString() : new Date().toISOString(),
     created_at: task.created_at ? new Date(task.created_at).toISOString() : new Date().toISOString(),

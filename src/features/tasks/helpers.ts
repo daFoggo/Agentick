@@ -98,30 +98,53 @@ export const resolveDefaultTaskOptionIds = (
 }
 
 /**
- * Lọc danh sách task theo trạng thái cho Dashboard Overview.
- * - inProgress: task chưa hoàn thành và chưa quá hạn
- * - upcoming:   task chưa hoàn thành, còn hạn (due_date > today)
- * - overdue:    task chưa hoàn thành, đã quá hạn (due_date < today)
+ * Lọc danh sách task theo trạng thái cho Dashboard Overview (Phương án B - Agile/Scrum).
+ * - overdue:    task chưa hoàn thành, đã quá hạn chót (due_date < today)
+ * - upcoming:   task chưa hoàn thành, chưa đến ngày bắt đầu (start_date > today)
+ * - inProgress: task chưa hoàn thành, đang trong hạn hoặc không có hạn chót (start_date <= today <= due_date)
  */
-export const filterTasksForOverview = (tasks: Partial<TTask>[], today: Date) => {
-  const isCompleted = (t: Partial<TTask>) =>
-    (t as any).status?.is_completed === true
+export const filterTasksForOverview = (
+  tasks: Partial<TTask>[],
+  today: Date
+) => {
+  const isCompleted = (t: Partial<TTask>) => {
+    const status = (t as { status?: { is_completed?: boolean } }).status
+    return status?.is_completed === true
+  }
 
-  const inProgress = tasks.filter(
-    (t) => !isCompleted(t) && !(t.due_date && new Date(t.due_date) < today)
-  )
-  const upcoming = tasks.filter(
-    (t) =>
-      !isCompleted(t) &&
-      t.due_date &&
-      new Date(t.due_date) > today
-  )
-  const overdue = tasks.filter(
-    (t) =>
-      !isCompleted(t) &&
-      t.due_date &&
-      new Date(t.due_date) < today
-  )
+  const todayTime = today.getTime()
+
+  const getNormalizedTime = (dateValue?: string | Date | null) => {
+    if (!dateValue) return null
+    const d = new Date(dateValue)
+    if (Number.isNaN(d.getTime())) return null
+    d.setHours(0, 0, 0, 0)
+    return d.getTime()
+  }
+
+  const overdue = tasks.filter((t) => {
+    if (isCompleted(t)) return false
+    const dueTime = getNormalizedTime(t.due_date)
+    return dueTime !== null && dueTime < todayTime
+  })
+
+  const upcoming = tasks.filter((t) => {
+    if (isCompleted(t)) return false
+    const startTime = getNormalizedTime(t.start_date)
+    return startTime !== null && startTime > todayTime
+  })
+
+  const inProgress = tasks.filter((t) => {
+    if (isCompleted(t)) return false
+
+    const dueTime = getNormalizedTime(t.due_date)
+    const startTime = getNormalizedTime(t.start_date)
+
+    const isOverdue = dueTime !== null && dueTime < todayTime
+    const isUpcoming = startTime !== null && startTime > todayTime
+
+    return !isOverdue && !isUpcoming
+  })
 
   return { inProgress, upcoming, overdue }
 }

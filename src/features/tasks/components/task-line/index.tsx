@@ -17,10 +17,7 @@ export const TaskLine = () => {
 
   const today = startOfToday()
   const tasks = myTasksData?.founds ?? []
-  const { inProgress, upcoming, overdue } = filterTasksForOverview(
-    tasks,
-    today
-  )
+  const { inProgress, upcoming, overdue } = filterTasksForOverview(tasks, today)
 
   const initials =
     user.name

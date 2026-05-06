@@ -293,7 +293,17 @@ export const CreateTaskListDialog = ({
                         <SelectContent>
                           {options.members.map((member) => (
                             <SelectItem key={member.id} value={member.id}>
-                              {member.user?.name ?? member.user_id}
+                              <div className="flex items-center gap-2">
+                                <Avatar className="size-5">
+                                  <AvatarImage src={member.user?.avatar_url} />
+                                  <AvatarFallback>
+                                    {member.user?.name?.charAt(0)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="text-sm">
+                                  {member.user?.name ?? member.user_id}
+                                </span>
+                              </div>
                             </SelectItem>
                           ))}
                         </SelectContent>

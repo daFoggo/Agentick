@@ -5,11 +5,11 @@ import { format } from "date-fns"
 import { ArrowRight, Circle } from "lucide-react"
 import type { TTask } from "../../schemas"
 
-interface TaskItemProps {
+interface ITaskItemProps {
   task: Partial<TTask>
 }
 
-export const TaskItem = ({ task }: TaskItemProps) => {
+export const TaskItem = ({ task }: ITaskItemProps) => {
   const navigate = useNavigate()
   const { teamId } = useParams({ strict: false })
 
@@ -35,7 +35,7 @@ export const TaskItem = ({ task }: TaskItemProps) => {
           {task.title}
         </span>
         <div className="flex shrink-0 items-center gap-2">
-          <Badge variant="outline">{task.type}</Badge>
+          {task?.type && <Badge variant="outline">{task.type}</Badge>}
           <span
             className={cn(
               "min-w-[60px] text-right text-xs font-medium transition-colors",
