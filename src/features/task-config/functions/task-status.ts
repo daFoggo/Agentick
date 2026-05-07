@@ -12,7 +12,7 @@ import {
   fetchTaskStatusById,
   fetchTaskStatuses,
   updateTaskStatus,
-} from "../servers"
+} from "../servers/task-status"
 import { withProjectId } from "./base"
 
 export const getTaskStatusesFn = createServerFn({ method: "GET" })

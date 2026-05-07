@@ -13,6 +13,7 @@ export const inboxStatsQueryOptions = (params: GetInboxStatsInput = {}) =>
     queryKey: inboxKeys.stats(),
     queryFn: () => getInboxStatsFn({ data: params }) as Promise<TInboxStats>,
     staleTime: 1000 * 60 * 2, // 2 minutes
+    refetchInterval: 2000, // Poll every 2 seconds for real-time updates
   })
 
 export const inboxListQueryOptions = (status?: TInboxStatus, isRead?: boolean, isBookmarked?: boolean) =>
@@ -20,4 +21,5 @@ export const inboxListQueryOptions = (status?: TInboxStatus, isRead?: boolean, i
     queryKey: inboxKeys.list(status, isRead, isBookmarked),
     queryFn: () => getInboxListFn({ data: { status, isRead, isBookmarked } }) as Promise<TInboxItem[]>,
     staleTime: 1000 * 30, // 30 seconds
+    refetchInterval: 2000, // Poll every 2 seconds for real-time updates
   })

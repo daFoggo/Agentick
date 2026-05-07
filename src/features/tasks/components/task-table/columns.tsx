@@ -1,3 +1,4 @@
+import { toast } from "sonner"
 import { MemberAvatarGroup } from "@/components/common/member-avatar-group"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -191,7 +192,9 @@ export const getTaskColumns = (options: ITaskListDialogOptions) =>
           </>
         )
       },
-      cell: ({ getValue }) => {
+      cell: ({ getValue, row }) => {
+        const task = row.original
+        const { update } = useTaskMutations()
         const status = getStatusOption(getValue() as string, options)
         if (!status) return null
 
@@ -216,7 +219,19 @@ export const getTaskColumns = (options: ITaskListDialogOptions) =>
                 <DropdownMenuItem
                   key={opt.id}
                   className="gap-2"
-                  onClick={(event) => event.preventDefault()}
+                  onClick={async (e) => {
+                    e.stopPropagation()
+                    try {
+                      await update.mutateAsync({
+                        projectId: task.project_id,
+                        taskId: task.id,
+                        payload: { status_id: opt.id },
+                      })
+                      toast.success("Status updated")
+                    } catch (error) {
+                      toast.error("Failed to update status")
+                    }
+                  }}
                 >
                   <span
                     className="size-1.5 shrink-0 rounded-full"
@@ -251,7 +266,9 @@ export const getTaskColumns = (options: ITaskListDialogOptions) =>
           </>
         )
       },
-      cell: ({ getValue }) => {
+      cell: ({ getValue, row }) => {
+        const task = row.original
+        const { update } = useTaskMutations()
         const priority = getPriorityOption(getValue() as string, options)
         if (!priority) return null
 
@@ -275,7 +292,19 @@ export const getTaskColumns = (options: ITaskListDialogOptions) =>
                 <DropdownMenuItem
                   key={opt.id}
                   className="gap-2"
-                  onClick={(event) => event.preventDefault()}
+                  onClick={async (e) => {
+                    e.stopPropagation()
+                    try {
+                      await update.mutateAsync({
+                        projectId: task.project_id,
+                        taskId: task.id,
+                        payload: { priority_id: opt.id },
+                      })
+                      toast.success("Priority updated")
+                    } catch (error) {
+                      toast.error("Failed to update priority")
+                    }
+                  }}
                 >
                   <span
                     className="size-1.5 shrink-0 rounded-full"

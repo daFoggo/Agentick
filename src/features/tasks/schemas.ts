@@ -73,6 +73,9 @@ export type TTask = z.infer<typeof ProjectTaskSchema> & {
   tags?: TTag[]
   phase?: TPhase
   assignees?: TProjectMember[]
+  type_color?: string
+  status_color?: string
+  priority_color?: string
 }
 
 /**

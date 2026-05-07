@@ -5,3 +5,6 @@ export * from "./queries"
 
 export * from "./components/task-table"
 export * from "./components/task-line"
+export * from "./components/task-kanban"
+export * from "./components/task-table/create-task-list-dialog"
+export * from "./components/task-table/edit-task-list-dialog"
