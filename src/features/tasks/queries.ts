@@ -50,6 +50,16 @@ export const taskQueries = {
 }
 
 /**
+ * Invalidate tất cả query liên quan đến dashboard charts của project.
+ * Dùng prefix ["projects"] để bắt cả task-stats lẫn workload mà không cần projectId cụ thể.
+ */
+const invalidateDashboardCharts = (queryClient: ReturnType<typeof useQueryClient>) =>
+  Promise.all([
+    queryClient.invalidateQueries({ queryKey: ["projects", "task-stats"] }),
+    queryClient.invalidateQueries({ queryKey: ["projects", "workload"] }),
+  ])
+
+/**
  * Hook quản lý các Mutation liên quan đến Task (Create, Update, Delete)
  */
 export const useTaskMutations = () => {
@@ -64,6 +74,7 @@ export const useTaskMutations = () => {
         queryClient.invalidateQueries({ queryKey: taskKeys.details() }),
         queryClient.invalidateQueries({ queryKey: taskKeys.myTasks() }),
         queryClient.invalidateQueries({ queryKey: ["users", "stats"] }),
+        invalidateDashboardCharts(queryClient),
       ])
     },
   })
@@ -79,6 +90,7 @@ export const useTaskMutations = () => {
         }),
         queryClient.invalidateQueries({ queryKey: taskKeys.myTasks() }),
         queryClient.invalidateQueries({ queryKey: ["users", "stats"] }),
+        invalidateDashboardCharts(queryClient),
       ])
     },
   })
@@ -94,6 +106,7 @@ export const useTaskMutations = () => {
         }),
         queryClient.invalidateQueries({ queryKey: taskKeys.myTasks() }),
         queryClient.invalidateQueries({ queryKey: ["users", "stats"] }),
+        invalidateDashboardCharts(queryClient),
       ])
     },
   })

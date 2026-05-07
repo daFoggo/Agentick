@@ -5,176 +5,134 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Rectangle } from "recharts"
 import { ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { Button } from "@/components/ui/button"
-import {
-  TASK_PRIORITY_CATALOG,
-  TASK_STATUS_CATALOG,
-  TASK_TYPE_CATALOG,
-} from "@/features/tasks/constants"
-import { MOCK_PROJECT_TASKS } from "@/features/projects/mocks"
-import type { TTask } from "@/features/tasks/schemas"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useQuery } from "@tanstack/react-query"
+import { useParams } from "@tanstack/react-router"
+import { projectTaskStatsQueryOptions } from "@/features/projects/queries"
+import type { TStatsPeriod } from "@/features/projects/schemas"
 
 type ViewMode = "priority" | "status" | "type"
 
-function buildSeries(tasks: Partial<TTask>[], mode: ViewMode) {
-  if (mode === "priority") {
-    const counts = TASK_PRIORITY_CATALOG.map((p) => ({
-      label: p.label,
-      value: 0,
-      color: p.color,
-    }))
-    tasks.forEach((t) => {
-      const priority =
-        TASK_PRIORITY_CATALOG.find((p) => p.value === (t.priority_id as any)) ??
-        TASK_PRIORITY_CATALOG.find((p) => p.isDefault)
-      const item = counts.find((c) => c.label === priority?.label)
-      if (item) item.value = (item.value ?? 0) + 1
-    })
-    return counts.map((c) => ({
-      name: c.label,
-      value: c.value,
-      fill: c.color,
-    }))
-  }
-
-  if (mode === "status") {
-    const counts = tasks.reduce(
-      (acc, t) => {
-        const statusLabel = t.status || "Unknown"
-        // Match by label from catalog, or use the string as-is
-        const statusCatalog = TASK_STATUS_CATALOG.find(
-          (s) => s.label.toLowerCase() === statusLabel.toLowerCase()
-        )
-        const label = statusCatalog?.label || statusLabel
-        const color = statusCatalog?.color || "#94a3b8"
-
-        const existing = acc.find((c) => c.label === label)
-        if (existing) {
-          existing.value += 1
-        } else {
-          acc.push({ label, value: 1, color })
-        }
-        return acc
-      },
-      [] as { label: string; value: number; color: string }[]
-    )
-    return counts.map((c) => ({
-      name: c.label,
-      value: c.value,
-      fill: c.color,
-    }))
-  }
-
-  if (mode === "type") {
-    const counts = tasks.reduce(
-      (acc, t) => {
-        const typeLabel = t.type || "Unknown"
-        // Match by label from catalog, or use the string as-is
-        const typeCatalog = TASK_TYPE_CATALOG.find(
-          (ty) => ty.label.toLowerCase() === typeLabel.toLowerCase()
-        )
-        const label = typeCatalog?.label || typeLabel
-        const color = typeCatalog?.color || "#64748b"
-
-        const existing = acc.find((c) => c.label === label)
-        if (existing) {
-          existing.value += 1
-        } else {
-          acc.push({ label, value: 1, color })
-        }
-        return acc
-      },
-      [] as { label: string; value: number; color: string }[]
-    )
-    return counts.map((c) => ({
-      name: c.label,
-      value: c.value,
-      fill: c.color,
-    }))
-  }
-
-  return []
-}
-
 export const ProjectTaskStatsCard = () => {
   const [mode, setMode] = React.useState<ViewMode>("priority")
+  const [period, setPeriod] = React.useState<TStatsPeriod>("weekly")
+  const { projectId } = useParams({ strict: false })
 
-  const now = new Date()
-  const startOfWeek = new Date(now)
-  startOfWeek.setDate(now.getDate() - now.getDay())
-  const endOfWeek = new Date(startOfWeek)
-  endOfWeek.setDate(startOfWeek.getDate() + 7)
+  const { data: stats, isLoading } = useQuery(
+    projectTaskStatsQueryOptions(projectId ?? "", period)
+  )
 
-  const tasksThisWeek = MOCK_PROJECT_TASKS.filter((t) => {
-    if (!t.due_date) return false
-    const d = new Date(t.due_date)
-    return d >= startOfWeek && d < endOfWeek
-  }) as Partial<TTask>[]
-
-  const data = buildSeries(tasksThisWeek, mode)
+  // Map API response sang format cho BarChart
+  const data = React.useMemo(() => {
+    if (!stats) return []
+    const source =
+      mode === "priority"
+        ? stats.by_priority
+        : mode === "status"
+          ? stats.by_status
+          : stats.by_type
+    return source.map((item) => ({
+      name: item.name,
+      value: item.count,
+      fill: item.color,
+    }))
+  }, [stats, mode])
 
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between gap-2">
-          <CardTitle>
-            Total tasks{" "}
-            <span className="text-sm text-muted-foreground">(this week)</span>
-          </CardTitle>
-          <ButtonGroup orientation="horizontal">
-            <Button
-              size="sm"
-              variant={mode === "priority" ? "default" : "outline"}
-              onClick={() => setMode("priority")}
-            >
-              Priority
-            </Button>
-            <Button
-              size="sm"
-              variant={mode === "status" ? "default" : "outline"}
-              onClick={() => setMode("status")}
-            >
-              Status
-            </Button>
-            <Button
-              size="sm"
-              variant={mode === "type" ? "default" : "outline"}
-              onClick={() => setMode("type")}
-            >
-              Type
-            </Button>
-          </ButtonGroup>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-col">
+            <CardTitle>
+              Total tasks{" "}
+              <span className="text-sm text-muted-foreground">
+                ({period === "weekly" ? "this week" : "last 30 days"})
+              </span>
+            </CardTitle>
+          </div>
+          <div className="flex items-center gap-2">
+            {/* Period toggle */}
+            <ButtonGroup orientation="horizontal">
+              <Button
+                size="sm"
+                variant={period === "weekly" ? "default" : "outline"}
+                onClick={() => setPeriod("weekly")}
+              >
+                Weekly
+              </Button>
+              <Button
+                size="sm"
+                variant={period === "monthly" ? "default" : "outline"}
+                onClick={() => setPeriod("monthly")}
+              >
+                Monthly
+              </Button>
+            </ButtonGroup>
+            {/* View mode toggle */}
+            <ButtonGroup orientation="horizontal">
+              <Button
+                size="sm"
+                variant={mode === "priority" ? "default" : "outline"}
+                onClick={() => setMode("priority")}
+              >
+                Priority
+              </Button>
+              <Button
+                size="sm"
+                variant={mode === "status" ? "default" : "outline"}
+                onClick={() => setMode("status")}
+              >
+                Status
+              </Button>
+              <Button
+                size="sm"
+                variant={mode === "type" ? "default" : "outline"}
+                onClick={() => setMode("type")}
+              >
+                Type
+              </Button>
+            </ButtonGroup>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
-        <ChartContainer
-          id="project-stats"
-          className="aspect-auto"
-          config={{ value: { label: "Tasks", color: "var(--chart-1)" } }}
-          style={{ height: 240 }}
-        >
-          <BarChart data={data} barCategoryGap="20%" barGap={8}>
-            <CartesianGrid strokeDasharray="3 3" vertical={true} />
-            <XAxis dataKey="name" tickLine={false} />
-            <YAxis allowDecimals={false} width={44} />
-            <ChartTooltip
-              content={
-                <ChartTooltipContent
-                  labelKey="name"
-                  nameKey="value"
-                  indicator="dot"
-                />
-              }
-            />
-            <Bar
-              dataKey="value"
-              radius={[8, 8, 0, 0]}
-              shape={(props: any) => {
-                const { fill, ...others } = props
-                return <Rectangle {...others} fill={props.payload.fill} />
-              }}
-            />
-          </BarChart>
-        </ChartContainer>
+        {isLoading ? (
+          <Skeleton className="h-60 w-full rounded-lg" />
+        ) : data.length === 0 ? (
+          <div className="flex h-60 items-center justify-center text-sm text-muted-foreground">
+            No tasks found for this period.
+          </div>
+        ) : (
+          <ChartContainer
+            id="project-stats"
+            className="aspect-auto"
+            config={{ value: { label: "Tasks", color: "var(--chart-1)" } }}
+            style={{ height: 240 }}
+          >
+            <BarChart data={data} barCategoryGap="20%" barGap={8}>
+              <CartesianGrid strokeDasharray="3 3" vertical={true} />
+              <XAxis dataKey="name" tickLine={false} />
+              <YAxis allowDecimals={false} width={44} />
+              <ChartTooltip
+                content={
+                  <ChartTooltipContent
+                    labelKey="name"
+                    nameKey="value"
+                    indicator="dot"
+                  />
+                }
+              />
+              <Bar
+                dataKey="value"
+                radius={[8, 8, 0, 0]}
+                shape={(props: any) => {
+                  const { fill: _fill, ...others } = props
+                  return <Rectangle {...others} fill={props.payload.fill} />
+                }}
+              />
+            </BarChart>
+          </ChartContainer>
+        )}
       </CardContent>
     </Card>
   )

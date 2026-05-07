@@ -5,6 +5,9 @@ import type {
   TGetProjectsInput,
   TProject,
   TProjectsResponse,
+  TProjectTaskStats,
+  TProjectWorkloadResponse,
+  TStatsPeriod,
 } from "./schemas"
 import { z } from "zod"
 import { CreateProjectSchema, UpdateProjectSchema } from "./schemas"
@@ -80,3 +83,28 @@ export async function deleteProject(projectId: string): Promise<boolean> {
   return response.data
 }
 
+/**
+ * Lấy thống kê task của project (by priority/status/type) — dùng cho biểu đồ ProjectTaskStatsCard.
+ */
+export async function fetchProjectTaskStats(
+  projectId: string,
+  period: TStatsPeriod = "weekly"
+): Promise<TProjectTaskStats> {
+  const response = await api
+    .get(`projects/${projectId}/tasks/stats`, { searchParams: { period } })
+    .json<TBaseResponse<TProjectTaskStats>>()
+  return response.data
+}
+
+/**
+ * Lấy workload của từng member trong project theo ngày — dùng cho biểu đồ ProjectWorkload.
+ */
+export async function fetchProjectMemberWorkload(
+  projectId: string,
+  period: TStatsPeriod = "weekly"
+): Promise<TProjectWorkloadResponse> {
+  const response = await api
+    .get(`projects/${projectId}/members/workload`, { searchParams: { period } })
+    .json<TBaseResponse<TProjectWorkloadResponse>>()
+  return response.data
+}

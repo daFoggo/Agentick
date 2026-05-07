@@ -63,3 +63,50 @@ export type TGetProjectInput = z.infer<typeof GetProjectSchema>
 export type TGetProjectsInput = z.infer<typeof GetProjectsSchema>
 export type TCreateProjectInput = z.infer<typeof CreateProjectSchema>
 export type TUpdateProjectInput = z.infer<typeof UpdateProjectSchema>
+
+// ── Dashboard: Task Stats ──────────────────────────────────────────────────────
+
+export const TaskStatItemSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  color: z.string(),
+  count: z.number(),
+})
+export type TTaskStatItem = z.infer<typeof TaskStatItemSchema>
+
+export const StatsPeriodSchema = z.enum(["weekly", "monthly"])
+export type TStatsPeriod = z.infer<typeof StatsPeriodSchema>
+
+export const ProjectTaskStatsSchema = z.object({
+  by_priority: z.array(TaskStatItemSchema),
+  by_status: z.array(TaskStatItemSchema),
+  by_type: z.array(TaskStatItemSchema),
+  period: StatsPeriodSchema,
+  date_from: z.string(),
+  date_to: z.string(),
+})
+export type TProjectTaskStats = z.infer<typeof ProjectTaskStatsSchema>
+
+// ── Dashboard: Member Workload ─────────────────────────────────────────────────
+
+export const WorkloadDataPointSchema = z.object({
+  date: z.string(),       // "YYYY-MM-DD"
+  task_count: z.number(),
+})
+
+export const MemberWorkloadSchema = z.object({
+  user_id: z.string(),
+  name: z.string(),
+  avatar_url: z.string().nullable().optional(),
+  series: z.array(WorkloadDataPointSchema),
+})
+export type TMemberWorkload = z.infer<typeof MemberWorkloadSchema>
+
+export const ProjectWorkloadResponseSchema = z.object({
+  members: z.array(MemberWorkloadSchema),
+  period: StatsPeriodSchema,
+  date_from: z.string(),
+  date_to: z.string(),
+})
+export type TProjectWorkloadResponse = z.infer<typeof ProjectWorkloadResponseSchema>
+

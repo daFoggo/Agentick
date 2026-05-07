@@ -1,6 +1,6 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
-import { getProjectByIdFn, getProjectsFn, getMyProjectsFn, createProjectFn, updateProjectFn, deleteProjectFn } from "./functions"
-import type { TGetProjectsInput } from "./schemas"
+import { getProjectByIdFn, getProjectsFn, getMyProjectsFn, createProjectFn, updateProjectFn, deleteProjectFn, fetchProjectTaskStatsFn, fetchProjectMemberWorkloadFn } from "./functions"
+import type { TGetProjectsInput, TStatsPeriod } from "./schemas"
 
 export const projectKeys = {
   all: ["projects"] as const,
@@ -9,6 +9,10 @@ export const projectKeys = {
   myProjects: () => ["projects", "me"] as const,
   details: () => [...projectKeys.all, "detail"] as const,
   detail: (id: string) => [...projectKeys.details(), id] as const,
+  taskStats: (projectId: string, period: TStatsPeriod) =>
+    [...projectKeys.all, "task-stats", projectId, period] as const,
+  workload: (projectId: string, period: TStatsPeriod) =>
+    [...projectKeys.all, "workload", projectId, period] as const,
 }
 
 export const projectsQueryOptions = (params: TGetProjectsInput = {}) =>
@@ -27,6 +31,26 @@ export const projectQueryOptions = (projectId: string) =>
   queryOptions({
     queryKey: projectKeys.detail(projectId),
     queryFn: () => getProjectByIdFn({ data: { projectId } }),
+  })
+
+export const projectTaskStatsQueryOptions = (
+  projectId: string,
+  period: TStatsPeriod = "weekly"
+) =>
+  queryOptions({
+    queryKey: projectKeys.taskStats(projectId, period),
+    queryFn: () => fetchProjectTaskStatsFn({ data: { projectId, period } }),
+    enabled: !!projectId,
+  })
+
+export const projectWorkloadQueryOptions = (
+  projectId: string,
+  period: TStatsPeriod = "weekly"
+) =>
+  queryOptions({
+    queryKey: projectKeys.workload(projectId, period),
+    queryFn: () => fetchProjectMemberWorkloadFn({ data: { projectId, period } }),
+    enabled: !!projectId,
   })
 
 export const useProjectMutations = () => {
@@ -68,4 +92,3 @@ export const useProjectMutations = () => {
 
   return { create, update, remove }
 }
-

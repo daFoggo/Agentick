@@ -12,10 +12,7 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { MOCK_USER_WORKLOAD } from "@/features/projects/mocks"
-import { Search } from "lucide-react"
-import * as React from "react"
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Empty,
   EmptyDescription,
@@ -23,30 +20,58 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
+import { useQuery } from "@tanstack/react-query"
+import { useParams } from "@tanstack/react-router"
+import { projectWorkloadQueryOptions } from "@/features/projects/queries"
+import type { TStatsPeriod, TMemberWorkload } from "@/features/projects/schemas"
+import { Search } from "lucide-react"
+import * as React from "react"
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 
-type UserSeries = {
-  userId: string
-  name: string
-  week: { period: string; value: number }[]
-  month: { period: string; value: number }[]
+/** Parse "YYYY-MM-DD" string mà không bị lệch timezone */
+function parseDateStr(dateStr: string) {
+  const [y, m, d] = dateStr.split("-").map(Number)
+  return new Date(y, m - 1, d)  // local date — không phải UTC
 }
 
 export function ProjectWorkload() {
   const [mode, setMode] = React.useState<"week" | "month">("week")
   const [searchTerm, setSearchTerm] = React.useState("")
+  const { projectId } = useParams({ strict: false })
 
-  // compute global max for the selected mode so all charts share the same Y domain
-  const allValues = MOCK_USER_WORKLOAD.flatMap((u) =>
-    (mode === "week" ? u.week : u.month).map(
-      (p: { period: string; value: number }) => p.value
-    )
+  const period: TStatsPeriod = mode === "week" ? "weekly" : "monthly"
+
+  const { data: workloadData, isLoading } = useQuery(
+    projectWorkloadQueryOptions(projectId ?? "", period)
   )
-  const globalMax = Math.max(1, ...allValues)
-  const ticks = [0, Math.ceil(globalMax / 2), globalMax]
 
-  // Filter users by search term
-  const filteredUsers = MOCK_USER_WORKLOAD.filter((u) =>
-    u.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const members: TMemberWorkload[] = workloadData?.members ?? []
+
+  const mappedMembers = React.useMemo(
+    () =>
+      members.map((m) => ({
+        userId: m.user_id,
+        name: m.name,
+        avatar_url: m.avatar_url,
+        chartData: m.series.map((p) => ({
+          period: p.date,       // "YYYY-MM-DD"
+          value: p.task_count,
+        })),
+      })),
+    [members]
+  )
+
+  // YAxis ticks chung — tránh duplicate khi globalMax nhỏ
+  const allValues = mappedMembers.flatMap((m) => m.chartData.map((p) => p.value))
+  const globalMax = Math.max(1, ...allValues)
+  const yTicks = React.useMemo(() => {
+    if (globalMax === 1) return [0, 1]
+    const mid = Math.ceil(globalMax / 2)
+    return mid === globalMax ? [0, globalMax] : [0, mid, globalMax]
+  }, [globalMax])
+
+  const filteredMembers = mappedMembers.filter((m) =>
+    m.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   return (
@@ -86,48 +111,47 @@ export function ProjectWorkload() {
         </div>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-96 w-full">
-          <div className="flex flex-col divide-y">
-            {filteredUsers.length > 0 ? (
-              filteredUsers.map((u: UserSeries) => {
-                // Select data based on mode, then filter month to only show days with value > 0
-                const baseData = mode === "week" ? u.week : u.month
-                const displayData =
-                  mode === "month"
-                    ? baseData.filter((p) => p.value > 0)
-                    : baseData
-                return (
-                  <div key={u.userId} className="flex items-center gap-2 py-2">
+        {isLoading ? (
+          <div className="flex flex-col gap-4">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-28 w-full rounded-lg" />
+            ))}
+          </div>
+        ) : (
+          <ScrollArea className="h-96 w-full">
+            <div className="flex flex-col divide-y">
+              {filteredMembers.length > 0 ? (
+                filteredMembers.map((m, idx) => (
+                  <div key={m.userId ?? idx} className="flex items-center gap-2 py-2">
                     <div className="min-w-24">
-                      <div className="text-sm font-medium">{u.name}</div>
+                      <div className="text-sm font-medium">{m.name}</div>
                       <div className="text-xs text-muted-foreground">
                         Team member
                       </div>
                     </div>
                     <div className="flex-1">
                       <ChartContainer
-                        id={`workload-${u.userId}`}
+                        id={`workload-chart-${idx}`}
                         className="aspect-auto"
                         config={{
-                          value: { label: "Tasks", color: "var(--chart-1)" },
+                          value: { label: "Tasks done", color: "var(--chart-1)" },
                         }}
                         style={{ height: 112 }}
                       >
                         <LineChart
-                          data={displayData}
+                          data={m.chartData}
                           margin={{ left: 0, right: 12, top: 8, bottom: 8 }}
                         >
-                          <CartesianGrid
-                            vertical={true}
-                            strokeDasharray="3 3"
-                          />
+                          <CartesianGrid vertical={false} strokeDasharray="3 3" />
                           <XAxis
                             dataKey="period"
                             tickLine={false}
                             axisLine={false}
+                            // Giảm số tick hiển thị tránh chồng chéo
+                            interval={mode === "week" ? 0 : 4}
                             tickFormatter={(v) => {
                               try {
-                                const d = new Date(v)
+                                const d = parseDateStr(v)
                                 if (mode === "week") {
                                   return d.toLocaleDateString(undefined, {
                                     weekday: "short",
@@ -140,11 +164,12 @@ export function ProjectWorkload() {
                             }}
                           />
                           <YAxis
-                            width={44}
+                            width={32}
                             axisLine={false}
                             tickLine={false}
+                            allowDecimals={false}
                             domain={[0, globalMax]}
-                            ticks={ticks}
+                            ticks={yTicks}
                           />
                           <ChartTooltip
                             content={
@@ -152,6 +177,16 @@ export function ProjectWorkload() {
                                 labelKey="period"
                                 nameKey="value"
                                 indicator="dot"
+                                labelFormatter={(label) => {
+                                  try {
+                                    return parseDateStr(label).toLocaleDateString(
+                                      "vi-VN",
+                                      { day: "2-digit", month: "2-digit", year: "numeric" }
+                                    )
+                                  } catch {
+                                    return label
+                                  }
+                                }}
                               />
                             }
                           />
@@ -160,29 +195,35 @@ export function ProjectWorkload() {
                             stroke="var(--chart-1)"
                             strokeWidth={2}
                             dot={false}
+                            activeDot={{ r: 4 }}
                           />
                         </LineChart>
                       </ChartContainer>
                     </div>
                   </div>
-                )
-              })
-            ) : (
-              <Empty>
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <Search className="size-4" />
-                  </EmptyMedia>
-                  <EmptyTitle>No team members found</EmptyTitle>
-                  <EmptyDescription>
-                    Try adjusting your search or filter to find what you're
-                    looking for.
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            )}
-          </div>
-        </ScrollArea>
+                ))
+              ) : (
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <Search className="size-4" />
+                    </EmptyMedia>
+                    <EmptyTitle>
+                      {members.length === 0
+                        ? "No data for this period"
+                        : "No team members found"}
+                    </EmptyTitle>
+                    <EmptyDescription>
+                      {members.length === 0
+                        ? "Members haven't been assigned tasks yet."
+                        : "Try adjusting your search to find what you're looking for."}
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              )}
+            </div>
+          </ScrollArea>
+        )}
       </CardContent>
     </Card>
   )
