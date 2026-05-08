@@ -22,9 +22,13 @@ function RouteComponent() {
   return (
     <div className="flex w-full flex-col gap-4">
       <UserGreeting />
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <TaskLine />
-        <MyProjectsGrid />
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
+        <div className="md:col-span-7">
+          <TaskLine />
+        </div>
+        <div className="md:col-span-5">
+          <MyProjectsGrid />
+        </div>
       </div>
     </div>
   )
