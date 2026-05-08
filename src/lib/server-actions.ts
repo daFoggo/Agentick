@@ -1,5 +1,5 @@
-import { serverEnv } from "@/configs/env.server"
-import { createServerFn } from "@tanstack/react-start"
+import { createServerFn } from "@tanstack/react-start";
+import { serverEnv } from "@/configs/env.server";
 
 /**
  * Server Function mẫu minh họa cách truy cập an toàn vào các biến môi trường
@@ -7,12 +7,12 @@ import { createServerFn } from "@tanstack/react-start"
  * Hàm này đảm bảo các thông tin nhạy cảm không bao giờ bị lộ ra client-side.
  */
 export const getSecretData = createServerFn({ method: "GET" }).handler(
-  async () => {
-    const { OPEN_AI_API_KEY } = serverEnv
+	async () => {
+		const { OPEN_AI_API_KEY } = serverEnv;
 
-    return {
-      message: "This data was fetched using the migrated OpenAI secret.",
-      status: OPEN_AI_API_KEY ? "Authenticated" : "No Secret Found",
-    }
-  }
-)
+		return {
+			message: "This data was fetched using the migrated OpenAI secret.",
+			status: OPEN_AI_API_KEY ? "Authenticated" : "No Secret Found",
+		};
+	},
+);

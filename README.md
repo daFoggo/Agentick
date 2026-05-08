@@ -80,16 +80,7 @@ To ensure a smooth, zero-latency user experience, use the **Loader Prefetching**
 > [!TIP]
 > This pattern prevents "Waterfall" loading where components fetch data sequentially after they mount.
 
-### 🎨 4.3 UI Consistency & Design Rules
-
-To maintain a premium, state-of-the-art aesthetic, follow these visual rules:
-
-- **Reference Existing Patterns**: Before building a UI element (like an Avatar or a List Item), check established components like the `Sidebar` or `TeamSwitcher`. Mirror their padding, icon sizes (`size-4`), and colors.
-- **Bento Grid Layout**: Avoid simple 50/50 splits. Use the 12-column grid system (`md:grid-cols-12`) to create asymmetrical, modern layouts (e.g., 4-span for info, 8-span for lists).
-- **Dynamic Sizing**: Avoid hard-coding heights (e.g., `h-[400px]`). Use `flex-1` and `min-h` with internal scrolling (`overflow-y-auto`) so the UI adapts naturally to data.
-- **Micro-interactions**: Use `bg-muted/50` for lists and `hover:bg-accent` or `hover:bg-muted/80` for interactive cards to make the app feel alive.
-
-### ⚖️ 4.4 Scoping: Global vs. Feature
+### ⚖️ 4.3 Scoping: Global vs. Feature
 
 Maintaining a clean separation between global and feature-specific code is crucial for maintainability.
 
@@ -142,14 +133,29 @@ import { teamSchema } from "@/features/teams";
 
 ## 🛡️ 5. Quality Assurance (Pre-commit)
 
-To maintain codebase stability, every developer **must** ensure that the project builds successfully and passes all type checks before committing code.
+To maintain codebase stability, every developer **must** ensure that the project builds successfully, passes all linter checks, and passes all type checks before committing code.
 
-### Required Checks:
-1. **Type Check**: `pnpm typecheck` (Runs `tsc --noEmit`)
-2. **Production Build**: `pnpm build` (Ensures the project can be deployed)
+### Required Checks & Commands:
+1. **Linter, Formatter & Import Organizer (Biome)**: 
+   ```bash
+   pnpx @biomejs/biome check --write
+   ```
+   *Must be run to automatically format, clean, lint, and organize imports for all files.*
+
+2. **Type Check**: 
+   ```bash
+   pnpm typecheck
+   ```
+   *Runs `tsc --noEmit` to guarantee all TypeScript types are fully valid.*
+
+3. **Production Build**: 
+   ```bash
+   pnpm build
+   ```
+   *Ensures the project compiles cleanly and can be deployed without any build errors.*
 
 > [!IMPORTANT]
-> Any commit that breaks the build or contains TypeScript errors should not be pushed to the repository. It is highly recommended to run these checks before every commit.
+> Any commit that breaks the build, contains TypeScript errors, or violates Biome linting rules is strictly prohibited from being pushed to the repository. Please run these checks before every commit to ensure the highest code quality standards.
 
 ## 📚 6. Recommended Documentation
 

@@ -1,26 +1,30 @@
-import { useForm } from "@tanstack/react-form"
-import { useSuspenseQuery } from "@tanstack/react-query"
-import { useNavigate } from "@tanstack/react-router"
-import { Loader2 } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
-import { toast } from "sonner"
+import { useForm } from "@tanstack/react-form";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import { Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
-import { projectQueryOptions, useProjectMutations } from "../queries"
-import { UpdateProjectSchema, type TUpdateProjectInput } from "../schemas"
-import { ProjectDeleteDialog } from "./project-delete-dialog"
+	Field,
+	FieldError,
+	FieldGroup,
+	FieldLabel,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import {
+	projectKeys,
+	projectQueryOptions,
+	useProjectMutations,
+} from "../queries";
+import { type TUpdateProjectInput, UpdateProjectSchema } from "../schemas";
+import { ProjectDeleteDialog } from "./project-delete-dialog";
 
 interface IProjectSettingsProps {
-  projectId: string
-  teamId: string
+	projectId: string;
+	teamId: string;
 }
 
 /**
@@ -28,213 +32,225 @@ interface IProjectSettingsProps {
  * Hỗ trợ cập nhật thông tin chung (name, avatar) và cung cấp tính năng xóa dự án.
  */
 export const ProjectSettings = ({
-  projectId,
-  teamId,
+	projectId,
+	teamId,
 }: IProjectSettingsProps) => {
-  const navigate = useNavigate()
-  const { data: project } = useSuspenseQuery(projectQueryOptions(projectId))
-  const { update, remove } = useProjectMutations()
-  const [updatingField, setUpdatingField] = useState<
-    keyof TUpdateProjectInput | null
-  >(null)
-  const [recentlyUpdatedField, setRecentlyUpdatedField] = useState<
-    keyof TUpdateProjectInput | null
-  >(null)
-  const recentlyUpdatedTimeoutRef = useRef<ReturnType<
-    typeof setTimeout
-  > | null>(null)
+	const navigate = useNavigate();
+	const queryClient = useQueryClient();
+	const { data: project } = useSuspenseQuery(projectQueryOptions(projectId));
+	const { update, remove } = useProjectMutations();
+	const [updatingField, setUpdatingField] = useState<
+		keyof TUpdateProjectInput | null
+	>(null);
+	const [recentlyUpdatedField, setRecentlyUpdatedField] = useState<
+		keyof TUpdateProjectInput | null
+	>(null);
+	const recentlyUpdatedTimeoutRef = useRef<ReturnType<
+		typeof setTimeout
+	> | null>(null);
 
-  useEffect(() => {
-    return () => {
-      if (recentlyUpdatedTimeoutRef.current) {
-        clearTimeout(recentlyUpdatedTimeoutRef.current)
-      }
-    }
-  }, [])
+	useEffect(() => {
+		return () => {
+			if (recentlyUpdatedTimeoutRef.current) {
+				clearTimeout(recentlyUpdatedTimeoutRef.current);
+			}
+		};
+	}, []);
 
-  const form = useForm({
-    defaultValues: {
-      name: project?.name || "",
-      description: project?.description || "",
-      avatar_url: project?.avatar_url || "",
-    } as TUpdateProjectInput,
-    validators: {
-      onSubmit: UpdateProjectSchema,
-    },
-  })
+	const form = useForm({
+		defaultValues: {
+			name: project?.name || "",
+			description: project?.description || "",
+			avatar_url: project?.avatar_url || "",
+		} as TUpdateProjectInput,
+		validators: {
+			onSubmit: UpdateProjectSchema,
+		},
+	});
 
-  const handleFieldUpdate = async (fieldName: keyof TUpdateProjectInput) => {
-    if (update.isPending) {
-      return
-    }
+	const handleFieldUpdate = async (fieldName: keyof TUpdateProjectInput) => {
+		if (update.isPending) {
+			return;
+		}
 
-    setUpdatingField(fieldName)
+		setUpdatingField(fieldName);
 
-    try {
-      const value = form.getFieldValue(fieldName)
-      await update.mutateAsync({
-        projectId: projectId,
-        payload: { [fieldName]: value },
-      })
+		try {
+			const value = form.getFieldValue(fieldName);
+			await update.mutateAsync({
+				projectId: projectId,
+				payload: { [fieldName]: value },
+			});
 
-      if (recentlyUpdatedTimeoutRef.current) {
-        clearTimeout(recentlyUpdatedTimeoutRef.current)
-      }
+			if (recentlyUpdatedTimeoutRef.current) {
+				clearTimeout(recentlyUpdatedTimeoutRef.current);
+			}
 
-      setRecentlyUpdatedField(fieldName)
-      recentlyUpdatedTimeoutRef.current = setTimeout(() => {
-        setRecentlyUpdatedField((current) =>
-          current === fieldName ? null : current
-        )
-      }, 800)
+			setRecentlyUpdatedField(fieldName);
+			recentlyUpdatedTimeoutRef.current = setTimeout(() => {
+				setRecentlyUpdatedField((current) =>
+					current === fieldName ? null : current,
+				);
+			}, 800);
 
-      toast.success(`Updated ${fieldName.replace("_", " ")}`)
-    } catch (error) {
-      toast.error(`Failed to update ${fieldName.replace("_", " ")}`)
-    } finally {
-      setUpdatingField((current) => (current === fieldName ? null : current))
-    }
-  }
+			toast.success(`Updated ${fieldName.replace("_", " ")}`);
+		} catch (_error) {
+			toast.error(`Failed to update ${fieldName.replace("_", " ")}`);
+		} finally {
+			setUpdatingField((current) => (current === fieldName ? null : current));
+		}
+	};
 
-  const handleDeleteProject = async () => {
-    try {
-      await remove.mutateAsync(projectId)
-      toast.success("Project deleted successfully")
+	const handleDeleteProject = async () => {
+		try {
+			await remove.mutateAsync(projectId);
+			toast.success("Project deleted successfully");
 
-      navigate({
-        to: "/dashboard/$teamId/projects",
-        params: { teamId },
-        replace: true,
-      })
-      return true
-    } catch (error) {
-      toast.error("Failed to delete project")
-      return false
-    }
-  }
+			// Đọc cache myProjects đã được invalidate bởi mutation onSuccess
+			const remaining = queryClient.getQueryData<any[]>(
+				projectKeys.myProjects(),
+			);
 
-  return (
-    <div className="w-full space-y-8">
-      <div className="max-w-xl">
-        <FieldGroup className="gap-6">
-          <SettingField
-            form={form}
-            name="name"
-            label="Project Name"
-            placeholder="e.g. Website Redesign"
-            originalValue={project?.name}
-            isPending={update.isPending && updatingField === "name"}
-            keepVisible={recentlyUpdatedField === "name"}
-            disableAction={update.isPending || recentlyUpdatedField === "name"}
-            onUpdate={() => handleFieldUpdate("name")}
-          />
+			if (!remaining || remaining.length === 0) {
+				navigate({
+					to: "/dashboard/$teamId/overview",
+					params: { teamId },
+					replace: true,
+				});
+			} else {
+				navigate({
+					to: "/dashboard/$teamId/projects",
+					params: { teamId },
+					replace: true,
+				});
+			}
+			return true;
+		} catch (_error) {
+			toast.error("Failed to delete project");
+			return false;
+		}
+	};
 
-          <SettingField
-            form={form}
-            name="avatar_url"
-            label="Avatar URL"
-            placeholder="https://example.com/icon.png"
-            originalValue={project?.avatar_url || ""}
-            isPending={update.isPending && updatingField === "avatar_url"}
-            keepVisible={recentlyUpdatedField === "avatar_url"}
-            disableAction={
-              update.isPending || recentlyUpdatedField === "avatar_url"
-            }
-            onUpdate={() => handleFieldUpdate("avatar_url")}
-          />
+	return (
+		<div className="w-full space-y-8">
+			<div className="max-w-xl">
+				<FieldGroup className="gap-6">
+					<SettingField
+						form={form}
+						name="name"
+						label="Project Name"
+						placeholder="e.g. Website Redesign"
+						originalValue={project?.name}
+						isPending={update.isPending && updatingField === "name"}
+						keepVisible={recentlyUpdatedField === "name"}
+						disableAction={update.isPending || recentlyUpdatedField === "name"}
+						onUpdate={() => handleFieldUpdate("name")}
+					/>
 
-          <SettingField
-            form={form}
-            name="description"
-            label="Description"
-            placeholder="Brief description about this project"
-            originalValue={project?.description || ""}
-            isPending={update.isPending && updatingField === "description"}
-            keepVisible={recentlyUpdatedField === "description"}
-            disableAction={
-              update.isPending || recentlyUpdatedField === "description"
-            }
-            onUpdate={() => handleFieldUpdate("description")}
-          />
-        </FieldGroup>
-      </div>
+					<SettingField
+						form={form}
+						name="avatar_url"
+						label="Avatar URL"
+						placeholder="https://example.com/icon.png"
+						originalValue={project?.avatar_url || ""}
+						isPending={update.isPending && updatingField === "avatar_url"}
+						keepVisible={recentlyUpdatedField === "avatar_url"}
+						disableAction={
+							update.isPending || recentlyUpdatedField === "avatar_url"
+						}
+						onUpdate={() => handleFieldUpdate("avatar_url")}
+					/>
 
-      <Separator />
+					<SettingField
+						form={form}
+						name="description"
+						label="Description"
+						placeholder="Brief description about this project"
+						originalValue={project?.description || ""}
+						isPending={update.isPending && updatingField === "description"}
+						keepVisible={recentlyUpdatedField === "description"}
+						disableAction={
+							update.isPending || recentlyUpdatedField === "description"
+						}
+						onUpdate={() => handleFieldUpdate("description")}
+					/>
+				</FieldGroup>
+			</div>
 
-      <ProjectDeleteDialog
-        isPending={remove.isPending}
-        onConfirm={handleDeleteProject}
-      />
-    </div>
-  )
-}
+			<Separator />
+
+			<ProjectDeleteDialog
+				isPending={remove.isPending}
+				onConfirm={handleDeleteProject}
+			/>
+		</div>
+	);
+};
 
 interface ISettingFieldProps {
-  form: any
-  name: keyof TUpdateProjectInput
-  label: string
-  placeholder: string
-  originalValue: string | undefined | null
-  isPending: boolean
-  keepVisible: boolean
-  disableAction: boolean
-  onUpdate: () => void
+	form: any;
+	name: keyof TUpdateProjectInput;
+	label: string;
+	placeholder: string;
+	originalValue: string | undefined | null;
+	isPending: boolean;
+	keepVisible: boolean;
+	disableAction: boolean;
+	onUpdate: () => void;
 }
 
 const SettingField = ({
-  form,
-  name,
-  label,
-  placeholder,
-  originalValue,
-  isPending,
-  keepVisible,
-  disableAction,
-  onUpdate,
+	form,
+	name,
+	label,
+	placeholder,
+	originalValue,
+	isPending,
+	keepVisible,
+	disableAction,
+	onUpdate,
 }: ISettingFieldProps) => {
-  return (
-    <form.Field
-      name={name}
-      children={(field: any) => {
-        const isInvalid =
-          field.state.meta.isTouched && !!field.state.meta.errors.length
-        const isChanged = field.state.value !== (originalValue || "")
-        const shouldShowAction = isChanged || keepVisible
+	return (
+		<form.Field
+			name={name}
+			children={(field: any) => {
+				const isInvalid =
+					field.state.meta.isTouched && !!field.state.meta.errors.length;
+				const isChanged = field.state.value !== (originalValue || "");
+				const shouldShowAction = isChanged || keepVisible;
 
-        return (
-          <Field data-invalid={isInvalid}>
-            <FieldLabel htmlFor={field.name} className="font-bold">
-              {label}
-            </FieldLabel>
-            <div className="flex items-center gap-2">
-              <Input
-                id={field.name}
-                name={field.name}
-                value={field.state.value as string}
-                onBlur={field.handleBlur}
-                onChange={(e) => field.handleChange(e.target.value)}
-                placeholder={placeholder}
-                aria-invalid={isInvalid}
-              />
-              <Button
-                type="button"
-                className={`w-20 justify-center ${!shouldShowAction ? "invisible" : ""}`}
-                disabled={disableAction || !isChanged}
-                onClick={onUpdate}
-              >
-                {isPending ? (
-                  <>
-                    <Loader2 className="size-4 animate-spin" />
-                  </>
-                ) : (
-                  <span>Update</span>
-                )}
-              </Button>
-            </div>
-            <FieldError errors={field.state.meta.errors} />
-          </Field>
-        )
-      }}
-    />
-  )
-}
+				return (
+					<Field data-invalid={isInvalid}>
+						<FieldLabel htmlFor={field.name} className="font-bold">
+							{label}
+						</FieldLabel>
+						<div className="flex items-center gap-2">
+							<Input
+								id={field.name}
+								name={field.name}
+								value={field.state.value as string}
+								onBlur={field.handleBlur}
+								onChange={(e) => field.handleChange(e.target.value)}
+								placeholder={placeholder}
+								aria-invalid={isInvalid}
+							/>
+							<Button
+								type="button"
+								className={`w-20 justify-center ${!shouldShowAction ? "invisible" : ""}`}
+								disabled={disableAction || !isChanged}
+								onClick={onUpdate}
+							>
+								{isPending ? (
+									<Loader2 className="size-4 animate-spin" />
+								) : (
+									<span>Update</span>
+								)}
+							</Button>
+						</div>
+						<FieldError errors={field.state.meta.errors} />
+					</Field>
+				);
+			}}
+		/>
+	);
+};

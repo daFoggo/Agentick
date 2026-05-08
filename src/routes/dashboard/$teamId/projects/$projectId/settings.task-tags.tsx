@@ -1,14 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router"
-import { TaskTagList } from "@/features/task-config"
+import { createFileRoute } from "@tanstack/react-router";
+import { TaskTagList } from "@/features/task-config";
 
 export const Route = createFileRoute(
-  "/dashboard/$teamId/projects/$projectId/settings/task-tags"
+	"/dashboard/$teamId/projects/$projectId/settings/task-tags",
 )({
-  component: ProjectTaskTagsSettingsPage,
-})
+	component: ProjectTaskTagsSettingsPage,
+});
 
 function ProjectTaskTagsSettingsPage() {
-  const { projectId } = Route.useParams()
+	const { projectId } = Route.useParams();
 
-  return <TaskTagList projectId={projectId} />
+	return <TaskTagList projectId={projectId} />;
 }

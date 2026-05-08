@@ -1,280 +1,281 @@
 import {
-  DndContext,
-  DragOverlay,
-  pointerWithin,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  MeasuringStrategy,
-  defaultDropAnimationSideEffects,
-} from "@dnd-kit/core"
+	DndContext,
+	DragOverlay,
+	defaultDropAnimationSideEffects,
+	KeyboardSensor,
+	MeasuringStrategy,
+	PointerSensor,
+	pointerWithin,
+	useSensor,
+	useSensors,
+} from "@dnd-kit/core";
 import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  horizontalListSortingStrategy,
-} from "@dnd-kit/sortable"
-import { useMemo, useEffect } from "react"
-import { toast } from "sonner"
+	horizontalListSortingStrategy,
+	SortableContext,
+	sortableKeyboardCoordinates,
+} from "@dnd-kit/sortable";
+import { useEffect, useMemo } from "react";
+import { toast } from "sonner";
+import type { TProjectMember } from "@/features/project-members";
 import {
-  type TTaskStatus,
-  type TTaskType,
-  type TTaskPriority,
-  useTaskConfigMutations,
-} from "@/features/task-config"
-import { useTaskMutations } from "../../queries"
-import type { TTask } from "../../schemas"
-import type { TProjectMember } from "@/features/project-members"
-import { KanbanCard } from "./kanban-card"
-import { KanbanColumn } from "./kanban-column"
-import { CreateTaskListDialog } from "../task-table/create-task-list-dialog"
-import { EditTaskListDialog } from "../task-table/edit-task-list-dialog"
-import { DeleteTaskListDialog } from "../task-table/delete-task-list-dialog"
-import { useKanbanStore } from "@/stores/use-kanban-store"
+	type TTaskPriority,
+	type TTaskStatus,
+	type TTaskType,
+	useTaskConfigMutations,
+} from "@/features/task-config";
+import { useKanbanStore } from "@/stores/use-kanban-store";
+import { useTaskMutations } from "../../queries";
+import type { TTask } from "../../schemas";
+import { CreateTaskListDialog } from "../task-table/create-task-list-dialog";
+import { DeleteTaskListDialog } from "../task-table/delete-task-list-dialog";
+import { EditTaskListDialog } from "../task-table/edit-task-list-dialog";
+import { KanbanCard } from "./kanban-card";
+import { KanbanColumn } from "./kanban-column";
 
 interface ITaskKanbanProps {
-  projectId: string
-  tasks: TTask[]
-  statuses: TTaskStatus[]
-  types: TTaskType[]
-  priorities: TTaskPriority[]
-  members: TProjectMember[]
+	projectId: string;
+	tasks: TTask[];
+	statuses: TTaskStatus[];
+	types: TTaskType[];
+	priorities: TTaskPriority[];
+	members: TProjectMember[];
 }
 
 export const TaskKanban = ({
-  projectId,
-  tasks: initialTasks,
-  statuses,
-  types,
-  priorities,
-  members,
+	projectId,
+	tasks: initialTasks,
+	statuses,
+	types,
+	priorities,
+	members,
 }: ITaskKanbanProps): React.ReactNode => {
-  const {
-    tasks,
-    setTasks,
-    activeTask,
-    activeColumn,
-    selectedTask,
-    taskToDelete,
-    isEditOpen,
-    isCreateOpen,
-    isDeleteOpen,
-    defaultStatusId,
-    setIsEditOpen,
-    setIsCreateOpen,
-    setIsDeleteOpen,
-    openCreateDialog,
-    openEditDialog,
-    openDeleteDialog,
-    closeDialogs,
-    handleDragStart,
-    handleDragOver,
-    handleDragEnd,
-  } = useKanbanStore()
+	const {
+		tasks,
+		setTasks,
+		activeTask,
+		activeColumn,
+		selectedTask,
+		taskToDelete,
+		isEditOpen,
+		isCreateOpen,
+		isDeleteOpen,
+		defaultStatusId,
+		setIsEditOpen,
+		setIsCreateOpen,
+		setIsDeleteOpen,
+		openCreateDialog,
+		openEditDialog,
+		openDeleteDialog,
+		closeDialogs,
+		handleDragStart,
+		handleDragOver,
+		handleDragEnd,
+	} = useKanbanStore();
 
-  const { update, remove } = useTaskMutations()
-  const { updateStatus } = useTaskConfigMutations()
+	const { update, remove } = useTaskMutations();
+	const { updateStatus } = useTaskConfigMutations();
 
-  useEffect(() => {
-    setTasks(initialTasks)
-  }, [initialTasks, setTasks])
+	useEffect(() => {
+		setTasks(initialTasks);
+	}, [initialTasks, setTasks]);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  )
+	const sensors = useSensors(
+		useSensor(PointerSensor, {
+			activationConstraint: {
+				distance: 8,
+			},
+		}),
+		useSensor(KeyboardSensor, {
+			coordinateGetter: sortableKeyboardCoordinates,
+		}),
+	);
 
-  // Custom collision detection to ignore Y-axis for columns, making horizontal dragging flawless
-  const customCollisionDetection = (args: any) => {
-    // 1. If we are dragging a column, only check X-axis intersection
-    if (args.active.data.current?.type === "column") {
-      const activeRect = args.active.rect.current?.translated
-      if (!activeRect) return pointerWithin(args)
+	// Custom collision detection to ignore Y-axis for columns, making horizontal dragging flawless
+	const customCollisionDetection = (args: any) => {
+		// 1. If we are dragging a column, only check X-axis intersection
+		if (args.active.data.current?.type === "column") {
+			const activeRect = args.active.rect.current?.translated;
+			if (!activeRect) return pointerWithin(args);
 
-      const columnContainers = args.droppableContainers.filter(
-        (c: any) => c.data.current?.type === "column" && c.id !== args.active.id
-      )
+			const columnContainers = args.droppableContainers.filter(
+				(c: any) =>
+					c.data.current?.type === "column" && c.id !== args.active.id,
+			);
 
-      let closestId = null
-      let maxIntersectionRatio = 0
+			let closestId = null;
+			let maxIntersectionRatio = 0;
 
-      for (const container of columnContainers) {
-        const targetRect = container.rect.current
-        if (!targetRect) continue
+			for (const container of columnContainers) {
+				const targetRect = container.rect.current;
+				if (!targetRect) continue;
 
-        // Calculate horizontal overlap
-        const overlapLeft = Math.max(activeRect.left, targetRect.left)
-        const overlapRight = Math.min(activeRect.right, targetRect.right)
-        const overlapX = overlapRight - overlapLeft
+				// Calculate horizontal overlap
+				const overlapLeft = Math.max(activeRect.left, targetRect.left);
+				const overlapRight = Math.min(activeRect.right, targetRect.right);
+				const overlapX = overlapRight - overlapLeft;
 
-        if (overlapX > 0) {
-          const intersectionRatio = overlapX / activeRect.width
-          if (intersectionRatio > maxIntersectionRatio) {
-            maxIntersectionRatio = intersectionRatio
-            closestId = container.id
-          }
-        }
-      }
+				if (overlapX > 0) {
+					const intersectionRatio = overlapX / activeRect.width;
+					if (intersectionRatio > maxIntersectionRatio) {
+						maxIntersectionRatio = intersectionRatio;
+						closestId = container.id;
+					}
+				}
+			}
 
-      // If we overlap more than 20% horizontally, trigger the swap
-      if (closestId && maxIntersectionRatio > 0.2) {
-        return [
-          {
-            id: closestId,
-            data: {
-              droppableContainer: args.droppableContainers.find(
-                (c: any) => c.id === closestId
-              ),
-            },
-          },
-        ]
-      }
-      return []
-    }
+			// If we overlap more than 20% horizontally, trigger the swap
+			if (closestId && maxIntersectionRatio > 0.2) {
+				return [
+					{
+						id: closestId,
+						data: {
+							droppableContainer: args.droppableContainers.find(
+								(c: any) => c.id === closestId,
+							),
+						},
+					},
+				];
+			}
+			return [];
+		}
 
-    // 2. For cards, use standard pointerWithin
-    return pointerWithin(args)
-  }
+		// 2. For cards, use standard pointerWithin
+		return pointerWithin(args);
+	};
 
-  const taskOptions = useMemo(
-    () => ({
-      statuses,
-      types,
-      priorities,
-      members,
-    }),
-    [statuses, types, priorities, members]
-  )
+	const taskOptions = useMemo(
+		() => ({
+			statuses,
+			types,
+			priorities,
+			members,
+		}),
+		[statuses, types, priorities, members],
+	);
 
-  const nextOrder = useMemo(
-    () => tasks.reduce((max, t) => Math.max(max, t.order ?? -1), -1) + 1,
-    [tasks]
-  )
+	const nextOrder = useMemo(
+		() => tasks.reduce((max, t) => Math.max(max, t.order ?? -1), -1) + 1,
+		[tasks],
+	);
 
-  const handleConfirmDelete = async () => {
-    if (!taskToDelete) return false
-    try {
-      await remove.mutateAsync({
-        projectId: taskToDelete.project_id,
-        taskId: taskToDelete.id,
-      })
-      toast.success("Task deleted successfully")
-      closeDialogs()
-      return true
-    } catch (error) {
-      toast.error("Failed to delete task")
-      return false
-    }
-  }
+	const handleConfirmDelete = async () => {
+		if (!taskToDelete) return false;
+		try {
+			await remove.mutateAsync({
+				projectId: taskToDelete.project_id,
+				taskId: taskToDelete.id,
+			});
+			toast.success("Task deleted successfully");
+			closeDialogs();
+			return true;
+		} catch (_error) {
+			toast.error("Failed to delete task");
+			return false;
+		}
+	};
 
-  const dropAnimation = {
-    sideEffects: defaultDropAnimationSideEffects({
-      styles: {
-        active: {
-          opacity: "0.4",
-        },
-      },
-    }),
-  }
+	const dropAnimation = {
+		sideEffects: defaultDropAnimationSideEffects({
+			styles: {
+				active: {
+					opacity: "0.4",
+				},
+			},
+		}),
+	};
 
-  return (
-    <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden">
-      <DndContext
-        sensors={sensors}
-        collisionDetection={customCollisionDetection}
-        measuring={{
-          droppable: {
-            strategy: MeasuringStrategy.Always,
-          },
-        }}
-        onDragStart={(e) => handleDragStart(e, statuses)}
-        onDragOver={handleDragOver}
-        onDragEnd={(e) =>
-          handleDragEnd(
-            e,
-            statuses,
-            projectId,
-            initialTasks,
-            updateStatus.mutate,
-            update.mutate
-          )
-        }
-      >
-        <div className="no-scrollbar flex min-h-0 flex-1 overflow-x-auto">
-          <div className="no-scrollbar flex min-w-full items-start gap-4 pb-1">
-            <SortableContext
-              items={statuses.map((s) => s.id)}
-              strategy={horizontalListSortingStrategy}
-            >
-              {statuses.map((status) => (
-                <KanbanColumn
-                  key={status.id}
-                  id={status.id}
-                  title={status.name}
-                  tasks={tasks.filter((t) => t.status_id === status.id)}
-                  onTaskClick={openEditDialog}
-                  onDeleteTask={openDeleteDialog}
-                  onAddTask={openCreateDialog}
-                />
-              ))}
-            </SortableContext>
-          </div>
-        </div>
+	return (
+		<div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden">
+			<DndContext
+				sensors={sensors}
+				collisionDetection={customCollisionDetection}
+				measuring={{
+					droppable: {
+						strategy: MeasuringStrategy.Always,
+					},
+				}}
+				onDragStart={(e) => handleDragStart(e, statuses)}
+				onDragOver={handleDragOver}
+				onDragEnd={(e) =>
+					handleDragEnd(
+						e,
+						statuses,
+						projectId,
+						initialTasks,
+						updateStatus.mutate,
+						update.mutate,
+					)
+				}
+			>
+				<div className="no-scrollbar flex min-h-0 flex-1 overflow-x-auto">
+					<div className="no-scrollbar flex min-w-full items-start gap-4 pb-1">
+						<SortableContext
+							items={statuses.map((s) => s.id)}
+							strategy={horizontalListSortingStrategy}
+						>
+							{statuses.map((status) => (
+								<KanbanColumn
+									key={status.id}
+									id={status.id}
+									title={status.name}
+									tasks={tasks.filter((t) => t.status_id === status.id)}
+									onTaskClick={openEditDialog}
+									onDeleteTask={openDeleteDialog}
+									onAddTask={openCreateDialog}
+								/>
+							))}
+						</SortableContext>
+					</div>
+				</div>
 
-        <DragOverlay dropAnimation={dropAnimation}>
-          {activeColumn && (
-            <div className="pointer-events-none scale-105 -rotate-2 cursor-grabbing transition-transform">
-              <KanbanColumn
-                id={activeColumn.id}
-                title={activeColumn.name}
-                tasks={tasks.filter((t) => t.status_id === activeColumn.id)}
-                onTaskClick={() => {}}
-                onAddTask={() => {}}
-                isOverlay
-              />
-            </div>
-          )}
-          {activeTask && (
-            <div className="pointer-events-none scale-105 -rotate-2 cursor-grabbing transition-transform">
-              <KanbanCard task={activeTask} onClick={() => {}} isOverlay />
-            </div>
-          )}
-        </DragOverlay>
-      </DndContext>
+				<DragOverlay dropAnimation={dropAnimation}>
+					{activeColumn && (
+						<div className="pointer-events-none scale-105 -rotate-2 cursor-grabbing transition-transform">
+							<KanbanColumn
+								id={activeColumn.id}
+								title={activeColumn.name}
+								tasks={tasks.filter((t) => t.status_id === activeColumn.id)}
+								onTaskClick={() => {}}
+								onAddTask={() => {}}
+								isOverlay
+							/>
+						</div>
+					)}
+					{activeTask && (
+						<div className="pointer-events-none scale-105 -rotate-2 cursor-grabbing transition-transform">
+							<KanbanCard task={activeTask} onClick={() => {}} isOverlay />
+						</div>
+					)}
+				</DragOverlay>
+			</DndContext>
 
-      <CreateTaskListDialog
-        projectId={projectId}
-        nextOrder={nextOrder}
-        open={isCreateOpen}
-        onOpenChange={setIsCreateOpen}
-        options={taskOptions}
-        defaultStatusId={defaultStatusId}
-      />
+			<CreateTaskListDialog
+				projectId={projectId}
+				nextOrder={nextOrder}
+				open={isCreateOpen}
+				onOpenChange={setIsCreateOpen}
+				options={taskOptions}
+				defaultStatusId={defaultStatusId}
+			/>
 
-      {selectedTask && (
-        <EditTaskListDialog
-          task={selectedTask}
-          open={isEditOpen}
-          onOpenChange={setIsEditOpen}
-          options={taskOptions}
-        />
-      )}
+			{selectedTask && (
+				<EditTaskListDialog
+					task={selectedTask}
+					open={isEditOpen}
+					onOpenChange={setIsEditOpen}
+					options={taskOptions}
+				/>
+			)}
 
-      {taskToDelete && (
-        <DeleteTaskListDialog
-          task={taskToDelete}
-          open={isDeleteOpen}
-          onOpenChange={setIsDeleteOpen}
-          isPending={remove.isPending}
-          onConfirm={handleConfirmDelete}
-        />
-      )}
-    </div>
-  )
-}
+			{taskToDelete && (
+				<DeleteTaskListDialog
+					task={taskToDelete}
+					open={isDeleteOpen}
+					onOpenChange={setIsDeleteOpen}
+					isPending={remove.isPending}
+					onConfirm={handleConfirmDelete}
+				/>
+			)}
+		</div>
+	);
+};

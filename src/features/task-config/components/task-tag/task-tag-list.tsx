@@ -1,43 +1,66 @@
-import { DataTable } from "@/components/common/data-table"
-import { Button } from "@/components/ui/button"
-import { useQuery } from "@tanstack/react-query"
-import { Loader2, Plus } from "lucide-react"
-import { useState } from "react"
-import { taskConfigQueries } from "../../queries"
-import type { TTaskTag } from "../../schemas"
-import { CreateTaskTagDialog } from "./create-task-tag-dialog"
-import { taskTagColumns } from "./task-tag-columns"
+import { useQuery } from "@tanstack/react-query";
+import { Loader2, Plus } from "lucide-react";
+import { useState } from "react";
+import { DataTable } from "@/components/common/data-table";
+import { Button } from "@/components/ui/button";
+import { taskConfigQueries } from "../../queries";
+import type { TTaskTag } from "../../schemas";
+import { CreateTaskTagDialog } from "./create-task-tag-dialog";
+import { taskTagColumns } from "./task-tag-columns";
 
-interface ITaskTagListProps { projectId: string }
+interface ITaskTagListProps {
+	projectId: string;
+}
 
 export const TaskTagList = ({ projectId }: ITaskTagListProps) => {
-  const [isCreateOpen, setIsCreateOpen] = useState(false)
-  const { data: tagsData, isLoading, error } = useQuery(
-    taskConfigQueries.tags(projectId, {
-      page: 1,
-      page_size: "all",
-      ordering: "name",
-    })
-  )
-  const tags = tagsData?.founds ?? []
+	const [isCreateOpen, setIsCreateOpen] = useState(false);
+	const {
+		data: tagsData,
+		isLoading,
+		error,
+	} = useQuery(
+		taskConfigQueries.tags(projectId, {
+			page: 1,
+			page_size: "all",
+			ordering: "name",
+		}),
+	);
+	const tags = tagsData?.founds ?? [];
 
-  if (isLoading) return <div className="flex h-32 w-full items-center justify-center"><Loader2 className="size-6 animate-spin text-muted-foreground" /></div>
-  if (error) return <div className="flex h-32 w-full items-center justify-center text-destructive">Error loading task tags</div>
+	if (isLoading)
+		return (
+			<div className="flex h-32 w-full items-center justify-center">
+				<Loader2 className="size-6 animate-spin text-muted-foreground" />
+			</div>
+		);
+	if (error)
+		return (
+			<div className="flex h-32 w-full items-center justify-center text-destructive">
+				Error loading task tags
+			</div>
+		);
 
-  return (
-    <div className="space-y-4">
-      <Button onClick={() => setIsCreateOpen(true)}><Plus className="size-4" />New Tag</Button>
-      <DataTable<TTaskTag>
-        data={tags}
-        columns={taskTagColumns}
-        getRowId={(row) => row.id}
-        showPagination={true}
-        enablePagination={true}
-        enableRowSelection={false}
-        enableColumnReorder={false}
-        enableColumnPinning={false}
-      />
-      <CreateTaskTagDialog projectId={projectId} open={isCreateOpen} onOpenChange={setIsCreateOpen} />
-    </div>
-  )
-}
+	return (
+		<div className="space-y-4">
+			<Button onClick={() => setIsCreateOpen(true)}>
+				<Plus className="size-4" />
+				New Tag
+			</Button>
+			<DataTable<TTaskTag>
+				data={tags}
+				columns={taskTagColumns}
+				getRowId={(row) => row.id}
+				showPagination={true}
+				enablePagination={true}
+				enableRowSelection={false}
+				enableColumnReorder={false}
+				enableColumnPinning={false}
+			/>
+			<CreateTaskTagDialog
+				projectId={projectId}
+				open={isCreateOpen}
+				onOpenChange={setIsCreateOpen}
+			/>
+		</div>
+	);
+};

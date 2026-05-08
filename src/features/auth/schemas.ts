@@ -1,42 +1,42 @@
-import { z } from "zod"
-import { UserSchema } from "../users"
+import { z } from "zod";
+import { UserSchema } from "../users";
 
 export const SignInSchema = z.object({
-  email__eq: z.email(),
-  password: z.string().min(6),
-})
+	email__eq: z.email(),
+	password: z.string().min(6),
+});
 
 export const SignInResponseSchema = z.object({
-  access_token: z.string(),
-  expiration: z.string(),
-  refresh_token: z.string(),
-  refresh_expiration: z.string(),
-  user_info: UserSchema,
-})
+	access_token: z.string(),
+	expiration: z.string(),
+	refresh_token: z.string(),
+	refresh_expiration: z.string(),
+	user_info: UserSchema,
+});
 
 export const RefreshTokenInputSchema = z.object({
-  refresh_token: z.string(),
-})
+	refresh_token: z.string(),
+});
 
 export const TokenResponseSchema = z.object({
-  access_token: z.string(),
-  expiration: z.string(),
-  refresh_token: z.string(),
-  refresh_expiration: z.string(),
-})
+	access_token: z.string(),
+	expiration: z.string(),
+	refresh_token: z.string(),
+	refresh_expiration: z.string(),
+});
 
 export const SignUpSchema = z.object({
-  email: z.email(),
-  password: z.string().min(6),
-  name: z.string().min(3),
-  avatar_url: z.url().optional().or(z.literal("")),
-})
+	email: z.email(),
+	password: z.string().min(6),
+	name: z.string().min(3),
+	avatar_url: z.url().optional().or(z.literal("")),
+});
 
-export const SignUpResponseSchema = UserSchema
+export const SignUpResponseSchema = UserSchema;
 
-export type TSignInInput = z.infer<typeof SignInSchema>
-export type TSignInResponse = z.infer<typeof SignInResponseSchema>
-export type TSignUpInput = z.infer<typeof SignUpSchema>
-export type TSignUpResponse = z.infer<typeof SignUpResponseSchema>
-export type TRefreshTokenInput = z.infer<typeof RefreshTokenInputSchema>
-export type TTokenResponse = z.infer<typeof TokenResponseSchema>
+export type TSignInInput = z.infer<typeof SignInSchema>;
+export type TSignInResponse = z.infer<typeof SignInResponseSchema>;
+export type TSignUpInput = z.infer<typeof SignUpSchema>;
+export type TSignUpResponse = z.infer<typeof SignUpResponseSchema>;
+export type TRefreshTokenInput = z.infer<typeof RefreshTokenInputSchema>;
+export type TTokenResponse = z.infer<typeof TokenResponseSchema>;

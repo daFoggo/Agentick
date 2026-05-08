@@ -1,70 +1,70 @@
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { useEffect, useState } from "react";
 import {
-  ResizablePanelGroup,
-  ResizablePanel,
-  ResizableHandle,
-} from "@/components/ui/resizable"
-import { useInboxStore } from "@/stores/use-inbox-store"
-import { useEffect, useState } from "react"
-import type { TInboxItem } from "../schemas"
-import { InboxList } from "./inbox-list"
-import { InboxDetailPanel } from "./inbox-detail-panel"
+	ResizableHandle,
+	ResizablePanel,
+	ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useInboxStore } from "@/stores/use-inbox-store";
+import type { TInboxItem } from "../schemas";
+import { InboxDetailPanel } from "./inbox-detail-panel";
+import { InboxList } from "./inbox-list";
 
 interface IInboxViewProps {
-  items: TInboxItem[]
+	items: TInboxItem[];
 }
 
 export const InboxView = ({ items }: IInboxViewProps) => {
-  const { selectedItemId } = useInboxStore()
-  const selectedItem = items.find((item) => item.id === selectedItemId) || null
-  const [mounted, setMounted] = useState(false)
+	const { selectedItemId } = useInboxStore();
+	const selectedItem = items.find((item) => item.id === selectedItemId) || null;
+	const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+	useEffect(() => {
+		setMounted(true);
+	}, []);
 
-  if (!mounted) {
-    return null
-  }
+	if (!mounted) {
+		return null;
+	}
 
-  return (
-    <div className="h-full w-full">
-      {/* Desktop View with Resizable Panels */}
-      <div className="hidden lg:flex h-full">
-        <div className="flex-1 rounded-lg border bg-card overflow-hidden">
-          <ResizablePanelGroup
-            orientation="horizontal"
-            onLayoutChange={(sizes) => {
-              document.cookie = `inbox-layout=${JSON.stringify(sizes)};path=/;max-age=31536000`
-            }}
-          >
-            {/* Left Panel - Inbox List */}
-            <ResizablePanel defaultSize="35%" className="overflow-hidden">
-              <ScrollArea className="h-full">
-                <div className="p-4">
-                  <InboxList items={items} />
-                </div>
-              </ScrollArea>
-            </ResizablePanel>
+	return (
+		<div className="h-full w-full">
+			{/* Desktop View with Resizable Panels */}
+			<div className="hidden lg:flex h-full">
+				<div className="flex-1 rounded-lg border bg-card overflow-hidden">
+					<ResizablePanelGroup
+						orientation="horizontal"
+						onLayoutChange={(sizes) => {
+							document.cookie = `inbox-layout=${JSON.stringify(sizes)};path=/;max-age=31536000`;
+						}}
+					>
+						{/* Left Panel - Inbox List */}
+						<ResizablePanel defaultSize="35%" className="overflow-hidden">
+							<ScrollArea className="h-full">
+								<div className="p-4">
+									<InboxList items={items} />
+								</div>
+							</ScrollArea>
+						</ResizablePanel>
 
-            <ResizableHandle withHandle />
+						<ResizableHandle withHandle />
 
-            {/* Right Panel - Detail View */}
-            <ResizablePanel defaultSize="65%" className="overflow-hidden">
-              <InboxDetailPanel item={selectedItem} />
-            </ResizablePanel>
-          </ResizablePanelGroup>
-        </div>
-      </div>
+						{/* Right Panel - Detail View */}
+						<ResizablePanel defaultSize="65%" className="overflow-hidden">
+							<InboxDetailPanel item={selectedItem} />
+						</ResizablePanel>
+					</ResizablePanelGroup>
+				</div>
+			</div>
 
-      {/* Mobile View - List Only */}
-      <div className="lg:hidden h-full bg-card rounded-lg border overflow-hidden">
-        <ScrollArea className="h-full">
-          <div className="p-4">
-            <InboxList items={items} />
-          </div>
-        </ScrollArea>
-      </div>
-    </div>
-  )
-}
+			{/* Mobile View - List Only */}
+			<div className="lg:hidden h-full bg-card rounded-lg border overflow-hidden">
+				<ScrollArea className="h-full">
+					<div className="p-4">
+						<InboxList items={items} />
+					</div>
+				</ScrollArea>
+			</div>
+		</div>
+	);
+};

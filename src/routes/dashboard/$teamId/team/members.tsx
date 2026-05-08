@@ -1,11 +1,11 @@
-import { TeamMemberList } from "@/features/team-members"
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router";
+import { TeamMemberList } from "@/features/team-members";
 
 export const Route = createFileRoute("/dashboard/$teamId/team/members")({
-  component: TeamMembersView,
-})
+	component: TeamMembersView,
+});
 
 function TeamMembersView() {
-  const { teamId } = Route.useParams()
-  return <TeamMemberList teamId={teamId} />
+	const { teamId } = Route.useParams();
+	return <TeamMemberList teamId={teamId} />;
 }

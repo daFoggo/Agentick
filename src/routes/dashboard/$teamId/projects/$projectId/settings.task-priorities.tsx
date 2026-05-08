@@ -1,14 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router"
-import { TaskPriorityList } from "@/features/task-config"
+import { createFileRoute } from "@tanstack/react-router";
+import { TaskPriorityList } from "@/features/task-config";
 
 export const Route = createFileRoute(
-  "/dashboard/$teamId/projects/$projectId/settings/task-priorities"
+	"/dashboard/$teamId/projects/$projectId/settings/task-priorities",
 )({
-  component: ProjectTaskPrioritiesSettingsPage,
-})
+	component: ProjectTaskPrioritiesSettingsPage,
+});
 
 function ProjectTaskPrioritiesSettingsPage() {
-  const { projectId } = Route.useParams()
+	const { projectId } = Route.useParams();
 
-  return <TaskPriorityList projectId={projectId} />
+	return <TaskPriorityList projectId={projectId} />;
 }

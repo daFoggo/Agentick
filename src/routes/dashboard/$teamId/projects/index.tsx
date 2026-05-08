@@ -1,9 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/dashboard/$teamId/projects/")({
-  component: ProjectList,
-})
+	component: ProjectList,
+});
 
 function ProjectList() {
-  return <div>Hello "/dashboard/projects/"!</div>
+	return <div>Hello "/dashboard/projects/"!</div>;
 }

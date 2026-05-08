@@ -3,13 +3,13 @@
  * Được sử dụng tập trung cho việc hiển thị page title và hỗ trợ SEO.
  */
 export const SITE_CONFIG = {
-  metadata: {
-    title: "Agentick",
-    description: "A project management platform with AI",
-  },
-  app: {
-    title: "Agentick",
-  },
-} as const
+	metadata: {
+		title: "Agentick",
+		description: "A project management platform with AI",
+	},
+	app: {
+		title: "Agentick",
+	},
+} as const;
 
-export type TSiteConfig = typeof SITE_CONFIG
+export type TSiteConfig = typeof SITE_CONFIG;

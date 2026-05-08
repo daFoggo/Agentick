@@ -1,103 +1,125 @@
-import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
-import { getProjectByIdFn, getProjectsFn, getMyProjectsFn, createProjectFn, updateProjectFn, deleteProjectFn, fetchProjectTaskStatsFn, fetchProjectMemberWorkloadFn, fetchProjectRecentStatusUpdatesFn } from "./functions"
-import type { TGetProjectsInput, TStatsPeriod } from "./schemas"
+import {
+	queryOptions,
+	useMutation,
+	useQueryClient,
+} from "@tanstack/react-query";
+import {
+	createProjectFn,
+	deleteProjectFn,
+	fetchProjectMemberWorkloadFn,
+	fetchProjectRecentStatusUpdatesFn,
+	fetchProjectTaskStatsFn,
+	getMyProjectsFn,
+	getProjectByIdFn,
+	getProjectsFn,
+	updateProjectFn,
+} from "./functions";
+import type { TGetProjectsInput, TStatsPeriod } from "./schemas";
 
 export const projectKeys = {
-  all: ["projects"] as const,
-  lists: () => [...projectKeys.all, "list"] as const,
-  list: (params: TGetProjectsInput) => [...projectKeys.lists(), params] as const,
-  myProjects: () => ["projects", "me"] as const,
-  details: () => [...projectKeys.all, "detail"] as const,
-  detail: (id: string) => [...projectKeys.details(), id] as const,
-  taskStats: (projectId: string, period: TStatsPeriod) =>
-    [...projectKeys.all, "task-stats", projectId, period] as const,
-  workload: (projectId: string, period: TStatsPeriod) =>
-    [...projectKeys.all, "workload", projectId, period] as const,
-  recentUpdates: (projectId: string) =>
-    [...projectKeys.all, "recent-updates", projectId] as const,
-}
+	all: ["projects"] as const,
+	lists: () => [...projectKeys.all, "list"] as const,
+	list: (params: TGetProjectsInput) =>
+		[...projectKeys.lists(), params] as const,
+	myProjects: () => ["projects", "me"] as const,
+	details: () => [...projectKeys.all, "detail"] as const,
+	detail: (id: string) => [...projectKeys.details(), id] as const,
+	taskStats: (projectId: string, period: TStatsPeriod) =>
+		[...projectKeys.all, "task-stats", projectId, period] as const,
+	workload: (projectId: string, period: TStatsPeriod) =>
+		[...projectKeys.all, "workload", projectId, period] as const,
+	recentUpdates: (projectId: string) =>
+		[...projectKeys.all, "recent-updates", projectId] as const,
+};
 
 export const projectsQueryOptions = (params: TGetProjectsInput = {}) =>
-  queryOptions({
-    queryKey: projectKeys.list(params),
-    queryFn: () => getProjectsFn({ data: params }),
-  })
+	queryOptions({
+		queryKey: projectKeys.list(params),
+		queryFn: () => getProjectsFn({ data: params }),
+	});
 
 export const myProjectsQueryOptions = () =>
-  queryOptions({
-    queryKey: projectKeys.myProjects(),
-    queryFn: () => getMyProjectsFn(),
-  })
+	queryOptions({
+		queryKey: projectKeys.myProjects(),
+		queryFn: () => getMyProjectsFn(),
+	});
 
 export const projectQueryOptions = (projectId: string) =>
-  queryOptions({
-    queryKey: projectKeys.detail(projectId),
-    queryFn: () => getProjectByIdFn({ data: { projectId } }),
-  })
+	queryOptions({
+		queryKey: projectKeys.detail(projectId),
+		queryFn: () => getProjectByIdFn({ data: { projectId } }),
+	});
 
 export const projectTaskStatsQueryOptions = (
-  projectId: string,
-  period: TStatsPeriod = "weekly"
+	projectId: string,
+	period: TStatsPeriod = "weekly",
 ) =>
-  queryOptions({
-    queryKey: projectKeys.taskStats(projectId, period),
-    queryFn: () => fetchProjectTaskStatsFn({ data: { projectId, period } }),
-    enabled: !!projectId,
-  })
+	queryOptions({
+		queryKey: projectKeys.taskStats(projectId, period),
+		queryFn: () => fetchProjectTaskStatsFn({ data: { projectId, period } }),
+		enabled: !!projectId,
+	});
 
 export const projectWorkloadQueryOptions = (
-  projectId: string,
-  period: TStatsPeriod = "weekly"
+	projectId: string,
+	period: TStatsPeriod = "weekly",
 ) =>
-  queryOptions({
-    queryKey: projectKeys.workload(projectId, period),
-    queryFn: () => fetchProjectMemberWorkloadFn({ data: { projectId, period } }),
-    enabled: !!projectId,
-  })
+	queryOptions({
+		queryKey: projectKeys.workload(projectId, period),
+		queryFn: () =>
+			fetchProjectMemberWorkloadFn({ data: { projectId, period } }),
+		enabled: !!projectId,
+	});
 
-export const projectRecentStatusUpdatesQueryOptions = (projectId: string, limit: number = 10) =>
-  queryOptions({
-    queryKey: projectKeys.recentUpdates(projectId),
-    queryFn: () => fetchProjectRecentStatusUpdatesFn({ data: { projectId, limit } }),
-    enabled: !!projectId,
-  })
+export const projectRecentStatusUpdatesQueryOptions = (
+	projectId: string,
+	limit: number = 10,
+) =>
+	queryOptions({
+		queryKey: projectKeys.recentUpdates(projectId),
+		queryFn: () =>
+			fetchProjectRecentStatusUpdatesFn({ data: { projectId, limit } }),
+		enabled: !!projectId,
+	});
 
 export const useProjectMutations = () => {
-  const queryClient = useQueryClient()
+	const queryClient = useQueryClient();
 
-  const create = useMutation({
-    mutationFn: (payload: any) => createProjectFn({ data: payload }),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: projectKeys.lists() }),
-        queryClient.invalidateQueries({ queryKey: projectKeys.myProjects() }),
-      ])
-    },
-  })
+	const create = useMutation({
+		mutationFn: (payload: any) => createProjectFn({ data: payload }),
+		onSuccess: async () => {
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: projectKeys.lists() }),
+				queryClient.invalidateQueries({ queryKey: projectKeys.myProjects() }),
+			]);
+		},
+	});
 
-  const update = useMutation({
-    mutationFn: (data: { projectId: string; payload: any }) =>
-      updateProjectFn({ data: { projectId: data.projectId, payload: data.payload } }),
-    onSuccess: async (_, variables) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: projectKeys.lists() }),
-        queryClient.invalidateQueries({ queryKey: projectKeys.myProjects() }),
-        queryClient.invalidateQueries({
-          queryKey: projectKeys.detail(variables.projectId),
-        }),
-      ])
-    },
-  })
+	const update = useMutation({
+		mutationFn: (data: { projectId: string; payload: any }) =>
+			updateProjectFn({
+				data: { projectId: data.projectId, payload: data.payload },
+			}),
+		onSuccess: async (_, variables) => {
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: projectKeys.lists() }),
+				queryClient.invalidateQueries({ queryKey: projectKeys.myProjects() }),
+				queryClient.invalidateQueries({
+					queryKey: projectKeys.detail(variables.projectId),
+				}),
+			]);
+		},
+	});
 
-  const remove = useMutation({
-    mutationFn: (projectId: string) => deleteProjectFn({ data: projectId }),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: projectKeys.lists() }),
-        queryClient.invalidateQueries({ queryKey: projectKeys.myProjects() }),
-      ])
-    },
-  })
+	const remove = useMutation({
+		mutationFn: (projectId: string) => deleteProjectFn({ data: projectId }),
+		onSuccess: async () => {
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: projectKeys.lists() }),
+				queryClient.invalidateQueries({ queryKey: projectKeys.myProjects() }),
+			]);
+		},
+	});
 
-  return { create, update, remove }
-}
+	return { create, update, remove };
+};

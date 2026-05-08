@@ -1,10 +1,10 @@
-import { Badge } from "@/components/ui/badge"
-import { getTeamRoleOption } from "@/constants/team-roles"
-import type { TTeamRole } from "@/features/team-members/schemas"
+import { Badge } from "@/components/ui/badge";
+import { getTeamRoleOption } from "@/constants/team-roles";
+import type { TTeamRole } from "@/features/team-members/schemas";
 
 interface IRoleBadgeProps {
-  role: TTeamRole
-  className?: string
+	role: TTeamRole;
+	className?: string;
 }
 
 /**
@@ -12,16 +12,16 @@ interface IRoleBadgeProps {
  * Tự động ánh xạ từ role value sang giao diện (màu sắc, icon, label) dựa trên constants.
  */
 export function RoleBadge({ role, className }: IRoleBadgeProps) {
-  const option = getTeamRoleOption(role)
-  if (!option) return null
+	const option = getTeamRoleOption(role);
+	if (!option) return null;
 
-  return (
-    <Badge
-      variant={option.variant}
-      className={`${option.className} ${className ?? ""}`}
-    >
-      <option.icon className="size-3" />
-      {option.label}
-    </Badge>
-  )
+	return (
+		<Badge
+			variant={option.variant}
+			className={`${option.className} ${className ?? ""}`}
+		>
+			<option.icon className="size-3" />
+			{option.label}
+		</Badge>
+	);
 }

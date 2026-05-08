@@ -1,14 +1,14 @@
-import { ProjectMemberList } from "@/features/project-members"
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router";
+import { ProjectMemberList } from "@/features/project-members";
 
 export const Route = createFileRoute(
-  "/dashboard/$teamId/projects/$projectId/settings/members"
+	"/dashboard/$teamId/projects/$projectId/settings/members",
 )({
-  component: ProjectSettingsMembersPage,
-})
+	component: ProjectSettingsMembersPage,
+});
 
 function ProjectSettingsMembersPage() {
-  const { projectId } = Route.useParams()
+	const { projectId } = Route.useParams();
 
-  return <ProjectMemberList projectId={projectId} />
+	return <ProjectMemberList projectId={projectId} />;
 }

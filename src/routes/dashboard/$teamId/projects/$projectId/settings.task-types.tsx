@@ -1,14 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router"
-import { TaskTypeList } from "@/features/task-config"
+import { createFileRoute } from "@tanstack/react-router";
+import { TaskTypeList } from "@/features/task-config";
 
 export const Route = createFileRoute(
-  "/dashboard/$teamId/projects/$projectId/settings/task-types"
+	"/dashboard/$teamId/projects/$projectId/settings/task-types",
 )({
-  component: ProjectTaskTypesSettingsPage,
-})
+	component: ProjectTaskTypesSettingsPage,
+});
 
 function ProjectTaskTypesSettingsPage() {
-  const { projectId } = Route.useParams()
+	const { projectId } = Route.useParams();
 
-  return <TaskTypeList projectId={projectId} />
+	return <TaskTypeList projectId={projectId} />;
 }

@@ -1,10 +1,10 @@
-import { useSession } from "@tanstack/react-start/server"
+import { useSession } from "@tanstack/react-start/server";
 
 type SessionData = {
-  access_token?: string
-  refresh_token?: string
-  userId?: string
-}
+	access_token?: string;
+	refresh_token?: string;
+	userId?: string;
+};
 
 /**
  * Hook (chỉ sử dụng ở phía Server) để quản lý phiên đăng nhập của người dùng.
@@ -13,14 +13,16 @@ type SessionData = {
  * và tránh bị tấn công XSS.
  */
 export function useAppSession() {
-  return useSession<SessionData>({
-    name: "agentick_session",
-    password: process.env.SESSION_SECRET!,
-    cookie: {
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      httpOnly: true,
-      maxAge: 60 * 60 * 24 * 7, // Hết hạn sau 7 ngày
-    },
-  })
+	return useSession<SessionData>({
+		name: "agentick_session",
+		password:
+			process.env.SESSION_SECRET ||
+			"default_development_secret_key_long_enough",
+		cookie: {
+			secure: process.env.NODE_ENV === "production",
+			sameSite: "lax",
+			httpOnly: true,
+			maxAge: 60 * 60 * 24 * 7, // Hết hạn sau 7 ngày
+		},
+	});
 }
