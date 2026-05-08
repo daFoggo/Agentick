@@ -148,3 +148,61 @@ export const filterTasksForOverview = (
 
   return { inProgress, upcoming, overdue }
 }
+
+export function mapTaskData(
+  task: any,
+  members: TProjectMember[],
+  options: {
+    statuses: Array<{ id: string; name: string; color?: string }>
+    types: Array<{ id: string; name: string; color?: string }>
+    priorities: Array<{ id: string; name: string; color?: string }>
+  }
+): TTask {
+  const assignee_ids = task.assignee_ids || (task.assignee_id ? [task.assignee_id] : [])
+  const assignees = members.filter((m) => assignee_ids.includes(m.id))
+
+  const display = (id: string, catalog: Array<{ id: string; name: string; color?: string }>) =>
+    catalog.find((item) => item.id === id)
+
+  const typeOpt = display(task.type_id, options.types)
+  const statusOpt = display(task.status_id, options.statuses)
+  const priorityOpt = display(task.priority_id, options.priorities)
+
+  return {
+    id: task.id,
+    project_id: task.project_id,
+    parent_id: null,
+    title: task.title,
+    description: task.description ?? null,
+    status_id: task.status_id,
+    type_id: task.type_id,
+    priority_id: task.priority_id,
+    assigner_id: task.assigner_id || "",
+    type: typeOpt?.name ?? task.type_id,
+    status: statusOpt?.name ?? task.status_id,
+    priority: priorityOpt?.name ?? task.priority_id,
+    type_color: typeOpt?.color,
+    status_color: statusOpt?.color,
+    priority_color: priorityOpt?.color,
+    phase_id: task.phase_id ?? null,
+    assignee_ids,
+    assignees,
+    start_date: task.start_date
+      ? new Date(task.start_date).toISOString()
+      : new Date().toISOString(),
+    due_date: task.due_date
+      ? new Date(task.due_date).toISOString()
+      : new Date().toISOString(),
+    created_at: task.created_at
+      ? new Date(task.created_at).toISOString()
+      : new Date().toISOString(),
+    updated_at: task.updated_at
+      ? new Date(task.updated_at).toISOString()
+      : new Date().toISOString(),
+    order: task.order ?? 0,
+    is_archived: !!task.is_archived,
+    is_deleted: !!task.is_deleted,
+    estimated_hours: 0,
+    actual_hours: 0,
+  }
+}

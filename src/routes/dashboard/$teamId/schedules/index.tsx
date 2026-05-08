@@ -96,9 +96,18 @@ function RouteComponent() {
 
   // Map tasks to calendar events
   const taskEvents = useMemo(() => {
-    if (!taskData?.founds) return []
+    if (!taskData?.founds || !userData?.id) return []
     return taskData.founds
-      .filter((task) => task.start_date && task.due_date)
+      .filter((task) => {
+        if (!task.start_date || !task.due_date) return false
+        
+        // Ensure the current user is assigned to this task
+        const isAssigned =
+          task.assignee_ids?.includes(userData.id) ||
+          task.assignees?.some((a) => a.user_id === userData.id)
+          
+        return isAssigned
+      })
       .map((task) => ({
         id: task.id,
         title: task.title,
@@ -112,7 +121,7 @@ function RouteComponent() {
           participants: task.assignees,
         },
       })) as IBigCalendarEvent[]
-  }, [taskData?.founds])
+  }, [taskData?.founds, userData?.id])
 
   const filteredEvents = useMemo(() => {
     const allEvents = [...formattedEvents, ...taskEvents]

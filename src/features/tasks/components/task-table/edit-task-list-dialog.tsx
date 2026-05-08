@@ -142,11 +142,16 @@ export const EditTaskListDialog = ({
           <DialogHeader>
             <DialogTitle>Edit task</DialogTitle>
             <DialogDescription>
-              Update task information for list view.
+              Update task information and assignments.
             </DialogDescription>
           </DialogHeader>
 
           <FieldGroup>
+            <Field>
+              <FieldLabel>Project</FieldLabel>
+              <Input value={task.project_id} disabled className="bg-muted" />
+            </Field>
+
             <form.Field
               name="title"
               children={(field) => {

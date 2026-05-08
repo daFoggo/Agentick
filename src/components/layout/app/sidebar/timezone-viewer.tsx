@@ -5,8 +5,22 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card"
 import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
+import { useState, useEffect } from "react"
 
 export const TimezoneViewer = () => {
+  const [time, setTime] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fmt = () =>
+      new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    setTime(fmt())
+    const id = setInterval(() => setTime(fmt()), 1000)
+    return () => clearInterval(id)
+  }, [])
+
   return (
     <SidebarMenuItem>
       <HoverCard openDelay={100} closeDelay={100}>
@@ -16,10 +30,7 @@ export const TimezoneViewer = () => {
               time
             </span>
             <Badge variant="secondary" className="font-mono font-semibold">
-              {new Date().toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+              {time ?? "--:--"}
             </Badge>
           </SidebarMenuButton>
         </HoverCardTrigger>
