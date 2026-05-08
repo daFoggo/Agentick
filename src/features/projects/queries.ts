@@ -1,5 +1,5 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
-import { getProjectByIdFn, getProjectsFn, getMyProjectsFn, createProjectFn, updateProjectFn, deleteProjectFn, fetchProjectTaskStatsFn, fetchProjectMemberWorkloadFn } from "./functions"
+import { getProjectByIdFn, getProjectsFn, getMyProjectsFn, createProjectFn, updateProjectFn, deleteProjectFn, fetchProjectTaskStatsFn, fetchProjectMemberWorkloadFn, fetchProjectRecentStatusUpdatesFn } from "./functions"
 import type { TGetProjectsInput, TStatsPeriod } from "./schemas"
 
 export const projectKeys = {
@@ -13,6 +13,8 @@ export const projectKeys = {
     [...projectKeys.all, "task-stats", projectId, period] as const,
   workload: (projectId: string, period: TStatsPeriod) =>
     [...projectKeys.all, "workload", projectId, period] as const,
+  recentUpdates: (projectId: string) =>
+    [...projectKeys.all, "recent-updates", projectId] as const,
 }
 
 export const projectsQueryOptions = (params: TGetProjectsInput = {}) =>
@@ -50,6 +52,13 @@ export const projectWorkloadQueryOptions = (
   queryOptions({
     queryKey: projectKeys.workload(projectId, period),
     queryFn: () => fetchProjectMemberWorkloadFn({ data: { projectId, period } }),
+    enabled: !!projectId,
+  })
+
+export const projectRecentStatusUpdatesQueryOptions = (projectId: string, limit: number = 10) =>
+  queryOptions({
+    queryKey: projectKeys.recentUpdates(projectId),
+    queryFn: () => fetchProjectRecentStatusUpdatesFn({ data: { projectId, limit } }),
     enabled: !!projectId,
   })
 

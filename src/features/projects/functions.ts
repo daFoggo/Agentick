@@ -16,6 +16,7 @@ import {
   deleteProject,
   fetchProjectTaskStats,
   fetchProjectMemberWorkload,
+  fetchProjectRecentStatusUpdates,
 } from "./server"
 import { z } from "zod"
 
@@ -76,4 +77,11 @@ export const fetchProjectMemberWorkloadFn = createServerFn({ method: "GET" })
   .inputValidator(z.object({ projectId: z.string(), period: StatsPeriodSchema.optional() }))
   .handler(async ({ data }) => {
     return await fetchProjectMemberWorkload(data.projectId, data.period ?? "weekly")
+  })
+
+export const fetchProjectRecentStatusUpdatesFn = createServerFn({ method: "GET" })
+  .middleware([requestLoggerMiddleware])
+  .inputValidator(z.object({ projectId: z.string(), limit: z.number().optional() }))
+  .handler(async ({ data }) => {
+    return await fetchProjectRecentStatusUpdates(data.projectId, data.limit ?? 10)
   })

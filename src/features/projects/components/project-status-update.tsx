@@ -9,29 +9,9 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { AlertCircle } from "lucide-react"
-import {
-  MOCK_PROJECT_TASKS,
-  type TProjectDashboardTask,
-} from "@/features/projects/mocks"
-import { TASK_STATUS_CATALOG } from "@/features/tasks/constants"
-
-function normalize(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, "")
-}
-
-function getCatalogItem<
-  T extends { value: string; label: string; color: string },
->(value: string | undefined | null, catalog: readonly T[]) {
-  if (!value) return null
-  const normalizedValue = normalize(value)
-  return (
-    catalog.find(
-      (item) =>
-        normalize(item.value) === normalizedValue ||
-        normalize(item.label) === normalizedValue
-    ) ?? null
-  )
-}
+import { useQuery } from "@tanstack/react-query"
+import { projectRecentStatusUpdatesQueryOptions } from "../queries"
+import type { TTaskActivity } from "../schemas"
 
 function formatDateTime(date?: string | Date | null) {
   if (!date) return "-"
@@ -43,50 +23,20 @@ function formatDateTime(date?: string | Date | null) {
   })
 }
 
-function getUpdatedBy(task: TProjectDashboardTask) {
-  return task.assignees?.[0]?.user?.name ?? "Team"
-}
-
-function getStatusLabel(value: string | undefined | null) {
-  const item = getCatalogItem(value, TASK_STATUS_CATALOG)
-  return item?.label ?? value ?? "Unknown"
-}
-
-function getStatusTransition(task: TProjectDashboardTask) {
-  const from = getStatusLabel(task.status_from ?? "To Do")
-  const to = getStatusLabel(task.status_to ?? task.status ?? task.status_id)
+function getStatusTransition(task: TTaskActivity) {
+  const from = task.old_status_name ?? "To Do"
+  const to = task.new_status_name ?? "Unknown"
   return `${from} → ${to}`
 }
 
-function getLatestStatusColor(task: TProjectDashboardTask) {
-  const latestStatus =
-    getCatalogItem(
-      task.status_to ?? task.status ?? task.status_id,
-      TASK_STATUS_CATALOG
-    ) ?? getCatalogItem(task.status_from ?? "To Do", TASK_STATUS_CATALOG)
-
-  return latestStatus?.color ?? "currentColor"
+function getLatestStatusColor(task: TTaskActivity) {
+  return task.new_status_color ?? task.old_status_color ?? "currentColor"
 }
 
-function isInCurrentWeek(date?: string | Date | null) {
-  if (!date) return false
-  const now = new Date()
-  const startOfWeek = new Date(now)
-  startOfWeek.setDate(now.getDate() - now.getDay())
-  const endOfWeek = new Date(startOfWeek)
-  endOfWeek.setDate(startOfWeek.getDate() + 7)
-  const d = typeof date === "string" ? new Date(date) : new Date(date)
-  return d >= startOfWeek && d < endOfWeek
-}
-
-export function ProjectStatusUpdate() {
-  const items = MOCK_PROJECT_TASKS.filter((t) =>
-    isInCurrentWeek(t.due_date)
-  ).sort((a, b) => {
-    const da = a.due_date ? new Date(a.due_date).getTime() : 0
-    const db = b.due_date ? new Date(b.due_date).getTime() : 0
-    return db - da
-  }) as TProjectDashboardTask[]
+export function ProjectStatusUpdate({ projectId }: { projectId: string }) {
+  const { data: items = [] } = useQuery(
+    projectRecentStatusUpdatesQueryOptions(projectId, 15)
+  )
 
   return (
     <Card>
@@ -116,35 +66,29 @@ export function ProjectStatusUpdate() {
                   className="flex items-start justify-between gap-4 py-2"
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="truncate font-medium">{it.title}</div>
+                    <div className="truncate font-medium">{it.task_title}</div>
                     <div className="mt-2 flex flex-wrap gap-1.5">
-                      {(() => {
-                        const status = getCatalogItem(
-                          it.status ?? it.status_id,
-                          TASK_STATUS_CATALOG
-                        )
-                        return status ? (
-                          <Badge
-                            variant="outline"
-                            className="gap-1.5 "
-                          >
-                            <span
-                              className="size-1.5 shrink-0 rounded-full"
-                              style={{
-                                backgroundColor: getLatestStatusColor(it),
-                              }}
-                            />
-                            {getStatusTransition(it)}
-                          </Badge>
-                        ) : null
-                      })()}
+                      {it.new_status_name ? (
+                        <Badge
+                          variant="outline"
+                          className="gap-1.5 "
+                        >
+                          <span
+                            className="size-1.5 shrink-0 rounded-full"
+                            style={{
+                              backgroundColor: getLatestStatusColor(it),
+                            }}
+                          />
+                          {getStatusTransition(it)}
+                        </Badge>
+                      ) : null}
                     </div>
                   </div>
                   <div className="shrink-0 text-right text-xs text-muted-foreground">
                     <div className="font-medium text-foreground">
-                      Updated by {getUpdatedBy(it)}
+                      Updated by {it.user_name}
                     </div>
-                    <div>{formatDateTime(it.due_date)}</div>
+                    <div>{formatDateTime(it.created_at)}</div>
                   </div>
                 </div>
               ))

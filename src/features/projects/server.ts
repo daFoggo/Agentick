@@ -8,6 +8,7 @@ import type {
   TProjectTaskStats,
   TProjectWorkloadResponse,
   TStatsPeriod,
+  TTaskActivity,
 } from "./schemas"
 import { z } from "zod"
 import { CreateProjectSchema, UpdateProjectSchema } from "./schemas"
@@ -106,5 +107,18 @@ export async function fetchProjectMemberWorkload(
   const response = await api
     .get(`projects/${projectId}/members/workload`, { searchParams: { period } })
     .json<TBaseResponse<TProjectWorkloadResponse>>()
+  return response.data
+}
+
+/**
+ * Lấy lịch sử cập nhật trạng thái gần đây của dự án.
+ */
+export async function fetchProjectRecentStatusUpdates(
+  projectId: string,
+  limit: number = 10
+): Promise<TTaskActivity[]> {
+  const response = await api
+    .get(`projects/${projectId}/tasks/recent-updates`, { searchParams: { limit } })
+    .json<TBaseResponse<TTaskActivity[]>>()
   return response.data
 }

@@ -24,7 +24,7 @@ function ProjectDashboardView() {
       </div>
       <div className="flex flex-col gap-4 lg:col-span-2">
         <ProjectAISummary projectId={projectId} />
-        <ProjectStatusUpdate />
+        <ProjectStatusUpdate projectId={projectId} />
       </div>
     </div>
   )

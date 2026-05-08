@@ -110,3 +110,21 @@ export const ProjectWorkloadResponseSchema = z.object({
 })
 export type TProjectWorkloadResponse = z.infer<typeof ProjectWorkloadResponseSchema>
 
+// ── Dashboard: Recent Status Updates ───────────────────────────────────────────
+
+export const TaskActivitySchema = z.object({
+  id: z.string(),
+  task_id: z.string(),
+  task_title: z.string(),
+  user_id: z.string(),
+  user_name: z.string(),
+  field_changed: z.string(),
+  old_value: z.string().nullable().optional(),
+  new_value: z.string().nullable().optional(),
+  old_status_name: z.string().nullable().optional(),
+  old_status_color: z.string().nullable().optional(),
+  new_status_name: z.string().nullable().optional(),
+  new_status_color: z.string().nullable().optional(),
+  created_at: z.string().nullable().optional(),
+})
+export type TTaskActivity = z.infer<typeof TaskActivitySchema>

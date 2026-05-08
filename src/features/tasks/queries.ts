@@ -57,6 +57,7 @@ const invalidateDashboardCharts = (queryClient: ReturnType<typeof useQueryClient
   Promise.all([
     queryClient.invalidateQueries({ queryKey: ["projects", "task-stats"] }),
     queryClient.invalidateQueries({ queryKey: ["projects", "workload"] }),
+    queryClient.invalidateQueries({ queryKey: ["projects", "recent-updates"] }),
   ])
 
 /**
