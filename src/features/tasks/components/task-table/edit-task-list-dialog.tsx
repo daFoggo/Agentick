@@ -63,7 +63,7 @@ export const EditTaskListDialog = ({
       status_id: task.status_id ?? defaults.statusId,
       type_id: task.type_id ?? defaults.typeId,
       priority_id: task.priority_id ?? defaults.priorityId,
-      assigner_id: task.assigner_id ?? defaults.assignerId,
+      assigner_id: task.assigner_id || defaults.assignerId,
       assignee_ids: task.assignee_ids ?? [],
       start_date: toCalendarDateValue(task.start_date) ?? new Date(),
       due_date: toCalendarDateValue(task.due_date) ?? new Date(),
@@ -120,7 +120,7 @@ export const EditTaskListDialog = ({
       status_id: task.status_id ?? defaults.statusId,
       type_id: task.type_id ?? defaults.typeId,
       priority_id: task.priority_id ?? defaults.priorityId,
-      assigner_id: task.assigner_id ?? defaults.assignerId,
+      assigner_id: task.assigner_id || defaults.assignerId,
       assignee_ids: task.assignee_ids ?? [],
       start_date: toCalendarDateValue(task.start_date) ?? new Date(),
       due_date: toCalendarDateValue(task.due_date) ?? new Date(),
@@ -317,7 +317,17 @@ export const EditTaskListDialog = ({
                           <SelectItem value="unassigned">Unassigned</SelectItem>
                           {options.members.map((member) => (
                             <SelectItem key={member.id} value={member.id}>
-                              {member.user?.name ?? member.user_id}
+                              <div className="flex items-center gap-2">
+                                <Avatar className="size-5">
+                                  <AvatarImage src={member.user?.avatar_url} />
+                                  <AvatarFallback>
+                                    {member.user?.name?.charAt(0)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="text-sm">
+                                  {member.user?.name ?? member.user_id}
+                                </span>
+                              </div>
                             </SelectItem>
                           ))}
                         </SelectContent>

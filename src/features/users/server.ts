@@ -2,13 +2,31 @@ import { api } from "@/lib/ky"
 import type { TBaseResponse } from "@/types/api"
 import "@tanstack/react-start/server-only"
 import { z } from "zod"
-import { SearchUsersInputSchema, type TUser, type TUserSearchResult } from "./schemas"
+import {
+  SearchUsersInputSchema,
+  type TStatsPeriod,
+  type TUser,
+  type TUserSearchResult,
+  type TUserStats,
+} from "./schemas"
 
 /**
  * Lấy thông tin tài khoản của người dùng hiện tại đang đăng nhập.
  */
 export async function getUserMe(): Promise<TUser> {
   const response = await api.get("users/me").json<TBaseResponse<TUser>>()
+  return response.data
+}
+
+/**
+ * Lấy thống kê cá nhân (tasks completed, collaborated with) theo period.
+ */
+export async function fetchUserStats(
+  period: TStatsPeriod = "weekly"
+): Promise<TUserStats> {
+  const response = await api
+    .get("users/me/stats", { searchParams: { period } })
+    .json<TBaseResponse<TUserStats>>()
   return response.data
 }
 

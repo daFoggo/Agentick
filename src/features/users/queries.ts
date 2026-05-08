@@ -1,5 +1,6 @@
 import { queryOptions } from "@tanstack/react-query"
-import { getUserMeFn, searchUsersFn } from "./functions"
+import { fetchUserStatsFn, getUserMeFn, searchUsersFn } from "./functions"
+import type { TStatsPeriod } from "./schemas"
 
 /**
  * @description Query options cho tính năng Users
@@ -32,5 +33,11 @@ export const userQueries = {
           },
         }),
       enabled: q.length >= 1,
+    }),
+
+  stats: (period: TStatsPeriod = "weekly") =>
+    queryOptions({
+      queryKey: ["users", "stats", period],
+      queryFn: () => fetchUserStatsFn({ data: { period } }),
     }),
 }

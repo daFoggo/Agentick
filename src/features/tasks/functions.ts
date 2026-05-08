@@ -5,6 +5,7 @@ import { CreateTaskSchema, FindTasksSchema, UpdateTaskSchema } from "./schemas"
 import {
   createTask,
   deleteTask,
+  fetchMyTasks,
   fetchTaskById,
   fetchTasks,
   updateTask,
@@ -22,6 +23,14 @@ export const fetchTasksFn = createServerFn({ method: "GET" })
     })
   )
   .handler(async ({ data }) => fetchTasks(data.projectId, data.params))
+
+/**
+ * Server Function lấy tất cả task của current user (Dashboard Overview)
+ */
+export const fetchMyTasksFn = createServerFn({ method: "GET" })
+  .middleware([requestLoggerMiddleware])
+  .inputValidator(z.object({ params: FindTasksSchema }))
+  .handler(async ({ data }) => fetchMyTasks(data.params))
 
 /**
  * Server Function lấy chi tiết một Task

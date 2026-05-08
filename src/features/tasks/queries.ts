@@ -6,6 +6,7 @@ import {
 import {
   createTaskFn,
   deleteTaskFn,
+  fetchMyTasksFn,
   fetchTaskByIdFn,
   fetchTasksFn,
   updateTaskFn,
@@ -23,6 +24,7 @@ export const taskKeys = {
   details: () => [...taskKeys.all, "detail"] as const,
   detail: (projectId: string, taskId: string) =>
     [...taskKeys.details(), projectId, taskId] as const,
+  myTasks: () => [...taskKeys.all, "my-tasks"] as const,
 }
 
 /**
@@ -39,7 +41,24 @@ export const taskQueries = {
       queryKey: taskKeys.detail(projectId, taskId),
       queryFn: () => fetchTaskByIdFn({ data: { projectId, taskId } }),
     }),
+  myTasks: () =>
+    queryOptions({
+      queryKey: taskKeys.myTasks(),
+      queryFn: () =>
+        fetchMyTasksFn({ data: { params: { page_size: "all" } } }),
+    }),
 }
+
+/**
+ * Invalidate tất cả query liên quan đến dashboard charts của project.
+ * Dùng prefix ["projects"] để bắt cả task-stats lẫn workload mà không cần projectId cụ thể.
+ */
+const invalidateDashboardCharts = (queryClient: ReturnType<typeof useQueryClient>) =>
+  Promise.all([
+    queryClient.invalidateQueries({ queryKey: ["projects", "task-stats"] }),
+    queryClient.invalidateQueries({ queryKey: ["projects", "workload"] }),
+    queryClient.invalidateQueries({ queryKey: ["projects", "recent-updates"] }),
+  ])
 
 /**
  * Hook quản lý các Mutation liên quan đến Task (Create, Update, Delete)
@@ -54,6 +73,9 @@ export const useTaskMutations = () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: taskKeys.lists() }),
         queryClient.invalidateQueries({ queryKey: taskKeys.details() }),
+        queryClient.invalidateQueries({ queryKey: taskKeys.myTasks() }),
+        queryClient.invalidateQueries({ queryKey: ["users", "stats"] }),
+        invalidateDashboardCharts(queryClient),
       ])
     },
   })
@@ -67,6 +89,9 @@ export const useTaskMutations = () => {
         queryClient.invalidateQueries({
           queryKey: taskKeys.detail(variables.projectId, variables.taskId),
         }),
+        queryClient.invalidateQueries({ queryKey: taskKeys.myTasks() }),
+        queryClient.invalidateQueries({ queryKey: ["users", "stats"] }),
+        invalidateDashboardCharts(queryClient),
       ])
     },
   })
@@ -80,6 +105,9 @@ export const useTaskMutations = () => {
         queryClient.invalidateQueries({
           queryKey: taskKeys.detail(variables.projectId, variables.taskId),
         }),
+        queryClient.invalidateQueries({ queryKey: taskKeys.myTasks() }),
+        queryClient.invalidateQueries({ queryKey: ["users", "stats"] }),
+        invalidateDashboardCharts(queryClient),
       ])
     },
   })

@@ -4,8 +4,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { userQueries } from "@/features/users"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { startOfToday } from "date-fns"
-import { MOCK_TASKS } from "../../constants"
 import { filterTasksForOverview } from "../../helpers"
+import { taskQueries } from "../../queries"
 import { TaskList } from "./task-list"
 
 /**
@@ -13,12 +13,11 @@ import { TaskList } from "./task-list"
  */
 export const TaskLine = () => {
   const { data: user } = useSuspenseQuery(userQueries.me())
+  const { data: myTasksData } = useSuspenseQuery(taskQueries.myTasks())
 
   const today = startOfToday()
-  const { inProgress, upcoming, overdue } = filterTasksForOverview(
-    MOCK_TASKS,
-    today
-  )
+  const tasks = myTasksData?.founds ?? []
+  const { inProgress, upcoming, overdue } = filterTasksForOverview(tasks, today)
 
   const initials =
     user.name
