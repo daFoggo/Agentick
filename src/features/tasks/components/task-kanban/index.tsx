@@ -16,6 +16,7 @@ import {
 } from "@dnd-kit/sortable";
 import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
+
 import type { TProjectMember } from "@/features/project-members";
 import {
 	type TTaskPriority,
@@ -185,7 +186,7 @@ export const TaskKanban = ({
 	};
 
 	return (
-		<div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden">
+		<>
 			<DndContext
 				sensors={sensors}
 				collisionDetection={customCollisionDetection}
@@ -207,25 +208,23 @@ export const TaskKanban = ({
 					)
 				}
 			>
-				<div className="no-scrollbar flex min-h-0 flex-1 overflow-x-auto">
-					<div className="no-scrollbar flex min-w-full items-start gap-4 pb-1">
-						<SortableContext
-							items={statuses.map((s) => s.id)}
-							strategy={horizontalListSortingStrategy}
-						>
-							{statuses.map((status) => (
-								<KanbanColumn
-									key={status.id}
-									id={status.id}
-									title={status.name}
-									tasks={tasks.filter((t) => t.status_id === status.id)}
-									onTaskClick={openEditDialog}
-									onDeleteTask={openDeleteDialog}
-									onAddTask={openCreateDialog}
-								/>
-							))}
-						</SortableContext>
-					</div>
+				<div className="flex h-full w-full items-start gap-4 overflow-x-auto overflow-y-hidden">
+					<SortableContext
+						items={statuses.map((s) => s.id)}
+						strategy={horizontalListSortingStrategy}
+					>
+						{statuses.map((status) => (
+							<KanbanColumn
+								key={status.id}
+								id={status.id}
+								title={status.name}
+								tasks={tasks.filter((t) => t.status_id === status.id)}
+								onTaskClick={openEditDialog}
+								onDeleteTask={openDeleteDialog}
+								onAddTask={openCreateDialog}
+							/>
+						))}
+					</SortableContext>
 				</div>
 
 				<DragOverlay dropAnimation={dropAnimation}>
@@ -276,6 +275,6 @@ export const TaskKanban = ({
 					onConfirm={handleConfirmDelete}
 				/>
 			)}
-		</div>
+		</>
 	);
 };

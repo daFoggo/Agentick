@@ -44,11 +44,11 @@ function DashboardLayout() {
 		<SidebarProvider className="h-svh overflow-hidden">
 			<AppSidebar />
 			<SidebarInset
-				className={cn("h-full", !isFixedHeight && "overflow-y-auto")}
+				className={cn("h-full min-w-0", !isFixedHeight && "overflow-y-auto")}
 			>
 				<main
 					className={cn(
-						"flex flex-col gap-4 p-4",
+						"flex flex-col gap-4 p-4 min-w-0",
 						isFixedHeight && "h-full overflow-hidden",
 					)}
 				>

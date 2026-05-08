@@ -99,14 +99,14 @@ export function ProjectWorkload() {
 					</div>
 					<ButtonGroup orientation="horizontal">
 						<Button
-							size="sm"
+							size="xs"
 							variant={mode === "week" ? "default" : "outline"}
 							onClick={() => setMode("week")}
 						>
 							Weekly
 						</Button>
 						<Button
-							size="sm"
+							size="xs"
 							variant={mode === "month" ? "default" : "outline"}
 							onClick={() => setMode("month")}
 						>

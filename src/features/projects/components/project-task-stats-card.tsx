@@ -53,25 +53,20 @@ export const ProjectTaskStatsCard = () => {
 			<CardHeader>
 				<div className="flex flex-wrap items-center justify-between gap-2">
 					<div className="flex flex-col">
-						<CardTitle>
-							Total tasks{" "}
-							<span className="text-sm text-muted-foreground">
-								({period === "weekly" ? "this week" : "last 30 days"})
-							</span>
-						</CardTitle>
+						<CardTitle>Total Tasks</CardTitle>
 					</div>
 					<div className="flex items-center gap-2">
 						{/* Period toggle */}
 						<ButtonGroup orientation="horizontal">
 							<Button
-								size="sm"
+								size="xs"
 								variant={period === "weekly" ? "default" : "outline"}
 								onClick={() => setPeriod("weekly")}
 							>
 								Weekly
 							</Button>
 							<Button
-								size="sm"
+								size="xs"
 								variant={period === "monthly" ? "default" : "outline"}
 								onClick={() => setPeriod("monthly")}
 							>
@@ -81,21 +76,21 @@ export const ProjectTaskStatsCard = () => {
 						{/* View mode toggle */}
 						<ButtonGroup orientation="horizontal">
 							<Button
-								size="sm"
+								size="xs"
 								variant={mode === "priority" ? "default" : "outline"}
 								onClick={() => setMode("priority")}
 							>
 								Priority
 							</Button>
 							<Button
-								size="sm"
+								size="xs"
 								variant={mode === "status" ? "default" : "outline"}
 								onClick={() => setMode("status")}
 							>
 								Status
 							</Button>
 							<Button
-								size="sm"
+								size="xs"
 								variant={mode === "type" ? "default" : "outline"}
 								onClick={() => setMode("type")}
 							>
@@ -121,7 +116,7 @@ export const ProjectTaskStatsCard = () => {
 					>
 						<BarChart data={data} barCategoryGap="20%" barGap={8}>
 							<CartesianGrid strokeDasharray="3 3" vertical={true} />
-							<XAxis dataKey="name" tickLine={false} />
+							<XAxis dataKey="name" tickLine={false}  />
 							<YAxis allowDecimals={false} width={44} />
 							<ChartTooltip
 								content={
