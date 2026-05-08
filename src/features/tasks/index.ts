@@ -2,6 +2,7 @@ export * from "./schemas"
 export * from "./constants"
 export * from "./functions"
 export * from "./queries"
+export * from "./helpers"
 
 export * from "./components/task-table"
 export * from "./components/task-line"

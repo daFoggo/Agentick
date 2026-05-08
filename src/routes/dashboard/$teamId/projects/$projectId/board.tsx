@@ -1,11 +1,10 @@
-import { TaskKanban, taskQueries } from "@/features/tasks"
+import { TaskKanban, taskQueries, mapTaskData } from "@/features/tasks"
 import { taskConfigQueries } from "@/features/task-config"
-import { projectQueryOptions } from "@/features/projects/queries"
+import { projectQueryOptions } from "@/features/projects"
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { useMemo } from "react"
-import { mapTaskData } from "@/features/tasks/helpers"
-import { useKanbanStore } from "@/features/tasks/stores/kanban-store"
+import { useMemo, useState, useEffect } from "react"
+import { useKanbanStore } from "@/stores/use-kanban-store"
 
 export const Route = createFileRoute(
   "/dashboard/$teamId/projects/$projectId/board"
@@ -19,6 +18,9 @@ export const Route = createFileRoute(
 function ProjectBoardView() {
   const { projectId } = Route.useParams()
 
+  // NOTE: All queries below are served from the cache instantly.
+  // Data is prefetched in the parent route loader (route.tsx) via ensureQueryData.
+  // See README §4.2 — Loader Prefetching Pattern.
   const { data: project } = useQuery(projectQueryOptions(projectId))
   const { data: tasksResponse } = useQuery(
     taskQueries.list(projectId, {
@@ -60,10 +62,15 @@ function ProjectBoardView() {
 
   const members = useMemo(() => project?.members ?? [], [project?.members])
 
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const savedOrder = useKanbanStore((state) => state.columnOrders[projectId])
 
   const finalStatuses = useMemo(() => {
-    if (!savedOrder) return sortedStatuses
+    if (!mounted || !savedOrder) return sortedStatuses
     return [...sortedStatuses].sort((a, b) => {
       const aIndex = savedOrder.indexOf(a.id)
       const bIndex = savedOrder.indexOf(b.id)
@@ -71,7 +78,7 @@ function ProjectBoardView() {
       if (bIndex === -1) return -1
       return aIndex - bIndex
     })
-  }, [sortedStatuses, savedOrder])
+  }, [sortedStatuses, savedOrder, mounted])
 
   const taskOptions = useMemo(() => ({
     statuses: finalStatuses,
@@ -84,6 +91,8 @@ function ProjectBoardView() {
       mapTaskData(task, project?.members ?? [], taskOptions)
     )
   }, [tasksResponse, project?.members, taskOptions])
+
+  if (!mounted) return null
 
   return (
     <TaskKanban

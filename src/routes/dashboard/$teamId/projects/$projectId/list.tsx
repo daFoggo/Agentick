@@ -1,15 +1,15 @@
-import { TaskTable, taskQueries } from "@/features/tasks"
-import { taskConfigQueries } from "@/features/task-config"
 import { projectQueryOptions } from "@/features/projects/queries"
+import { taskConfigQueries } from "@/features/task-config"
+import { TaskTable, taskQueries } from "@/features/tasks"
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { useMemo } from "react"
-import type { TTask } from "@/features/tasks"
-import type { TProjectMember } from "@/features/project-members"
 
 import { mapTaskData } from "@/features/tasks/helpers"
 
-export const Route = createFileRoute("/dashboard/$teamId/projects/$projectId/list")({
+export const Route = createFileRoute(
+  "/dashboard/$teamId/projects/$projectId/list"
+)({
   component: ProjectListView,
 })
 

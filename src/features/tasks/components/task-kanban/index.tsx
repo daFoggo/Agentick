@@ -8,17 +8,13 @@ import {
   useSensors,
   MeasuringStrategy,
   defaultDropAnimationSideEffects,
-  type DragStartEvent,
-  type DragOverEvent,
-  type DragEndEvent,
 } from "@dnd-kit/core"
 import {
-  arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   horizontalListSortingStrategy,
 } from "@dnd-kit/sortable"
-import { useMemo, useState, useEffect } from "react"
+import { useMemo, useEffect } from "react"
 import { toast } from "sonner"
 import {
   type TTaskStatus,
@@ -28,20 +24,21 @@ import {
 } from "@/features/task-config"
 import { useTaskMutations } from "../../queries"
 import type { TTask } from "../../schemas"
+import type { TProjectMember } from "@/features/project-members"
 import { KanbanCard } from "./kanban-card"
 import { KanbanColumn } from "./kanban-column"
 import { CreateTaskListDialog } from "../task-table/create-task-list-dialog"
 import { EditTaskListDialog } from "../task-table/edit-task-list-dialog"
 import { DeleteTaskListDialog } from "../task-table/delete-task-list-dialog"
-import { useKanbanStore } from "../../stores/kanban-store"
+import { useKanbanStore } from "@/stores/use-kanban-store"
 
-interface TaskKanbanProps {
+interface ITaskKanbanProps {
   projectId: string
   tasks: TTask[]
   statuses: TTaskStatus[]
   types: TTaskType[]
   priorities: TTaskPriority[]
-  members: any[]
+  members: TProjectMember[]
 }
 
 export const TaskKanban = ({
@@ -51,25 +48,36 @@ export const TaskKanban = ({
   types,
   priorities,
   members,
-}: TaskKanbanProps): React.ReactNode => {
-  const { setColumnOrder } = useKanbanStore()
-  
-  const [tasks, setTasks] = useState<TTask[]>(initialTasks)
-  const [activeTask, setActiveTask] = useState<TTask | null>(null)
-  const [activeColumn, setActiveColumn] = useState<TTaskStatus | null>(null)
-  const [selectedTask, setSelectedTask] = useState<TTask | null>(null)
-  const [taskToDelete, setTaskToDelete] = useState<TTask | null>(null)
-  const [isEditOpen, setIsEditOpen] = useState(false)
-  const [isCreateOpen, setIsCreateOpen] = useState(false)
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
-  const [defaultStatusId, setDefaultStatusId] = useState<string | undefined>()
+}: ITaskKanbanProps): React.ReactNode => {
+  const {
+    tasks,
+    setTasks,
+    activeTask,
+    activeColumn,
+    selectedTask,
+    taskToDelete,
+    isEditOpen,
+    isCreateOpen,
+    isDeleteOpen,
+    defaultStatusId,
+    setIsEditOpen,
+    setIsCreateOpen,
+    setIsDeleteOpen,
+    openCreateDialog,
+    openEditDialog,
+    openDeleteDialog,
+    closeDialogs,
+    handleDragStart,
+    handleDragOver,
+    handleDragEnd,
+  } = useKanbanStore()
 
   const { update, remove } = useTaskMutations()
   const { updateStatus } = useTaskConfigMutations()
 
   useEffect(() => {
     setTasks(initialTasks)
-  }, [initialTasks])
+  }, [initialTasks, setTasks])
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -116,7 +124,16 @@ export const TaskKanban = ({
 
       // If we overlap more than 20% horizontally, trigger the swap
       if (closestId && maxIntersectionRatio > 0.2) {
-        return [{ id: closestId, data: { droppableContainer: args.droppableContainers.find((c: any) => c.id === closestId) } }]
+        return [
+          {
+            id: closestId,
+            data: {
+              droppableContainer: args.droppableContainers.find(
+                (c: any) => c.id === closestId
+              ),
+            },
+          },
+        ]
       }
       return []
     }
@@ -125,134 +142,20 @@ export const TaskKanban = ({
     return pointerWithin(args)
   }
 
-  const handleDragStart = (event: DragStartEvent) => {
-    const { active } = event
-    const data = active.data.current
-    if (data?.type === "column") {
-      setActiveColumn(statuses.find((s) => s.id === active.id) || null)
-    } else if (data?.type === "card") {
-      setActiveTask(data.task || null)
-    }
-  }
+  const taskOptions = useMemo(
+    () => ({
+      statuses,
+      types,
+      priorities,
+      members,
+    }),
+    [statuses, types, priorities, members]
+  )
 
-  const handleDragOver = (event: DragOverEvent) => {
-    const { active, over } = event
-    if (!over) return
-
-    const activeId = active.id as string
-    const overId = over.id as string
-
-    if (activeId === overId) return
-    
-    // Return early if dragging a column
-    if (active.data.current?.type === "column") return
-
-    const isActiveCard = active.data.current?.type === "card"
-    const isOverCard = over.data.current?.type === "card"
-    const isOverColumn = over.data.current?.type === "column"
-
-    if (!isActiveCard) return
-
-    if (isOverColumn) {
-      setTasks((prev) => {
-        const activeIndex = prev.findIndex((t) => t.id === activeId)
-        if (prev[activeIndex].status_id !== overId) {
-          const newTasks = [...prev]
-          newTasks[activeIndex] = { ...newTasks[activeIndex], status_id: overId }
-          return arrayMove(newTasks, activeIndex, activeIndex) // trigger re-render
-        }
-        return prev
-      })
-    } else if (isOverCard) {
-      const overTaskStatusId = over.data.current?.task?.status_id
-      if (!overTaskStatusId) return
-
-      setTasks((prev) => {
-        const activeIndex = prev.findIndex((t) => t.id === activeId)
-        const overIndex = prev.findIndex((t) => t.id === overId)
-
-        if (prev[activeIndex].status_id !== overTaskStatusId) {
-          const newTasks = [...prev]
-          newTasks[activeIndex] = { ...newTasks[activeIndex], status_id: overTaskStatusId }
-          return arrayMove(newTasks, activeIndex, overIndex)
-        }
-
-        return arrayMove(prev, activeIndex, overIndex)
-      })
-    }
-  }
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
-    
-    // Cleanup active states
-    const draggedColumn = activeColumn
-    const draggedTask = activeTask
-    setActiveColumn(null)
-    setActiveTask(null)
-
-    if (!over) return
-    
-    const activeId = active.id as string
-    const overId = over.id as string
-
-    // Handle column drop
-    if (draggedColumn) {
-      if (activeId !== overId) {
-        const activeIndex = statuses.findIndex((s) => s.id === activeId)
-        const overIndex = statuses.findIndex((s) => s.id === overId)
-        
-        if (activeIndex !== -1 && overIndex !== -1) {
-          const newStatuses = arrayMove(statuses, activeIndex, overIndex)
-          setColumnOrder(projectId, newStatuses.map((s) => s.id))
-          updateStatus.mutate({
-            projectId,
-            statusId: activeId,
-            payload: { order: overIndex },
-          })
-        }
-      }
-      return
-    }
-
-    // Handle card drop
-    if (draggedTask) {
-      const currentTask = tasks.find(t => t.id === activeId)
-      if (!currentTask) return
-      
-      const initialTask = initialTasks.find(t => t.id === activeId)
-      
-      // If status changed, notify server
-      if (currentTask.status_id !== initialTask?.status_id) {
-        update.mutate({
-          projectId,
-          taskId: activeId,
-          payload: { status_id: currentTask.status_id },
-        })
-      }
-    }
-  }
-
-  const taskOptions = useMemo(() => ({
-    statuses,
-    types,
-    priorities,
-    members,
-  }), [statuses, types, priorities, members])
-
-  const nextOrder = useMemo(() => 
-    tasks.reduce((max, t) => Math.max(max, t.order ?? -1), -1) + 1,
-  [tasks])
-
-  const handleTaskClick = (task: TTask) => {
-    setSelectedTask(task)
-    setIsEditOpen(true)
-  }
-
-  const handleDeleteTask = (task: TTask) => {
-    setTaskToDelete(task)
-    setIsDeleteOpen(true)
-  }
+  const nextOrder = useMemo(
+    () => tasks.reduce((max, t) => Math.max(max, t.order ?? -1), -1) + 1,
+    [tasks]
+  )
 
   const handleConfirmDelete = async () => {
     if (!taskToDelete) return false
@@ -262,16 +165,12 @@ export const TaskKanban = ({
         taskId: taskToDelete.id,
       })
       toast.success("Task deleted successfully")
+      closeDialogs()
       return true
     } catch (error) {
       toast.error("Failed to delete task")
       return false
     }
-  }
-
-  const handleAddTask = (statusId: string) => {
-    setDefaultStatusId(statusId)
-    setIsCreateOpen(true)
   }
 
   const dropAnimation = {
@@ -285,7 +184,7 @@ export const TaskKanban = ({
   }
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden no-scrollbar">
+    <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden">
       <DndContext
         sensors={sensors}
         collisionDetection={customCollisionDetection}
@@ -294,22 +193,34 @@ export const TaskKanban = ({
             strategy: MeasuringStrategy.Always,
           },
         }}
-        onDragStart={handleDragStart}
+        onDragStart={(e) => handleDragStart(e, statuses)}
         onDragOver={handleDragOver}
-        onDragEnd={handleDragEnd}
+        onDragEnd={(e) =>
+          handleDragEnd(
+            e,
+            statuses,
+            projectId,
+            initialTasks,
+            updateStatus.mutate,
+            update.mutate
+          )
+        }
       >
-        <div className="h-full w-full overflow-x-auto  border-none bg-background/50 no-scrollbar">
-          <div className="flex min-w-full min-h-[calc(100vh-200px)] items-start gap-6 py-6 pr-6 pl-[60px] no-scrollbar">
-            <SortableContext items={statuses.map(s => s.id)} strategy={horizontalListSortingStrategy}>
+        <div className="no-scrollbar flex min-h-0 flex-1 overflow-x-auto">
+          <div className="no-scrollbar flex min-w-full items-start gap-4 pb-1">
+            <SortableContext
+              items={statuses.map((s) => s.id)}
+              strategy={horizontalListSortingStrategy}
+            >
               {statuses.map((status) => (
                 <KanbanColumn
                   key={status.id}
                   id={status.id}
                   title={status.name}
                   tasks={tasks.filter((t) => t.status_id === status.id)}
-                  onTaskClick={handleTaskClick}
-                  onDeleteTask={handleDeleteTask}
-                  onAddTask={handleAddTask}
+                  onTaskClick={openEditDialog}
+                  onDeleteTask={openDeleteDialog}
+                  onAddTask={openCreateDialog}
                 />
               ))}
             </SortableContext>
@@ -318,7 +229,7 @@ export const TaskKanban = ({
 
         <DragOverlay dropAnimation={dropAnimation}>
           {activeColumn && (
-            <div className="w-[260px] opacity-90 shadow-2xl scale-105 -rotate-2 cursor-grabbing pointer-events-none transition-transform">
+            <div className="pointer-events-none scale-105 -rotate-2 cursor-grabbing transition-transform">
               <KanbanColumn
                 id={activeColumn.id}
                 title={activeColumn.name}
@@ -330,12 +241,8 @@ export const TaskKanban = ({
             </div>
           )}
           {activeTask && (
-            <div className="w-[260px] opacity-90 shadow-2xl scale-105 -rotate-2 cursor-grabbing pointer-events-none transition-transform">
-              <KanbanCard 
-                task={activeTask} 
-                onClick={() => {}} 
-                isOverlay 
-              />
+            <div className="pointer-events-none scale-105 -rotate-2 cursor-grabbing transition-transform">
+              <KanbanCard task={activeTask} onClick={() => {}} isOverlay />
             </div>
           )}
         </DragOverlay>
