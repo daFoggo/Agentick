@@ -62,11 +62,11 @@ Font conventions for UI:
 | `--card-fore` / `--pop-fore` | `0.22 0.025 243.72` | `0.98 0.005 243.72` | Text on card, popover |
 | `--primary` | `0.6984 0.1458 243.72` | `0.6984 0.1458 243.72` | Primary color (vibrant light blue) |
 | `--primary-foreground` | `0.99 0.003 243.72` | `0.99 0.003 243.72` | Text on primary background |
-| `--secondary` | `0.95 0.015 243.72` | `0.26 0.02 243.72` | Secondary background |
+| `--secondary` | `0.95 0.015 243.72` | `0.30 0.02 243.72` | Secondary background |
 | `--secondary-foreground` | `0.35 0.08 243.72` | `0.98 0.005 243.72` | Secondary text |
-| `--muted` | `0.965 0.01 243.72` | `0.24 0.018 243.72` | Soft muted background |
+| `--muted` | `0.965 0.01 243.72` | `0.27 0.018 243.72` | Soft muted background |
 | `--muted-foreground` | `0.52 0.025 243.72` | `0.72 0.025 243.72` | Muted/secondary text |
-| `--accent` | `0.94 0.022 243.72` | `0.28 0.025 243.72` | Accent hover background |
+| `--accent` | `0.94 0.022 243.72` | `0.33 0.025 243.72` | Accent hover background |
 | `--accent-foreground` | `0.25 0.07 243.72` | `0.98 0.005 243.72` | Accent hover text |
 | `--destructive` | `0.6 0.18 25` | `0.72 0.19 22.216` | Error, delete actions (red) |
 | `--border` | `0.91 0.012 243.72` | `1 0 0 / 12%` | Borders |
@@ -80,7 +80,7 @@ Font conventions for UI:
 | `--sidebar-foreground` | `0.22 0.025 243.72` | `0.98 0.005 243.72` |
 | `--sidebar-primary` | `0.6984 0.1458 243.72` | `0.6984 0.1458 243.72` |
 | `--sidebar-primary-foreground` | `0.99 0.003 243.72` | `0.99 0.003 243.72` |
-| `--sidebar-accent` | `0.94 0.022 243.72` | `0.28 0.025 243.72` |
+| `--sidebar-accent` | `0.94 0.022 243.72` | `0.33 0.025 243.72` |
 | `--sidebar-accent-foreground` | `0.22 0.025 243.72` | `0.98 0.005 243.72` |
 | `--sidebar-border` | `0.91 0.012 243.72` | `1 0 0 / 12%` |
 | `--sidebar-ring` | `0.6984 0.1458 243.72` | `0.6984 0.1458 243.72` |

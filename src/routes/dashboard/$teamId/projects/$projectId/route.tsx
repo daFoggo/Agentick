@@ -73,7 +73,7 @@ function RouteComponent() {
 	return (
 		<div
 			className={cn(
-				"flex flex-col gap-4",
+				"flex flex-col gap-4 min-w-0",
 				isFixedHeight && "h-full overflow-hidden",
 			)}
 		>
@@ -85,7 +85,7 @@ function RouteComponent() {
 					hide={hideViewModeList}
 				/>
 			</div>
-			<div className={cn("flex-1", isFixedHeight && "overflow-hidden")}>
+			<div className={cn("flex-1 min-w-0", isFixedHeight && "overflow-hidden")}>
 				<Outlet />
 			</div>
 		</div>
