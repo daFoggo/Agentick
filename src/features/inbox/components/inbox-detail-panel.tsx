@@ -127,6 +127,23 @@ export const InboxDetailPanel = ({ item }: IInboxDetailPanelProps) => {
             {new Date(item.created_at).toLocaleString()}
           </span>
           <div className="text-xl font-bold">{item.title}</div>
+          {/* Show project & team context for task notifications */}
+          {item.type === "TASK_ASSIGNED" && item.data && (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-0.5">
+              {(item.data.project_name as string | undefined) && (
+                <CardDescription className="flex items-center gap-1 text-xs">
+                  <span className="font-medium text-foreground/70">Project:</span>
+                  <span>{item.data.project_name as string}</span>
+                </CardDescription>
+              )}
+              {(item.data.team_name as string | undefined) && (
+                <CardDescription className="flex items-center gap-1 text-xs">
+                  <span className="font-medium text-foreground/70">Team:</span>
+                  <span>{item.data.team_name as string}</span>
+                </CardDescription>
+              )}
+            </div>
+          )}
         </div>
         <div className="ml-4 flex items-center gap-1">
           <InboxActionButton

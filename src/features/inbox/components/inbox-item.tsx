@@ -18,7 +18,10 @@ import {
   BookmarkCheck,
   CheckCircle2,
   Circle,
+  ClipboardList,
+  FolderKanban,
   Trash2,
+  Users,
 } from "lucide-react"
 import {
   deleteInboxFn,
@@ -27,9 +30,16 @@ import {
   unarchiveInboxFn,
 } from "../functions"
 import { inboxKeys } from "../queries"
-import type { TInboxItem } from "../schemas"
+import type { TInboxItem, TInboxType } from "../schemas"
 import { useInboxStore } from "@/stores/use-inbox-store"
 import { InboxActionButton } from "./inbox-action-button"
+
+const TYPE_CONFIG: Record<TInboxType, { label: string; className: string }> = {
+  INVITATION: { label: "Invitation", className: "border-primary/20 bg-primary/10 text-primary" },
+  TASK_ASSIGNED: { label: "Task", className: "border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400" },
+  PROJECT_UPDATE: { label: "Project", className: "border-violet-500/20 bg-violet-500/10 text-violet-600 dark:text-violet-400" },
+  SYSTEM: { label: "System", className: "" },
+}
 
 interface IInboxItemProps {
   item: TInboxItem
@@ -158,15 +168,37 @@ export const InboxItem = ({ item, isSelected }: IInboxItemProps) => {
           </CardAction>
         </CardHeader>
 
-        <CardFooter className="flex items-center justify-between gap-2 border-none bg-transparent">
-          <Badge variant={item.type === "INVITATION" ? "default" : "secondary"}>
-            {item.type}
-          </Badge>
-          <span className="text-xs font-medium text-muted-foreground/60">
-            {formatDistanceToNow(new Date(item.created_at), {
-              addSuffix: true,
-            })}
-          </span>
+        <CardFooter className="flex flex-col items-start gap-1.5 border-none bg-transparent">
+          {/* Task metadata: project & team */}
+          {item.type === "TASK_ASSIGNED" && item.data && (
+            <div className="flex w-full flex-wrap items-center gap-1.5">
+              {item.data.project_name && (
+                <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <FolderKanban className="size-3" />
+                  <span className="max-w-[100px] truncate font-medium">{item.data.project_name as string}</span>
+                </span>
+              )}
+              {item.data.team_name && (
+                <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <span className="text-muted-foreground/40">·</span>
+                  <Users className="size-3" />
+                  <span className="max-w-[100px] truncate font-medium">{item.data.team_name as string}</span>
+                </span>
+              )}
+            </div>
+          )}
+          <div className="flex w-full items-center justify-between">
+            <Badge
+              variant="outline"
+              className={cn("text-[10px] font-semibold", TYPE_CONFIG[item.type]?.className)}
+            >
+              {item.type === "TASK_ASSIGNED" && <ClipboardList className="mr-1 size-2.5" />}
+              {TYPE_CONFIG[item.type]?.label ?? item.type}
+            </Badge>
+            <span className="text-xs font-medium text-muted-foreground/60">
+              {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
+            </span>
+          </div>
         </CardFooter>
       </Card>
     </TooltipProvider>

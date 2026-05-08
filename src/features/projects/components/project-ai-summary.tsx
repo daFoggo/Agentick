@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-export function ProjectAISummary({ projectId }: { projectId?: string }) {
+export function ProjectAISummary({ projectId: _projectId }: { projectId?: string }) {
   return (
     <Card>
       <CardHeader>

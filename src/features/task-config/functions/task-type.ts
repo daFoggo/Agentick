@@ -12,7 +12,7 @@ import {
   fetchTaskTypeById,
   fetchTaskTypes,
   updateTaskType,
-} from "../servers"
+} from "../servers/task-type"
 import { withProjectId } from "./base"
 
 export const getTaskTypesFn = createServerFn({ method: "GET" })

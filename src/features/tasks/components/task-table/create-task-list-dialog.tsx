@@ -44,6 +44,7 @@ interface ICreateTaskListDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   options: ITaskListDialogOptions
+  defaultStatusId?: string
 }
 
 export const CreateTaskListDialog = ({
@@ -52,6 +53,7 @@ export const CreateTaskListDialog = ({
   open,
   onOpenChange,
   options,
+  defaultStatusId,
 }: ICreateTaskListDialogProps) => {
   const { create } = useTaskMutations()
 
@@ -63,7 +65,7 @@ export const CreateTaskListDialog = ({
     defaultValues: {
       title: "",
       description: "",
-      status_id: defaults.statusId,
+      status_id: defaultStatusId || defaults.statusId,
       type_id: defaults.typeId,
       priority_id: defaults.priorityId,
       assigner_id: defaults.assignerId,
