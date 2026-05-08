@@ -186,7 +186,7 @@ export function BigCalendarEventContent({
           </span>
           {Boolean(event.meta?.location) && (
             <span
-              className="truncate text-[10px] font-bold tracking-wider uppercase opacity-50"
+              className="truncate text-xs font-bold tracking-wider uppercase opacity-50"
               style={{ color: finalColor }}
             >
               {String(event.meta?.location)}

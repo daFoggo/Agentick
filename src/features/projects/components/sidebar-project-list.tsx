@@ -233,7 +233,7 @@ const ProjectListItem = ({
     >
       <div className="mb-1 flex items-center justify-between gap-2">
         <span className="truncate text-xs font-semibold">{project.name}</span>
-        <div className="flex items-center gap-1 text-[10px] font-medium text-emerald-600">
+        <div className="flex items-center gap-1 text-xs font-medium text-emerald-600">
           <CheckCircle2 className="size-2.5" />
           {completionRate}%
         </div>

@@ -252,7 +252,7 @@ export const EventActionBar = ({
                           )}
                         />
                               {titleErrorMessage && (
-                                <span className="text-[10px] font-medium text-destructive">
+                                <span className="text-xs font-medium text-destructive">
                                   {titleErrorMessage}
                                 </span>
                               )}

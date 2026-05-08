@@ -85,7 +85,7 @@ export function MyTeamsList() {
           {teams.length}
         </Badge>
       </CardHeader>
-      <CardContent className="max-h-[300px] overflow-y-auto">
+      <CardContent className="max-h-72 overflow-y-auto">
         {content}
       </CardContent>
     </Card>

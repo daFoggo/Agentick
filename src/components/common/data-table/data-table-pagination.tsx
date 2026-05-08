@@ -69,13 +69,13 @@ export const DataTablePagination = <TData,>({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex h-7 w-[70px] justify-between px-2 text-xs font-normal"
+                  className="flex h-7 w-16 justify-between px-2 text-xs font-normal"
                 >
                   <span>{pageSize}</span>
                   <ChevronDown className="size-3 text-muted-foreground/70" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="min-w-[70px]">
+              <DropdownMenuContent align="start" className="min-w-16">
                 {pageSizeOptions.map((size) => (
                   <DropdownMenuItem
                     key={size}
@@ -109,7 +109,7 @@ export const DataTablePagination = <TData,>({
               className="size-7"
               onClick={() => table.firstPage()}
               disabled={!table.getCanPreviousPage()}
-              title="First page"
+              aria-label="First page"
             >
               <ChevronFirst className="size-3.5" />
             </Button>
@@ -119,7 +119,7 @@ export const DataTablePagination = <TData,>({
               className="size-7"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
-              title="Previous page"
+              aria-label="Previous page"
             >
               <ChevronLeft className="size-3.5" />
             </Button>
@@ -129,7 +129,7 @@ export const DataTablePagination = <TData,>({
               className="size-7"
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
-              title="Next page"
+              aria-label="Next page"
             >
               <ChevronRight className="size-3.5" />
             </Button>
@@ -139,7 +139,7 @@ export const DataTablePagination = <TData,>({
               className="size-7"
               onClick={() => table.lastPage()}
               disabled={!table.getCanNextPage()}
-              title="Last page"
+              aria-label="Last page"
             >
               <ChevronLast className="size-3.5" />
             </Button>

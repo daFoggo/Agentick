@@ -37,14 +37,14 @@ export function BigCalendarSkeleton({
           headerClassName
         )}
       >
-        <Skeleton className="h-9 w-[60px]" />
+        <Skeleton className="h-9 w-16" />
         <div className="flex items-center gap-1">
           <Skeleton className="h-9 w-9" />
           <Skeleton className="h-9 w-9" />
         </div>
-        <Skeleton className="h-5 w-[150px]" />
+        <Skeleton className="h-5 w-40" />
         <div className="flex-1" />
-        <Skeleton className="h-9 w-[120px]" />
+        <Skeleton className="h-9 w-32" />
       </div>
 
       {/* Skeleton Week View */}
@@ -103,13 +103,13 @@ export function BigCalendarSkeleton({
 
                 {/* Giả lập vài event blocks cho sinh động */}
                 {colIdx === 1 && (
-                  <Skeleton className="absolute left-1 right-1 top-[120px] h-[120px] rounded-md opacity-50" />
+                  <Skeleton className="absolute left-1 right-1 top-32 h-32 rounded-md opacity-50" />
                 )}
-                {colIdx === 3 && (
-                  <Skeleton className="absolute left-1 right-1 top-[60px] h-[60px] rounded-md opacity-50" />
+                {colIdx === 2 && (
+                  <Skeleton className="absolute left-1 right-1 top-16 h-16 rounded-md opacity-50" />
                 )}
                 {colIdx === 4 && (
-                  <Skeleton className="absolute left-1 right-1 top-[240px] h-[180px] rounded-md opacity-50" />
+                  <Skeleton className="absolute left-1 right-1 top-60 h-44 rounded-md opacity-50" />
                 )}
               </div>
             ))}

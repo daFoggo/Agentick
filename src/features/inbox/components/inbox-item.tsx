@@ -173,16 +173,16 @@ export const InboxItem = ({ item, isSelected }: IInboxItemProps) => {
           {item.type === "TASK_ASSIGNED" && item.data && (
             <div className="flex w-full flex-wrap items-center gap-1.5">
               {item.data.project_name && (
-                <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
                   <FolderKanban className="size-3" />
-                  <span className="max-w-[100px] truncate font-medium">{item.data.project_name as string}</span>
+                  <span className="max-w-24 truncate font-medium">{item.data.project_name as string}</span>
                 </span>
               )}
               {item.data.team_name && (
-                <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
                   <span className="text-muted-foreground/40">·</span>
                   <Users className="size-3" />
-                  <span className="max-w-[100px] truncate font-medium">{item.data.team_name as string}</span>
+                  <span className="max-w-24 truncate font-medium">{item.data.team_name as string}</span>
                 </span>
               )}
             </div>
@@ -190,7 +190,7 @@ export const InboxItem = ({ item, isSelected }: IInboxItemProps) => {
           <div className="flex w-full items-center justify-between">
             <Badge
               variant="outline"
-              className={cn("text-[10px] font-semibold", TYPE_CONFIG[item.type]?.className)}
+              className={cn("text-xs font-semibold", TYPE_CONFIG[item.type]?.className)}
             >
               {item.type === "TASK_ASSIGNED" && <ClipboardList className="mr-1 size-2.5" />}
               {TYPE_CONFIG[item.type]?.label ?? item.type}

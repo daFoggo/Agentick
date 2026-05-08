@@ -68,6 +68,7 @@ export const InboxDetailDialog = ({
                     "text-yellow-500 hover:text-yellow-600"
                 )}
                 onClick={handleToggleBookmark}
+                aria-label={item.status === "BOOKMARKED" ? "Remove bookmark" : "Add bookmark"}
               >
                 {item.status === "BOOKMARKED" ? (
                   <BookmarkCheck className="size-4" />
@@ -84,6 +85,7 @@ export const InboxDetailDialog = ({
                     "text-orange-500 hover:text-orange-600"
                 )}
                 onClick={handleToggleRead}
+                aria-label={item.status === "ACTIVE" ? "Mark as read" : "Mark as unread"}
               >
                 {item.status === "ACTIVE" ? (
                   <CheckCircle2 className="size-4" />
@@ -96,6 +98,7 @@ export const InboxDetailDialog = ({
                 size="icon"
                 className="rounded-md hover:text-destructive"
                 onClick={handleDelete}
+                aria-label="Delete"
               >
                 <Trash2 className="size-4" />
               </Button>

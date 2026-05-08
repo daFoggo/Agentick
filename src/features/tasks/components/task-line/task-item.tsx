@@ -38,7 +38,7 @@ export const TaskItem = ({ task }: ITaskItemProps) => {
           {task?.type && <Badge variant="outline">{task.type}</Badge>}
           <span
             className={cn(
-              "min-w-[60px] text-right text-xs font-medium transition-colors",
+              "min-w-16 text-right text-xs font-medium transition-colors",
               task.status_id === "overdue"
                 ? "text-destructive"
                 : "text-muted-foreground group-hover:text-foreground/70"

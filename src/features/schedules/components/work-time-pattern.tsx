@@ -75,7 +75,7 @@ export const WorkTimePattern = () => {
                 <div
                   key={dayIndex}
                   className={cn(
-                    "flex flex-1 flex-col items-center justify-center py-2 text-[10px] font-bold transition-colors",
+                    "flex flex-1 flex-col items-center justify-center py-2 text-xs font-bold transition-colors",
                     day.is_off && "bg-muted/50 text-muted-foreground/30",
                     isFullDay && "bg-primary text-primary-foreground",
                     isPartialDay && "bg-primary/20 text-primary"

@@ -65,6 +65,7 @@ export function ProjectDetailsHeader({
                     params: { teamId, projectId: project.id },
                   })
                 }
+                aria-label="Settings"
               >
                 <Settings className="size-4 text-muted-foreground" />
               </Button>

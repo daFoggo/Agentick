@@ -73,7 +73,7 @@ export const InboxTaskAssignedContent = ({
             <span className="text-xs text-muted-foreground">Project</span>
             <Badge
               variant="outline"
-              className="ml-auto max-w-[160px] truncate border-blue-500/20 bg-blue-500/5 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400"
+              className="ml-auto max-w-40 truncate border-blue-500/20 bg-blue-500/5 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400"
             >
               {projectName}
             </Badge>
@@ -87,7 +87,7 @@ export const InboxTaskAssignedContent = ({
             <span className="text-xs text-muted-foreground">Team</span>
             <Badge
               variant="secondary"
-              className="ml-auto max-w-[160px] truncate px-2 py-0.5 text-xs font-medium"
+              className="ml-auto max-w-40 truncate px-2 py-0.5 text-xs font-medium"
             >
               {teamName}
             </Badge>

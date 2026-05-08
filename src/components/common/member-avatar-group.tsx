@@ -78,7 +78,7 @@ export function MemberAvatarGroup<T>({
         <AvatarGroupCount
           className={cn(
             "bg-muted font-medium text-muted-foreground ring-2 ring-background",
-            size === "sm" && "text-[10px]",
+            size === "sm" && "text-xs",
             size === "default" && "text-xs",
             size === "lg" && "text-sm"
           )}

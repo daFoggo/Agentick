@@ -203,7 +203,7 @@ const TeamTile = ({ team, index }: { team: TTeam; index: number }) => {
             {team.name}
           </div>
           <div className="ml-auto flex items-center gap-1">
-            <kbd className="flex size-3.5 items-center justify-center rounded border border-border bg-muted text-[9px] text-muted-foreground group-hover:hidden">
+            <kbd className="flex size-3.5 items-center justify-center rounded border border-border bg-muted text-xs text-muted-foreground group-hover:hidden">
               {index + 1}
             </kbd>
             <GripVertical className="hidden size-3 cursor-grab text-muted-foreground group-hover:block" />
@@ -249,7 +249,7 @@ const TeamTile = ({ team, index }: { team: TTeam; index: number }) => {
           </ChartContainer>
         </div>
 
-        <div className="flex w-full items-center justify-between text-[11px] text-muted-foreground">
+        <div className="flex w-full items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <span className="font-semibold text-foreground">{totalTasks}</span>
             <span>tasks</span>

@@ -103,7 +103,7 @@ export const KanbanColumn = ({
         <CardContent
           ref={setDroppableRef}
           className={cn(
-            "no-scrollbar flex min-h-[80px] flex-1 flex-col gap-2 overflow-x-hidden overflow-y-auto p-0.5 transition-colors duration-200",
+            "no-scrollbar flex min-h-20 flex-1 flex-col gap-2 overflow-x-hidden overflow-y-auto p-0.5 transition-colors duration-200",
             isOver && !isOverlay
               ? "bg-foreground/5 ring-1 ring-foreground/10"
               : "bg-transparent"

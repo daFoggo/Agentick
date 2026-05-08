@@ -107,7 +107,7 @@ export const WorkTimePatternEditor = ({
                     className="flex-1"
                     size="sm"
                   />
-                  <InputGroupText className="shrink-0 px-1 text-xs font-bold text-muted-foreground/30 uppercase select-none">
+                  <InputGroupText className="shrink-0 px-1 text-xs font-bold text-muted-foreground/30 select-none">
                     to
                   </InputGroupText>
                   <TimePicker
@@ -118,7 +118,7 @@ export const WorkTimePatternEditor = ({
                   />
                 </InputGroup>
               ) : (
-                <div className="px-4text-xs flex h-8 w-full items-center justify-center rounded-lg bg-muted/50 font-bold tracking-widest text-muted-foreground/40 uppercase select-none">
+                <div className="px-4text-xs flex h-8 w-full items-center justify-center rounded-lg bg-muted/50 font-bold tracking-widest text-muted-foreground/40 select-none">
                   Day Off
                 </div>
               )}
