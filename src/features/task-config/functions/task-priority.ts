@@ -12,7 +12,7 @@ import {
   fetchTaskPriorities,
   fetchTaskPriorityById,
   updateTaskPriority,
-} from "../servers"
+} from "../servers/task-priority"
 import { withProjectId } from "./base"
 
 export const getTaskPrioritiesFn = createServerFn({ method: "GET" })
