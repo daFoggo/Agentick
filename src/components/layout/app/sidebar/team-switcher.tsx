@@ -77,7 +77,7 @@ export const TeamSwitcher = () => {
 			<Popover>
 				<PopoverTrigger asChild>
 					<SidebarMenuButton>
-						<div className="relative flex size-6 items-center justify-center overflow-hidden rounded-md border bg-muted/50">
+						<div className="relative flex size-6 items-center justify-center overflow-hidden rounded-md border bg-muted/50 shrink-0">
 							{teamDetail?.avatar_url && teamDetail.avatar_url !== "" ? (
 								<img
 									src={teamDetail.avatar_url}
@@ -93,7 +93,7 @@ export const TeamSwitcher = () => {
 						{isLoadingDetail ? (
 							<Skeleton className="h-6 w-24" />
 						) : (
-							<span className="text-sm font-medium line-clamp-1">
+							<span className="text-sm font-medium line-clamp-1 pr-1">
 								{teamDetail?.name || "Select Team"}
 							</span>
 						)}

@@ -6,6 +6,7 @@ import {
 import {
 	createTaskFn,
 	deleteTaskFn,
+	estimateTaskFn,
 	fetchMyTasksFn,
 	fetchTaskByIdFn,
 	fetchTasksFn,
@@ -24,7 +25,8 @@ export const taskKeys = {
 	details: () => [...taskKeys.all, "detail"] as const,
 	detail: (projectId: string, taskId: string) =>
 		[...taskKeys.details(), projectId, taskId] as const,
-	myTasks: () => [...taskKeys.all, "my-tasks"] as const,
+	myTasks: (teamId?: string) =>
+		[...taskKeys.all, "my-tasks", teamId ?? "all"] as const,
 };
 
 /**
@@ -41,10 +43,18 @@ export const taskQueries = {
 			queryKey: taskKeys.detail(projectId, taskId),
 			queryFn: () => fetchTaskByIdFn({ data: { projectId, taskId } }),
 		}),
-	myTasks: () =>
+	myTasks: (teamId?: string) =>
 		queryOptions({
-			queryKey: taskKeys.myTasks(),
-			queryFn: () => fetchMyTasksFn({ data: { params: { page_size: "all" } } }),
+			queryKey: taskKeys.myTasks(teamId),
+			queryFn: () =>
+				fetchMyTasksFn({
+					data: {
+						params: {
+							page_size: "all",
+							team_id__eq: teamId,
+						},
+					},
+				}),
 		}),
 };
 
@@ -113,5 +123,12 @@ export const useTaskMutations = () => {
 		},
 	});
 
-	return { create, update, remove };
+	const estimate = useMutation({
+		mutationFn: (data: {
+			projectId: string;
+			payload: { title: string; description: string | null };
+		}) => estimateTaskFn({ data }),
+	});
+
+	return { create, update, remove, estimate };
 };

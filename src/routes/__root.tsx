@@ -5,6 +5,7 @@ import {
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { useEffect, useState } from "react";
 import { ErrorFallback, NotFound } from "@/components/common/error-pages";
 import { QueryProvider } from "@/components/common/query-provider";
 import { ThemeProvider } from "@/components/common/theme-provider";
@@ -14,6 +15,16 @@ import { SITE_CONFIG } from "@/configs/site";
 import { getThemeServerFn } from "@/lib/theme";
 import type { IRouterContext } from "@/router";
 import appCss from "../styles.css?url";
+
+function SafeRouterDevtoolsPanel() {
+	const [mounted, setMounted] = useState(false);
+	useEffect(() => {
+		setMounted(true);
+	}, []);
+
+	if (!mounted) return null;
+	return <TanStackRouterDevtoolsPanel />;
+}
 
 export const Route = createRootRouteWithContext<IRouterContext>()({
 	head: () => ({
@@ -67,7 +78,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 					plugins={[
 						{
 							name: "Tanstack Router",
-							render: <TanStackRouterDevtoolsPanel />,
+							render: <SafeRouterDevtoolsPanel />,
 						},
 					]}
 				/>

@@ -253,7 +253,9 @@ export function mapTaskData(
 		order: task.order ?? 0,
 		is_archived: !!task.is_archived,
 		is_deleted: !!task.is_deleted,
-		estimated_hours: 0,
-		actual_hours: 0,
+		estimated_hours:
+			task.estimated_hours != null ? Number(task.estimated_hours) : undefined,
+		actual_hours:
+			task.actual_hours != null ? Number(task.actual_hours) : undefined,
 	};
 }

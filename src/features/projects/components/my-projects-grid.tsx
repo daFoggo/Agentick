@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { ArrowRight, Briefcase, FolderClosed, Plus } from "lucide-react";
-import { useState } from "react";
+import { memo, useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +18,7 @@ import { myProjectsQueryOptions } from "@/features/projects/queries";
 
 import { CreateProjectDialog } from "./create-project-dialog";
 
-export function MyProjectsGrid() {
+export const MyProjectsGrid = memo(() => {
 	const navigate = useNavigate();
 	const { teamId } = useParams({ strict: false });
 	const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -135,4 +135,6 @@ export function MyProjectsGrid() {
 			/>
 		</Card>
 	);
-}
+});
+
+MyProjectsGrid.displayName = "MyProjectsGrid";

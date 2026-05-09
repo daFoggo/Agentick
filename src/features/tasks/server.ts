@@ -120,3 +120,29 @@ export async function deleteTask(
 
 	return response.data;
 }
+
+/**
+ * Ước lượng thời gian hoàn thành của Task sử dụng AI.
+ */
+export async function estimateTask(
+	projectId: string,
+	payload: { title: string; description: string | null },
+): Promise<{
+	suggested_hours: number;
+	rationale: string;
+	reasoning_steps: any;
+}> {
+	const response = await api
+		.post(`projects/${projectId}/tasks/estimate`, {
+			json: payload,
+		})
+		.json<
+			TBaseResponse<{
+				suggested_hours: number;
+				rationale: string;
+				reasoning_steps: any;
+			}>
+		>();
+
+	return response.data;
+}

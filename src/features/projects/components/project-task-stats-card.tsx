@@ -23,7 +23,7 @@ import type { TStatsPeriod } from "@/features/projects/schemas";
 
 type ViewMode = "priority" | "status" | "type";
 
-export const ProjectTaskStatsCard = () => {
+export const ProjectTaskStatsCard = React.memo(() => {
 	const [mode, setMode] = React.useState<ViewMode>("priority");
 	const [period, setPeriod] = React.useState<TStatsPeriod>("weekly");
 	const { projectId } = useParams({ strict: false });
@@ -141,4 +141,6 @@ export const ProjectTaskStatsCard = () => {
 			</CardContent>
 		</Card>
 	);
-};
+});
+
+ProjectTaskStatsCard.displayName = "ProjectTaskStatsCard";
