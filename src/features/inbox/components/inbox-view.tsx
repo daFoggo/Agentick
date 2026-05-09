@@ -28,10 +28,10 @@ export const InboxView = ({ items }: IInboxViewProps) => {
 	}
 
 	return (
-		<div className="h-full w-full">
+		<div className="h-full w-full flex flex-col min-h-0">
 			{/* Desktop View with Resizable Panels */}
-			<div className="hidden lg:flex h-full">
-				<div className="flex-1 rounded-lg border bg-card overflow-hidden">
+			<div className="hidden lg:flex h-full w-full min-h-0">
+				<div className="flex-1 h-full rounded-lg border bg-card overflow-hidden">
 					<ResizablePanelGroup
 						orientation="horizontal"
 						onLayoutChange={(sizes) => {

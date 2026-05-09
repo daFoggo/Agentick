@@ -23,7 +23,6 @@ import { HeaderContent } from "./header-content";
 import { SidebarGroupSection } from "./sidebar-navigation";
 import { TeamSwitcher } from "./team-switcher";
 import { ThemeToggleWrapper } from "./theme-toggle-wrapper";
-import { TimezoneViewer } from "./timezone-viewer";
 import { UserProfile } from "./user-profile";
 
 /**
@@ -90,7 +89,6 @@ export const AppSidebar = () => {
 				{/* Tiện ích Footer */}
 				<SidebarGroup className="mt-auto">
 					<SidebarMenu>
-						<TimezoneViewer />
 						<ThemeToggleWrapper />
 					</SidebarMenu>
 				</SidebarGroup>

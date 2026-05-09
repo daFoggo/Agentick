@@ -1,8 +1,10 @@
-import { ChevronDown, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { MemberAvatarGroup } from "@/components/common/member-avatar-group";
-import { Badge } from "@/components/ui/badge";
+import { TaskPriorityBadge } from "@/components/common/task-priority-badge";
+import { TaskStatusBadge } from "@/components/common/task-status-badge";
+import { TaskTypeBadge } from "@/components/common/task-type-badge";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -14,54 +16,15 @@ import {
 import type { TTask } from "@/features/tasks";
 import {
 	formatCalendarDate,
+	getPriorityOption,
+	getStatusOption,
+	getTypeOption,
 	type ITaskListDialogOptions,
 } from "@/features/tasks/helpers";
 import { useTaskMutations } from "@/features/tasks/queries";
 import { generateColumns } from "@/lib/data-table";
 import { DeleteTaskListDialog } from "./delete-task-list-dialog";
 import { EditTaskListDialog } from "./edit-task-list-dialog";
-
-function getStatusOption(value: string, options: ITaskListDialogOptions) {
-	const normalizedValue = value.toLowerCase().replace(/[^a-z0-9]+/g, "");
-	return options.statuses.find((s) => {
-		const normalizedCatalogValue = s.name
-			.toLowerCase()
-			.replace(/[^a-z0-9]+/g, "");
-		const normalizedLabel = s.name.toLowerCase().replace(/[^a-z0-9]+/g, "");
-		return (
-			normalizedCatalogValue === normalizedValue ||
-			normalizedLabel === normalizedValue
-		);
-	});
-}
-
-function getPriorityOption(value: string, options: ITaskListDialogOptions) {
-	const normalizedValue = value.toLowerCase().replace(/[^a-z0-9]+/g, "");
-	return options.priorities.find((p) => {
-		const normalizedCatalogValue = p.name
-			.toLowerCase()
-			.replace(/[^a-z0-9]+/g, "");
-		const normalizedLabel = p.name.toLowerCase().replace(/[^a-z0-9]+/g, "");
-		return (
-			normalizedCatalogValue === normalizedValue ||
-			normalizedLabel === normalizedValue
-		);
-	});
-}
-
-function getTypeOption(value: string, options: ITaskListDialogOptions) {
-	const normalizedValue = value.toLowerCase().replace(/[^a-z0-9]+/g, "");
-	return options.types.find((t) => {
-		const normalizedCatalogValue = t.name
-			.toLowerCase()
-			.replace(/[^a-z0-9]+/g, "");
-		const normalizedLabel = t.name.toLowerCase().replace(/[^a-z0-9]+/g, "");
-		return (
-			normalizedCatalogValue === normalizedValue ||
-			normalizedLabel === normalizedValue
-		);
-	});
-}
 
 const TaskListActionCell = ({
 	task,
@@ -156,18 +119,46 @@ export const getTaskColumns = (options: ITaskListDialogOptions) =>
 		{
 			accessorKey: "type",
 			label: "Type",
-			size: 100,
-			cell: ({ getValue }) => {
+			size: 110,
+			cell: ({ getValue, row }) => {
+				const task = row.original;
+				const { update } = useTaskMutations();
 				const type = getTypeOption(getValue() as string, options);
 				if (!type) return null;
+
 				return (
-					<span
-						className="inline-flex items-center text-xs font-medium"
-						style={{ color: type.color }}
-						title={type.name}
-					>
-						<span className="max-w-20 truncate">{type.name}</span>
-					</span>
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<TaskTypeBadge name={type.name} color={type.color} interactive />
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="start" className="min-w-32.5">
+							{options.types.map((opt) => (
+								<DropdownMenuItem
+									key={opt.id}
+									className="gap-2"
+									onClick={async (e) => {
+										e.stopPropagation();
+										try {
+											await update.mutateAsync({
+												projectId: task.project_id,
+												taskId: task.id,
+												payload: { type_id: opt.id },
+											});
+											toast.success("Type updated");
+										} catch (_error) {
+											toast.error("Failed to update type");
+										}
+									}}
+								>
+									<span
+										className="size-1.5 shrink-0 rounded-full"
+										style={{ backgroundColor: opt.color }}
+									/>
+									{opt.name}
+								</DropdownMenuItem>
+							))}
+						</DropdownMenuContent>
+					</DropdownMenu>
 				);
 			},
 		},
@@ -201,18 +192,11 @@ export const getTaskColumns = (options: ITaskListDialogOptions) =>
 				return (
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
-							<Badge
-								variant="outline"
-								className="cursor-pointer gap-1.5 font-normal transition-colors duration-300 ease-in-out hover:bg-muted/50"
-								style={{ borderColor: status.color, color: status.color }}
-							>
-								<span
-									className="size-1.5 shrink-0 rounded-full"
-									style={{ backgroundColor: status.color }}
-								/>
-								{status.name}
-								<ChevronDown className="size-3 opacity-50" />
-							</Badge>
+							<TaskStatusBadge
+								name={status.name}
+								color={status.color}
+								interactive
+							/>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent align="start" className="min-w-37.5">
 							{options.statuses.map((opt) => (
@@ -275,17 +259,11 @@ export const getTaskColumns = (options: ITaskListDialogOptions) =>
 				return (
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
-							<Badge
-								variant="secondary"
-								className="cursor-pointer gap-1.5 px-2 font-normal transition-colors duration-300 ease-in-out hover:bg-muted"
-							>
-								<span
-									className="size-1.5 shrink-0 rounded-full"
-									style={{ backgroundColor: priority.color }}
-								/>
-								{priority.name}
-								<ChevronDown className="size-3 opacity-50" />
-							</Badge>
+							<TaskPriorityBadge
+								name={priority.name}
+								color={priority.color}
+								interactive
+							/>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent align="start" className="min-w-32.5">
 							{options.priorities.map((opt) => (

@@ -5,15 +5,16 @@ import {
 	BookmarkCheck,
 	CheckCircle2,
 	Circle,
-	ClipboardList,
-	FolderKanban,
+	FolderClosed,
 	Trash2,
 	Users,
 } from "lucide-react";
+import { TaskTypeBadge } from "@/components/common/task-type-badge";
 import { Badge } from "@/components/ui/badge";
 import {
 	Card,
 	CardAction,
+	CardContent,
 	CardDescription,
 	CardFooter,
 	CardHeader,
@@ -39,15 +40,16 @@ const TYPE_CONFIG: Record<TInboxType, { label: string; className: string }> = {
 	},
 	TASK_ASSIGNED: {
 		label: "Task",
-		className:
-			"border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400",
+		className: "border-primary/20 bg-primary/10 text-primary",
 	},
 	PROJECT_UPDATE: {
 		label: "Project",
-		className:
-			"border-violet-500/20 bg-violet-500/10 text-violet-600 dark:text-violet-400",
+		className: "border-primary/20 bg-primary/10 text-primary",
 	},
-	SYSTEM: { label: "System", className: "" },
+	SYSTEM: {
+		label: "System",
+		className: "border-border bg-muted text-muted-foreground",
+	},
 };
 
 interface IInboxItemProps {
@@ -122,7 +124,7 @@ export const InboxItem = ({ item, isSelected }: IInboxItemProps) => {
 				className={cn(
 					"group relative cursor-pointer transition-all hover:bg-accent/50",
 					item.status === "ACTIVE" && "bg-muted/40",
-					isSelected && "ring-2 ring-primary ring-offset-0",
+					isSelected && " ring-primary ring-offset-0",
 				)}
 				size="sm"
 			>
@@ -140,9 +142,6 @@ export const InboxItem = ({ item, isSelected }: IInboxItemProps) => {
 						)}
 						{item.title}
 					</CardTitle>
-					<CardDescription className="line-clamp-2 text-xs leading-relaxed">
-						{item.content?.substring(0, 300)}
-					</CardDescription>
 					<CardAction className="opacity-0 transition-opacity group-hover:opacity-100">
 						<div className="flex items-center gap-1">
 							<InboxActionButton
@@ -175,32 +174,15 @@ export const InboxItem = ({ item, isSelected }: IInboxItemProps) => {
 							/>
 						</div>
 					</CardAction>
+					<CardDescription className="col-span-full line-clamp-2 text-xs leading-relaxed w-full">
+						{item.content?.substring(0, 300)}
+					</CardDescription>
 				</CardHeader>
 
-				<CardFooter className="flex flex-col items-start gap-1.5 border-none bg-transparent">
-					{/* Task metadata: project & team */}
-					{item.type === "TASK_ASSIGNED" && item.data && (
-						<div className="flex w-full flex-wrap items-center gap-1.5">
-							{item.data.project_name && (
-								<span className="flex items-center gap-1 text-xs text-muted-foreground">
-									<FolderKanban className="size-3" />
-									<span className="max-w-24 truncate font-medium">
-										{item.data.project_name as string}
-									</span>
-								</span>
-							)}
-							{item.data.team_name && (
-								<span className="flex items-center gap-1 text-xs text-muted-foreground">
-									<span className="text-muted-foreground/40">·</span>
-									<Users className="size-3" />
-									<span className="max-w-24 truncate font-medium">
-										{item.data.team_name as string}
-									</span>
-								</span>
-							)}
-						</div>
-					)}
-					<div className="flex w-full items-center justify-between">
+				<CardContent>
+					{item.type === "TASK_ASSIGNED" ? (
+						<TaskTypeBadge name="Task" color="#3b82f6" />
+					) : (
 						<Badge
 							variant="outline"
 							className={cn(
@@ -208,12 +190,35 @@ export const InboxItem = ({ item, isSelected }: IInboxItemProps) => {
 								TYPE_CONFIG[item.type]?.className,
 							)}
 						>
-							{item.type === "TASK_ASSIGNED" && (
-								<ClipboardList className="mr-1 size-2.5" />
-							)}
 							{TYPE_CONFIG[item.type]?.label ?? item.type}
 						</Badge>
-						<span className="text-xs font-medium text-muted-foreground/60">
+					)}
+				</CardContent>
+
+				<CardFooter className="flex flex-col items-start gap-1.5 border-none bg-transparent">
+					<div className="flex w-full items-center justify-between">
+						{item.type === "TASK_ASSIGNED" && item.data && (
+							<div className="flex w-full flex-wrap items-center gap-1.5">
+								{item.data.project_name && (
+									<span className="flex items-center gap-1 text-xs text-muted-foreground">
+										<FolderClosed className="size-3" />
+										<span className="max-w-24 truncate font-medium">
+											{item.data.project_name as string}
+										</span>
+									</span>
+								)}
+								{item.data.team_name && (
+									<span className="flex items-center gap-1 text-xs text-muted-foreground">
+										<span className="text-muted-foreground/40">·</span>
+										<Users className="size-3" />
+										<span className="max-w-24 truncate font-medium">
+											{item.data.team_name as string}
+										</span>
+									</span>
+								)}
+							</div>
+						)}
+						<span className="text-xs font-medium text-muted-foreground/60 shrink-0">
 							{formatDistanceToNow(new Date(item.created_at), {
 								addSuffix: true,
 							})}

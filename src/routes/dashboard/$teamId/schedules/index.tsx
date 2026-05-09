@@ -29,9 +29,6 @@ import type { IBigCalendarEvent } from "@/types/big-calendar";
 
 export const Route = createFileRoute("/dashboard/$teamId/schedules/")({
 	loader: async ({ context, params }) => {
-		const userData = await context.queryClient.ensureQueryData(
-			userQueries.me(),
-		);
 		await Promise.all([
 			context.queryClient.ensureQueryData(mySchedulesQueryOptions()),
 			context.queryClient.ensureQueryData(userQueries.me()),
@@ -41,7 +38,6 @@ export const Route = createFileRoute("/dashboard/$teamId/schedules/")({
 			context.queryClient.ensureQueryData(
 				taskQueries.list(undefined, {
 					team_id__eq: params.teamId,
-					assignee_ids__contains: [userData.id],
 					page_size: "all",
 				}),
 			),
@@ -83,7 +79,6 @@ function RouteComponent() {
 	const { data: taskData } = useQuery(
 		taskQueries.list(undefined, {
 			team_id__eq: params.teamId,
-			assignee_ids__contains: userData?.id ? [userData.id] : [],
 			page_size: "all",
 		}),
 	);
@@ -103,12 +98,12 @@ function RouteComponent() {
 			.filter((task) => {
 				if (!task.start_date || !task.due_date) return false;
 
-				// Ensure the current user is assigned to this task
-				const isAssigned =
-					task.assignee_ids?.includes(userData.id) ||
-					task.assignees?.some((a) => a.user_id === userData.id);
+				// Ensure the current user is assigned to this task or is the assigner
+				const isAssignedOrAssigner =
+					task.assignees?.some((a) => a.user_id === userData.id) ||
+					task.assigner?.user_id === userData.id;
 
-				return isAssigned;
+				return isAssignedOrAssigner;
 			})
 			.map((task) => ({
 				id: task.id,

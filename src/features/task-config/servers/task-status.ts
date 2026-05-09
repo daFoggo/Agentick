@@ -49,7 +49,10 @@ export async function createTaskStatus(
 ): Promise<TTaskStatus> {
 	const response = await api
 		.post(buildSectionPath(projectId, "statuses"), {
-			json: TaskStatusCreateSchema.parse(payload),
+			json: TaskStatusCreateSchema.parse({
+				...payload,
+				project_id: projectId,
+			}),
 		})
 		.json<TBaseResponse<TTaskStatus>>();
 

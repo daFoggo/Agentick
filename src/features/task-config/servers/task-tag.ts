@@ -49,7 +49,10 @@ export async function createTaskTag(
 ): Promise<TTaskTag> {
 	const response = await api
 		.post(buildSectionPath(projectId, "tags"), {
-			json: TaskTagCreateSchema.parse(payload),
+			json: TaskTagCreateSchema.parse({
+				...payload,
+				project_id: projectId,
+			}),
 		})
 		.json<TBaseResponse<TTaskTag>>();
 

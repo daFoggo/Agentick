@@ -1,6 +1,7 @@
 import type { CellContext } from "@tanstack/react-table";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { TaskTagBadge } from "@/components/common/task-tag-badge";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -20,11 +21,7 @@ const TagNameCell = ({ row }: CellContext<TTaskTag, any>) => {
 	const tag = row.original;
 	return (
 		<div className="flex items-center gap-2">
-			<div
-				className="size-3 rounded-full"
-				style={{ backgroundColor: tag.color }}
-			/>
-			<span>{tag.name}</span>
+			<TaskTagBadge name={tag.name} color={tag.color} tagVariant="subtle" />
 		</div>
 	);
 };

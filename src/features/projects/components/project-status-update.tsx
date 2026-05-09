@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircle } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { TaskStatusBadge } from "@/components/common/task-status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	Empty,
@@ -69,15 +69,10 @@ export function ProjectStatusUpdate({ projectId }: { projectId: string }) {
 										<div className="truncate font-medium">{it.task_title}</div>
 										<div className="mt-2 flex flex-wrap gap-1.5">
 											{it.new_status_name ? (
-												<Badge variant="outline" className="gap-1.5 ">
-													<span
-														className="size-1.5 shrink-0 rounded-full"
-														style={{
-															backgroundColor: getLatestStatusColor(it),
-														}}
-													/>
-													{getStatusTransition(it)}
-												</Badge>
+												<TaskStatusBadge
+													name={getStatusTransition(it)}
+													color={getLatestStatusColor(it)}
+												/>
 											) : null}
 										</div>
 									</div>

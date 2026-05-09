@@ -116,7 +116,7 @@ export const ProjectTaskStatsCard = () => {
 					>
 						<BarChart data={data} barCategoryGap="20%" barGap={8}>
 							<CartesianGrid strokeDasharray="3 3" vertical={true} />
-							<XAxis dataKey="name" tickLine={false}  />
+							<XAxis dataKey="name" tickLine={false} />
 							<YAxis allowDecimals={false} width={44} />
 							<ChartTooltip
 								content={
