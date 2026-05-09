@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { RadialBar, RadialBarChart } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ChartConfig, ChartContainer } from "@/components/ui/chart";
 
 interface IProjectRiskGaugeProps {
@@ -30,35 +31,40 @@ export const ProjectRiskGauge = memo(
 		];
 
 		return (
-			<div className="col-span-1 rounded-xl border bg-card p-5 shadow-sm relative overflow-hidden">
-				<h3 className="text-sm font-semibold mb-4 text-muted-foreground text-center">
-					Project Risk Index
-				</h3>
-				<div className="relative flex items-center justify-center h-[180px]">
-					<ChartContainer config={gaugeConfig} className="w-full h-full">
-						<RadialBarChart
-							cx="50%"
-							cy="100%"
-							innerRadius="80%"
-							outerRadius="100%"
-							barSize={16}
-							data={gaugeData}
-							startAngle={180}
-							endAngle={0}
-						>
-							<RadialBar background dataKey="value" cornerRadius={10} />
-						</RadialBarChart>
-					</ChartContainer>
-					<div className="absolute bottom-0 text-center">
-						<span className="text-4xl font-black tracking-tighter text-foreground">
-							{overallRiskPct}%
-						</span>
-						<p className="text-xs font-bold mt-1" style={{ color: gaugeColor }}>
-							{gaugeLabel}
-						</p>
+			<Card className="col-span-1">
+				<CardHeader>
+					<CardTitle className="text-center">Project Risk Index</CardTitle>
+				</CardHeader>
+				<CardContent className="relative flex justify-center overflow-hidden">
+					<div className="relative flex h-45 items-center justify-center">
+						<ChartContainer config={gaugeConfig} className="h-full w-full">
+							<RadialBarChart
+								cx="50%"
+								cy="100%"
+								innerRadius="80%"
+								outerRadius="100%"
+								barSize={16}
+								data={gaugeData}
+								startAngle={180}
+								endAngle={0}
+							>
+								<RadialBar background dataKey="value" cornerRadius={10} />
+							</RadialBarChart>
+						</ChartContainer>
+						<div className="absolute bottom-0 text-center">
+							<span className="text-4xl font-black tracking-tighter text-foreground">
+								{overallRiskPct}%
+							</span>
+							<p
+								className="mt-1 text-xs font-bold"
+								style={{ color: gaugeColor }}
+							>
+								{gaugeLabel}
+							</p>
+						</div>
 					</div>
-				</div>
-			</div>
+				</CardContent>
+			</Card>
 		);
 	},
 );

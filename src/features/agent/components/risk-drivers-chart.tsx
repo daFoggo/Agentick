@@ -1,5 +1,6 @@
 import { memo, useMemo } from "react";
 import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	type ChartConfig,
 	ChartContainer,
@@ -56,44 +57,46 @@ export const RiskDriversChart = memo(({ tasks }: IRiskDriversChartProps) => {
 	}, [tasks]);
 
 	return (
-		<div className="col-span-1 rounded-xl border bg-card p-5 shadow-sm">
-			<h3 className="text-sm font-semibold mb-2 text-muted-foreground text-center">
-				Core Risk Drivers
-			</h3>
-			<div className="h-[200px]">
-				<ChartContainer config={radarConfig} className="w-full h-full">
-					<RadarChart cx="50%" cy="50%" outerRadius="65%" data={radarData}>
-						<PolarGrid />
-						<PolarAngleAxis dataKey="subject" fontSize={10} />
-						<Radar
-							name="Risk Factor"
-							dataKey="value"
-							fill="var(--color-value)"
-							stroke="var(--color-value)"
-							fillOpacity={0.25}
-						/>
-						<ChartTooltip
-							content={({ active, payload }) => {
-								if (active && payload?.length) {
-									return (
-										<div className="rounded-lg border bg-background/95 p-2 shadow-xl backdrop-blur-sm text-xs">
-											<p className="font-bold mb-1">{payload[0].name}</p>
-											<p className="text-muted-foreground">
-												Value:{" "}
-												<strong>
-													{Math.round(payload[0].value as number)}%
-												</strong>
-											</p>
-										</div>
-									);
-								}
-								return null;
-							}}
-						/>
-					</RadarChart>
-				</ChartContainer>
-			</div>
-		</div>
+		<Card className="col-span-1">
+			<CardHeader>
+				<CardTitle className="text-center">Core Risk Drivers</CardTitle>
+			</CardHeader>
+			<CardContent>
+				<div className="h-50">
+					<ChartContainer config={radarConfig} className="h-full w-full">
+						<RadarChart cx="50%" cy="50%" outerRadius="65%" data={radarData}>
+							<PolarGrid />
+							<PolarAngleAxis dataKey="subject" fontSize={10} />
+							<Radar
+								name="Risk Factor"
+								dataKey="value"
+								fill="var(--color-value)"
+								stroke="var(--color-value)"
+								fillOpacity={0.25}
+							/>
+							<ChartTooltip
+								content={({ active, payload }) => {
+									if (active && payload?.length) {
+										return (
+											<div className="rounded-lg border bg-background/95 p-2 text-xs shadow-xl backdrop-blur-sm">
+												<p className="mb-1 font-bold">{payload[0].name}</p>
+												<p className="text-muted-foreground">
+													Value:{" "}
+													<strong>
+														{Math.round(payload[0].value as number)}%
+													</strong>
+												</p>
+											</div>
+										);
+									}
+									return null;
+								}}
+							/>
+						</RadarChart>
+					</ChartContainer>
+				</div>
+			</CardContent>
+		</Card>
 	);
 });
 
