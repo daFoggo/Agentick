@@ -93,7 +93,7 @@ export const TeamSwitcher = () => {
 						{isLoadingDetail ? (
 							<Skeleton className="h-6 w-24" />
 						) : (
-							<span className="text-sm font-medium">
+							<span className="text-sm font-medium line-clamp-1">
 								{teamDetail?.name || "Select Team"}
 							</span>
 						)}

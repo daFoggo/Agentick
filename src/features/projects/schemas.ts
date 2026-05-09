@@ -12,6 +12,7 @@ export const ProjectSchema = z.object({
 		.max(255),
 	description: z.string().max(512).optional().nullable(),
 	avatar_url: z.string().url().optional().nullable(),
+	timezone: z.string().optional().nullable(),
 	is_deleted: z.boolean().default(false),
 	created_at: z.string().datetime(),
 	updated_at: z.string().datetime().optional().nullable(),
@@ -25,6 +26,7 @@ export const CreateProjectSchema = z.object({
 		.max(255),
 	description: z.string().max(512).optional(),
 	avatar_url: z.string().url().optional(),
+	timezone: z.string().optional(),
 });
 
 export const UpdateProjectSchema = CreateProjectSchema.omit({
