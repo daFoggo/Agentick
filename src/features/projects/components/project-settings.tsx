@@ -13,7 +13,15 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { TIMEZONES } from "@/constants/timezone";
 import {
 	projectKeys,
 	projectQueryOptions,
@@ -62,6 +70,8 @@ export const ProjectSettings = ({
 			name: project?.name || "",
 			description: project?.description || "",
 			avatar_url: project?.avatar_url || "",
+			timezone:
+				project?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
 		} as TUpdateProjectInput,
 		validators: {
 			onSubmit: UpdateProjectSchema,
@@ -174,6 +184,20 @@ export const ProjectSettings = ({
 						}
 						onUpdate={() => handleFieldUpdate("description")}
 					/>
+
+					<SettingSelectField
+						form={form}
+						name="timezone"
+						label="Timezone"
+						options={TIMEZONES}
+						originalValue={project?.timezone || ""}
+						isPending={update.isPending && updatingField === "timezone"}
+						keepVisible={recentlyUpdatedField === "timezone"}
+						disableAction={
+							update.isPending || recentlyUpdatedField === "timezone"
+						}
+						onUpdate={() => handleFieldUpdate("timezone")}
+					/>
 				</FieldGroup>
 			</div>
 
@@ -234,6 +258,80 @@ const SettingField = ({
 								placeholder={placeholder}
 								aria-invalid={isInvalid}
 							/>
+							<Button
+								type="button"
+								className={`w-20 justify-center ${!shouldShowAction ? "invisible" : ""}`}
+								disabled={disableAction || !isChanged}
+								onClick={onUpdate}
+							>
+								{isPending ? (
+									<Loader2 className="size-4 animate-spin" />
+								) : (
+									<span>Update</span>
+								)}
+							</Button>
+						</div>
+						<FieldError errors={field.state.meta.errors} />
+					</Field>
+				);
+			}}
+		/>
+	);
+};
+
+interface ISettingSelectFieldProps {
+	form: any;
+	name: keyof TUpdateProjectInput;
+	label: string;
+	options: { value: string; label: string }[];
+	originalValue: string | undefined | null;
+	isPending: boolean;
+	keepVisible: boolean;
+	disableAction: boolean;
+	onUpdate: () => void;
+}
+
+const SettingSelectField = ({
+	form,
+	name,
+	label,
+	options,
+	originalValue,
+	isPending,
+	keepVisible,
+	disableAction,
+	onUpdate,
+}: ISettingSelectFieldProps) => {
+	return (
+		<form.Field
+			name={name}
+			children={(field: any) => {
+				const isInvalid =
+					field.state.meta.isTouched && !!field.state.meta.errors.length;
+				const isChanged = field.state.value !== (originalValue || "");
+				const shouldShowAction = isChanged || keepVisible;
+
+				return (
+					<Field data-invalid={isInvalid}>
+						<FieldLabel htmlFor={field.name} className="font-bold">
+							{label}
+						</FieldLabel>
+						<div className="flex items-center gap-2">
+							<Select
+								value={(field.state.value as string) || ""}
+								onValueChange={(val) => field.handleChange(val)}
+							>
+								<SelectTrigger className="w-full h-8">
+									<SelectValue placeholder="Select timezone..." />
+								</SelectTrigger>
+								<SelectContent>
+									{options.map((opt) => (
+										<SelectItem key={opt.value} value={opt.value}>
+											{opt.label}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
 							<Button
 								type="button"
 								className={`w-20 justify-center ${!shouldShowAction ? "invisible" : ""}`}

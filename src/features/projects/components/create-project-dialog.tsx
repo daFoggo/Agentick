@@ -47,6 +47,7 @@ export const CreateProjectDialog = ({
 			name: "",
 			description: "",
 			avatar_url: undefined,
+			timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 		} as TCreateProjectInput,
 		validators: {
 			onSubmit: CreateProjectSchema,

@@ -17,12 +17,13 @@ import {
 	SIDEBAR_TEAM,
 } from "@/constants/sidebar-navigation";
 import { inboxStatsQueryOptions } from "@/features/inbox/queries";
-import { SidebarProjectList } from "@/features/projects";
+import { projectQueryOptions, SidebarProjectList } from "@/features/projects";
 import { useSidebarContextStore } from "@/stores/use-sidebar-context-store";
 import { HeaderContent } from "./header-content";
 import { SidebarGroupSection } from "./sidebar-navigation";
 import { TeamSwitcher } from "./team-switcher";
 import { ThemeToggleWrapper } from "./theme-toggle-wrapper";
+import { TimezoneViewer } from "./timezone-viewer";
 import { UserProfile } from "./user-profile";
 
 /**
@@ -58,6 +59,17 @@ export const AppSidebar = () => {
 		}),
 	};
 
+	const projectMatch = pathname.match(
+		/^\/dashboard\/([^/]+)\/projects\/([^/]+)/,
+	);
+	const projectId = projectMatch ? projectMatch[2] : undefined;
+
+	const { data: project } = useQuery({
+		...projectQueryOptions(projectId || ""),
+		enabled: !!projectId,
+	});
+	const timezone = project?.timezone;
+
 	return (
 		<Sidebar variant="inset">
 			<SidebarHeader>
@@ -89,6 +101,7 @@ export const AppSidebar = () => {
 				{/* Tiện ích Footer */}
 				<SidebarGroup className="mt-auto">
 					<SidebarMenu>
+						<TimezoneViewer timezone={timezone} />
 						<ThemeToggleWrapper />
 					</SidebarMenu>
 				</SidebarGroup>

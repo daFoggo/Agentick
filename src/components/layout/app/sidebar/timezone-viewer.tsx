@@ -7,19 +7,32 @@ import {
 } from "@/components/ui/hover-card";
 import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 
-export const TimezoneViewer = () => {
+interface ITimezoneViewerProps {
+	timezone?: string | null;
+}
+
+export const TimezoneViewer = ({ timezone }: ITimezoneViewerProps) => {
 	const [time, setTime] = useState<string | null>(null);
 
 	useEffect(() => {
-		const fmt = () =>
-			new Date().toLocaleTimeString([], {
-				hour: "2-digit",
-				minute: "2-digit",
-			});
+		const fmt = () => {
+			try {
+				return new Date().toLocaleTimeString([], {
+					hour: "2-digit",
+					minute: "2-digit",
+					timeZone: timezone || undefined,
+				});
+			} catch (_e) {
+				return new Date().toLocaleTimeString([], {
+					hour: "2-digit",
+					minute: "2-digit",
+				});
+			}
+		};
 		setTime(fmt());
 		const id = setInterval(() => setTime(fmt()), 1000);
 		return () => clearInterval(id);
-	}, []);
+	}, [timezone]);
 
 	return (
 		<SidebarMenuItem>
@@ -34,8 +47,14 @@ export const TimezoneViewer = () => {
 						</Badge>
 					</SidebarMenuButton>
 				</HoverCardTrigger>
-				<HoverCardContent align="start">
-					<p>
+				<HoverCardContent align="start" className="space-y-1.5">
+					<p className="font-medium text-xs text-muted-foreground uppercase">
+						Active Timezone
+					</p>
+					<p className="font-mono text-xs font-semibold">
+						{timezone || Intl.DateTimeFormat().resolvedOptions().timeZone}
+					</p>
+					<p className="text-xs text-muted-foreground leading-normal">
 						Current project time in the project's timezone. All dates, ranges,
 						and graphs you see are matched to this timezone.
 					</p>

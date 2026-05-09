@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { projectQueryOptions } from "@/features/projects/queries";
@@ -15,8 +15,8 @@ export const Route = createFileRoute(
 function ProjectListView() {
 	const { projectId } = Route.useParams();
 
-	const { data: project } = useQuery(projectQueryOptions(projectId));
-	const { data: tasksResponse } = useQuery(
+	const { data: project } = useSuspenseQuery(projectQueryOptions(projectId));
+	const { data: tasksResponse } = useSuspenseQuery(
 		taskQueries.list(projectId, {
 			ordering: "-id",
 			page: 1,
@@ -26,13 +26,13 @@ function ProjectListView() {
 	);
 
 	const commonParams = { page: 1, page_size: "all" } as const;
-	const { data: statusesResponse } = useQuery(
+	const { data: statusesResponse } = useSuspenseQuery(
 		taskConfigQueries.statuses(projectId, commonParams),
 	);
-	const { data: typesResponse } = useQuery(
+	const { data: typesResponse } = useSuspenseQuery(
 		taskConfigQueries.types(projectId, commonParams),
 	);
-	const { data: prioritiesResponse } = useQuery(
+	const { data: prioritiesResponse } = useSuspenseQuery(
 		taskConfigQueries.priorities(projectId, commonParams),
 	);
 
