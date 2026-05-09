@@ -16,6 +16,54 @@ export interface ITaskListDialogOptions {
 	members: TProjectMember[];
 }
 
+export function getStatusOption(
+	value: string,
+	options: ITaskListDialogOptions,
+) {
+	const normalizedValue = value.toLowerCase().replace(/[^a-z0-9]+/g, "");
+	return options.statuses.find((s) => {
+		const normalizedCatalogValue = s.name
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, "");
+		const normalizedLabel = s.name.toLowerCase().replace(/[^a-z0-9]+/g, "");
+		return (
+			normalizedCatalogValue === normalizedValue ||
+			normalizedLabel === normalizedValue
+		);
+	});
+}
+
+export function getPriorityOption(
+	value: string,
+	options: ITaskListDialogOptions,
+) {
+	const normalizedValue = value.toLowerCase().replace(/[^a-z0-9]+/g, "");
+	return options.priorities.find((p) => {
+		const normalizedCatalogValue = p.name
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, "");
+		const normalizedLabel = p.name.toLowerCase().replace(/[^a-z0-9]+/g, "");
+		return (
+			normalizedCatalogValue === normalizedValue ||
+			normalizedLabel === normalizedValue
+		);
+	});
+}
+
+export function getTypeOption(value: string, options: ITaskListDialogOptions) {
+	const normalizedValue = value.toLowerCase().replace(/[^a-z0-9]+/g, "");
+	return options.types.find((t) => {
+		const normalizedCatalogValue = t.name
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, "");
+		const normalizedLabel = t.name.toLowerCase().replace(/[^a-z0-9]+/g, "");
+		return (
+			normalizedCatalogValue === normalizedValue ||
+			normalizedLabel === normalizedValue
+		);
+	});
+}
+
 /**
  * Chuyển đổi giá trị sang đối tượng Date cho các Component lịch/ngày tháng
  */

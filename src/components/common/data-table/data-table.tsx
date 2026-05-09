@@ -34,6 +34,7 @@ export interface IDataTableProps<TData> {
 		table: import("@tanstack/react-table").Table<TData>,
 	) => React.ReactNode;
 	defaultGrouping?: GroupingState;
+	defaultExpanded?: ExpandedState;
 	defaultColumnPinning?: ColumnPinningState;
 	defaultPageSize?: number;
 	pageSizeOptions?: number[];
@@ -62,6 +63,7 @@ const DataTableInner = <TData,>({
 	getSubRows,
 	renderGroupRow,
 	defaultGrouping = [],
+	defaultExpanded = true,
 	defaultColumnPinning = {},
 	defaultPageSize = 20,
 	pageSizeOptions,
@@ -82,7 +84,7 @@ const DataTableInner = <TData,>({
 	const [columnPinning, setColumnPinning] =
 		useState<ColumnPinningState>(defaultColumnPinning);
 	const [grouping, setGrouping] = useState<GroupingState>(defaultGrouping);
-	const [expanded, setExpanded] = useState<ExpandedState>({});
+	const [expanded, setExpanded] = useState<ExpandedState>(defaultExpanded);
 
 	const [pagination, setPagination] = useState<PaginationState>({
 		pageIndex: 0,
@@ -184,6 +186,7 @@ const DataTableInner = <TData,>({
 	useEffect(() => {
 		if (
 			grouping.length > 0 &&
+			defaultExpanded !== true &&
 			(expanded === true || Object.keys(expanded).length === 0)
 		) {
 			const rows = table.getRowModel().flatRows;
@@ -194,7 +197,7 @@ const DataTableInner = <TData,>({
 		}
 		// Only run when data or grouping changes initially
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [grouping.length, table, expanded]);
+	}, [grouping.length, table, expanded, defaultExpanded]);
 
 	// ── Handle reorder via DragDropManager ──────────────────────────────────
 	const unpinnedLeafColumns = table.getCenterLeafColumns();

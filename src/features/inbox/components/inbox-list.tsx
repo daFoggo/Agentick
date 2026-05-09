@@ -7,7 +7,6 @@ import {
 	EmptyMedia,
 	EmptyTitle,
 } from "@/components/ui/empty";
-import { Separator } from "@/components/ui/separator";
 import { useInboxStore } from "@/stores/use-inbox-store";
 import type { TInboxItem } from "../schemas";
 import { InboxItem } from "./inbox-item";
@@ -36,11 +35,10 @@ export const InboxList = ({ items }: IInboxListProps) => {
 	}
 
 	return (
-		<div>
-			{items.map((item, index) => (
+		<div className="flex flex-col gap-4">
+			{items.map((item) => (
 				<Fragment key={item.id}>
 					<InboxItem item={item} isSelected={selectedItemId === item.id} />
-					{index < items.length - 1 && <Separator />}
 				</Fragment>
 			))}
 		</div>

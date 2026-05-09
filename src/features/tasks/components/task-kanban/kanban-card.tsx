@@ -3,7 +3,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { format } from "date-fns";
 import { AlignLeft, Clock } from "lucide-react";
 import { MemberAvatarGroup } from "@/components/common/member-avatar-group";
-import { Badge } from "@/components/ui/badge";
+import { TaskTypeBadge } from "@/components/common/task-type-badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { TTask } from "../../schemas";
@@ -69,22 +69,14 @@ export const KanbanCard = ({ task, onClick, isOverlay }: KanbanCardProps) => {
 
 					{/* Type/Category Badge */}
 					{task.type && (
-						<Badge
-							variant="outline"
-							className="flex w-fit items-center gap-1.5 rounded-full text-xs font-medium"
-							style={{
-								borderColor: task.type_color
-									? `${task.type_color}30`
-									: "currentColor",
-								color: task.type_color || "inherit",
-							}}
-						>
-							<span
-								className="size-1.5 rounded-full"
-								style={{ backgroundColor: task.type_color || "currentColor" }}
-							/>
-							<span>{task.type}</span>
-						</Badge>
+						<TaskTypeBadge
+							name={typeof task.type === "object" ? task.type.name : task.type}
+							color={
+								typeof task.type === "object"
+									? task.type.color
+									: task.type_color
+							}
+						/>
 					)}
 
 					{/* Footer: Icons & Assignee */}

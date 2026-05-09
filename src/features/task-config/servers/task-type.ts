@@ -49,7 +49,10 @@ export async function createTaskType(
 ): Promise<TTaskType> {
 	const response = await api
 		.post(buildSectionPath(projectId, "types"), {
-			json: TaskTypeCreateSchema.parse(payload),
+			json: TaskTypeCreateSchema.parse({
+				...payload,
+				project_id: projectId,
+			}),
 		})
 		.json<TBaseResponse<TTaskType>>();
 

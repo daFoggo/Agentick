@@ -59,9 +59,24 @@ export const ProjectTaskSchema = z.object({
 	is_archived: z.boolean(),
 	is_deleted: z.boolean(),
 	// Các trường ảo hỗ trợ mapping UI, không nhất thiết có trong API response gốc hoặc được Join
-	type: z.string().optional(),
-	status: z.string().optional(),
-	priority: z.string().optional(),
+	type: z
+		.union([
+			z.string(),
+			z.object({ id: z.string(), name: z.string(), color: z.string() }),
+		])
+		.optional(),
+	status: z
+		.union([
+			z.string(),
+			z.object({ id: z.string(), name: z.string(), color: z.string() }),
+		])
+		.optional(),
+	priority: z
+		.union([
+			z.string(),
+			z.object({ id: z.string(), name: z.string(), color: z.string() }),
+		])
+		.optional(),
 	estimated_hours: z.number().optional(),
 	actual_hours: z.number().optional(),
 });
@@ -73,6 +88,7 @@ export type TTask = z.infer<typeof ProjectTaskSchema> & {
 	tags?: TTag[];
 	phase?: TPhase;
 	assignees?: TProjectMember[];
+	assigner?: TProjectMember;
 	type_color?: string;
 	status_color?: string;
 	priority_color?: string;

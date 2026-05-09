@@ -9,7 +9,7 @@ import { persist } from "zustand/middleware";
 import type { TTaskStatus } from "@/features/task-config";
 import type { TTask } from "@/features/tasks/schemas";
 
-interface KanbanState {
+interface IKanbanStore {
 	// Persisted state
 	columnOrders: Record<string, string[]>; // projectId -> statusIds[]
 	setColumnOrder: (projectId: string, statusIds: string[]) => void;
@@ -56,7 +56,7 @@ interface KanbanState {
 	) => void;
 }
 
-export const useKanbanStore = create<KanbanState>()(
+export const useKanbanStore = create<IKanbanStore>()(
 	persist(
 		(set, get) => ({
 			columnOrders: {},

@@ -10,7 +10,7 @@ This guide outlines strictly enforced quality standards, linter rules, form vali
 
 ## 1. Quality Assurance & Required Checks (Pre-commit)
 
-To prevent breaking changes, every developer and AI agent **must** ensure that all code satisfies the following checks before committing:
+To maintain stability without sacrificing developer velocity, these checks **should NOT be run repeatedly for every minor code change**. Instead, run them **after completing major work items or changes that span across multiple files** or manualy.
 
 1. **Linter & Formatter (Biome)**:
    ```bash

@@ -49,7 +49,10 @@ export async function createTaskPriority(
 ): Promise<TTaskPriority> {
 	const response = await api
 		.post(buildSectionPath(projectId, "priorities"), {
-			json: TaskPriorityCreateSchema.parse(payload),
+			json: TaskPriorityCreateSchema.parse({
+				...payload,
+				project_id: projectId,
+			}),
 		})
 		.json<TBaseResponse<TTaskPriority>>();
 

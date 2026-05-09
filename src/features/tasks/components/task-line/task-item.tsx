@@ -1,7 +1,8 @@
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { ArrowRight, Circle } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { TaskPriorityBadge } from "@/components/common/task-priority-badge";
+import { TaskTypeBadge } from "@/components/common/task-type-badge";
 import { cn } from "@/lib/utils";
 import type { TTask } from "../../schemas";
 
@@ -35,7 +36,35 @@ export const TaskItem = ({ task }: ITaskItemProps) => {
 					{task.title}
 				</span>
 				<div className="flex shrink-0 items-center gap-2">
-					{task?.type && <Badge variant="outline">{task.type}</Badge>}
+					{(() => {
+						const typeObj = task?.type;
+						const typeName =
+							typeof typeObj === "object" ? typeObj.name : typeObj;
+						const typeColor =
+							typeof typeObj === "object" ? typeObj.color : task?.type_color;
+
+						const priorityObj = task?.priority;
+						const priorityName =
+							typeof priorityObj === "object" ? priorityObj.name : priorityObj;
+						const priorityColor =
+							typeof priorityObj === "object"
+								? priorityObj.color
+								: task?.priority_color;
+
+						return (
+							<>
+								{typeName && (
+									<TaskTypeBadge name={typeName} color={typeColor} />
+								)}
+								{priorityName && (
+									<TaskPriorityBadge
+										name={priorityName}
+										color={priorityColor}
+									/>
+								)}
+							</>
+						);
+					})()}
 					<span
 						className={cn(
 							"min-w-16 text-right text-xs font-medium transition-colors",
