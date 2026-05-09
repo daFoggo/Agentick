@@ -31,9 +31,9 @@ export const ProjectRiskDashboard = memo(
 						<Skeleton className="h-8 w-36 rounded" />
 					</div>
 					<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-						<Skeleton className="col-span-1 h-[250px] rounded-xl" />
-						<Skeleton className="col-span-1 md:col-span-2 h-[250px] rounded-xl" />
-						<Skeleton className="col-span-1 h-[250px] rounded-xl" />
+						<Skeleton className="col-span-1 h-62.5 rounded-xl" />
+						<Skeleton className="col-span-1 md:col-span-2 h-62.5 rounded-xl" />
+						<Skeleton className="col-span-1 h-62.5 rounded-xl" />
 					</div>
 				</div>
 			);
@@ -57,7 +57,7 @@ export const ProjectRiskDashboard = memo(
 						)}
 						{analyzeProjectRisk.isPending
 							? "Analyzing..."
-							: "Analyze Project Risk"}
+							: "Review Project Risk"}
 					</Button>
 				</div>
 

@@ -9,7 +9,7 @@ interface IProjectRiskGaugeProps {
 
 const gaugeConfig = {
 	riskIndex: {
-		label: "Risk Index",
+		label: "Risk Score",
 	},
 } satisfies ChartConfig;
 
@@ -17,13 +17,13 @@ export const ProjectRiskGauge = memo(
 	({ overallRiskIndex }: IProjectRiskGaugeProps) => {
 		const overallRiskPct = Math.round(overallRiskIndex * 100);
 		let gaugeColor = "var(--chart-2)";
-		let gaugeLabel = "Safe";
+		let gaugeLabel = "Low Risk";
 		if (overallRiskPct >= 70) {
 			gaugeColor = "var(--destructive)";
-			gaugeLabel = "Critical";
+			gaugeLabel = "High Risk";
 		} else if (overallRiskPct >= 40) {
 			gaugeColor = "var(--chart-3)";
-			gaugeLabel = "Attention Needed";
+			gaugeLabel = "Moderate Risk";
 		}
 
 		const gaugeData = [
@@ -33,7 +33,7 @@ export const ProjectRiskGauge = memo(
 		return (
 			<Card className="col-span-1">
 				<CardHeader>
-					<CardTitle className="text-center">Project Risk Index</CardTitle>
+					<CardTitle className="text-center">Project Risk Score</CardTitle>
 				</CardHeader>
 				<CardContent className="relative flex justify-center overflow-hidden">
 					<div className="relative flex h-45 items-center justify-center">
@@ -52,7 +52,7 @@ export const ProjectRiskGauge = memo(
 							</RadialBarChart>
 						</ChartContainer>
 						<div className="absolute bottom-0 text-center">
-							<span className="text-4xl font-black tracking-tighter text-foreground">
+							<span className="text-3xl font-bold text-foreground">
 								{overallRiskPct}%
 							</span>
 							<p

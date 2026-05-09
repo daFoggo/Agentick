@@ -19,7 +19,6 @@ import {
 	type ChartConfig,
 	ChartContainer,
 	ChartTooltip,
-	ChartTooltipContent,
 } from "@/components/ui/chart";
 import type { TRiskStatsTask } from "../schemas";
 
@@ -28,10 +27,10 @@ interface IRiskMatrixChartProps {
 }
 
 const scatterConfig = {
-	critical: { label: "Critical", color: "var(--destructive)" },
-	high: { label: "High", color: "var(--chart-4)" },
-	medium: { label: "Warning", color: "var(--chart-3)" },
-	low: { label: "Safe", color: "var(--chart-2)" },
+	critical: { label: "High Risk", color: "var(--destructive)" },
+	high: { label: "Elevated Risk", color: "var(--chart-4)" },
+	medium: { label: "Watch List", color: "var(--chart-3)" },
+	low: { label: "Low Risk", color: "var(--chart-2)" },
 } satisfies ChartConfig;
 
 export const RiskMatrixChart = memo(({ tasks }: IRiskMatrixChartProps) => {
@@ -60,11 +59,11 @@ export const RiskMatrixChart = memo(({ tasks }: IRiskMatrixChartProps) => {
 	return (
 		<Card className="col-span-1 md:col-span-2">
 			<CardHeader>
-				<CardTitle>Risk Matrix</CardTitle>
-				<CardDescription>X: Days Remaining | Y: Risk Score</CardDescription>
+				<CardTitle>Task Risk Map</CardTitle>
+				<CardDescription>X: Days Left | Y: Risk Score</CardDescription>
 			</CardHeader>
 			<CardContent>
-				<div className="h-[220px]">
+				<div className="h-55">
 					<ChartContainer config={scatterConfig} className="h-full w-full">
 						<ScatterChart
 							margin={{ top: 10, right: 20, bottom: 10, left: -20 }}
@@ -73,10 +72,10 @@ export const RiskMatrixChart = memo(({ tasks }: IRiskMatrixChartProps) => {
 							<XAxis
 								type="number"
 								dataKey="x"
-								name="Days Remaining"
+								name="Days Left"
 								unit=" days"
 								fontSize={12}
-								domain={["dataMin - 1", "dataMax + 2"]}
+								domain={["dataMin", "dataMax + 2"]}
 								reversed={true}
 							/>
 							<YAxis
@@ -91,7 +90,7 @@ export const RiskMatrixChart = memo(({ tasks }: IRiskMatrixChartProps) => {
 								type="number"
 								dataKey="z"
 								range={[50, 400]}
-								name="Est. Hours"
+								name="Estimated Effort"
 							/>
 							<ChartTooltip
 								cursor={{ strokeDasharray: "3 3" }}
@@ -102,11 +101,11 @@ export const RiskMatrixChart = memo(({ tasks }: IRiskMatrixChartProps) => {
 											<div className="w-80 max-w-[320px] rounded-lg border bg-background/95 p-3 shadow-xl backdrop-blur-sm">
 												<p className="mb-1 text-sm font-bold">{data.title}</p>
 												<p className="mb-2 text-xs text-muted-foreground">
-													Assignee: {data.assignee_name}
+													Owner: {data.assignee_name}
 												</p>
 												<div className="mb-2 grid grid-cols-2 gap-2 text-xs">
 													<div>
-														<span className="opacity-70">Risk:</span>{" "}
+														<span className="opacity-70">Risk level:</span>{" "}
 														<strong
 															className="uppercase"
 															style={{
@@ -117,7 +116,7 @@ export const RiskMatrixChart = memo(({ tasks }: IRiskMatrixChartProps) => {
 														</strong>
 													</div>
 													<div>
-														<span className="opacity-70">Due:</span>{" "}
+														<span className="opacity-70">Due in:</span>{" "}
 														<strong>{data.days_remaining}d</strong>
 													</div>
 												</div>

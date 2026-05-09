@@ -14,7 +14,7 @@ interface IRiskDriversChartProps {
 
 const radarConfig = {
 	value: {
-		label: "Risk Factor",
+		label: "Risk Signal",
 		color: "var(--destructive)",
 	},
 } satisfies ChartConfig;
@@ -41,12 +41,12 @@ export const RiskDriversChart = memo(({ tasks }: IRiskDriversChartProps) => {
 		});
 
 		return [
-			{ subject: "Time Overrun", value: totalTimeVar / numTasks },
-			{ subject: "Bottleneck", value: totalSched / numTasks },
-			{ subject: "Congestion", value: totalCongest / numTasks },
-			{ subject: "Blocked", value: totalBlocked / numTasks },
+			{ subject: "Schedule Slippage", value: totalTimeVar / numTasks },
+			{ subject: "Team Bottlenecks", value: totalSched / numTasks },
+			{ subject: "Workload Pressure", value: totalCongest / numTasks },
+			{ subject: "Blocked Work", value: totalBlocked / numTasks },
 			{
-				subject: "Critical Deadline",
+				subject: "Near Due Date",
 				value:
 					(tasks.filter((t) => t.days_remaining <= 2 && t.days_remaining >= 0)
 						.length /
@@ -59,7 +59,7 @@ export const RiskDriversChart = memo(({ tasks }: IRiskDriversChartProps) => {
 	return (
 		<Card className="col-span-1">
 			<CardHeader>
-				<CardTitle className="text-center">Core Risk Drivers</CardTitle>
+				<CardTitle className="text-center">Main Risk Drivers</CardTitle>
 			</CardHeader>
 			<CardContent>
 				<div className="h-50">
@@ -68,7 +68,7 @@ export const RiskDriversChart = memo(({ tasks }: IRiskDriversChartProps) => {
 							<PolarGrid />
 							<PolarAngleAxis dataKey="subject" fontSize={10} />
 							<Radar
-								name="Risk Factor"
+								name="Risk Signal"
 								dataKey="value"
 								fill="var(--color-value)"
 								stroke="var(--color-value)"
