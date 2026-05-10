@@ -14,24 +14,65 @@ Agentick is an AI Agent-powered project management platform that proactively det
 
 The platform leverages advanced AI agents to analyze historical execution patterns, providing teams with predictive insights that traditional project management tools lack.
 
-## ⚙️ 2. Installation
+## ⚙️ 2. Installation & Setup
 
-This project uses `pnpm` as the package manager. Ensure you have it installed globally.
+If you are starting from scratch (no dev tools installed), follow Step 0. Otherwise, skip to Step 1.
 
-### Prerequisites
-- Node.js (Latest LTS recommended)
-- pnpm (`npm install -g pnpm`)
+### 0. Prerequisites & Environment Setup
 
-### Setup Steps
-1. Clone the repository.
-2. Install dependencies:
-   ```bash
-   pnpm install
-   ```
-3. Start the development server:
-   ```bash
-   pnpm dev
-   ```
+You need to install these tools to run the frontend project:
+
+1. **Git**: To download the source code.
+   - [Download for Windows/Mac/Linux](https://git-scm.com/downloads)
+   - Verify: Open your terminal and run `git --version`
+
+2. **Node.js (LTS Version)**: The runtime for React apps.
+   - [Download Node.js](https://nodejs.org/en/download/) (Pick the **LTS** version)
+   - Restart terminal and verify: `node --version`
+
+3. **PNPM**: Our fast and efficient package manager.
+   - After installing Node.js, run this command in your terminal:
+     ```bash
+     npm install -g pnpm
+     ```
+   - Verify: `pnpm --version`
+
+---
+
+### 1. Clone the Repository
+Open your terminal (PowerShell, CMD, or Terminal) and run:
+```bash
+git clone https://github.com/daFoggo/Agentick-FE.git
+cd Agentick-FE
+```
+
+### 2. Setup Environment Variables
+Create a `.env` file in the project root and configure the backend API endpoints.
+```env
+# Client Side API Configuration (Mandatory)
+VITE_API_CORE_URL=http://localhost:8000
+VITE_API_AI_URL=http://localhost:8001
+VITE_APP_NAME="Agentick"
+
+# Server Side (Leave empty for default local flow unless needed)
+DATABASE_URL=
+OPEN_AI_API_KEY=
+SELINE_TOKEN=
+```
+*(If backend runs on a different port, update the URLs accordingly.)*
+
+### 3. Install Dependencies
+Run this command to install all project packages:
+```bash
+pnpm install
+```
+
+### 4. Start the Development Server
+```bash
+pnpm dev
+```
+**Result:** The application should now be running locally at the port displayed in your terminal (usually `http://localhost:3000`).
+
 
 ## 📁 3. Project Structure
 
