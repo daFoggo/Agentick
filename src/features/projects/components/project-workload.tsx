@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { Search } from "lucide-react";
 import * as React from "react";
+import { memo } from "react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
@@ -37,7 +38,7 @@ function parseDateStr(dateStr: string) {
 	return new Date(y, m - 1, d); // local date — không phải UTC
 }
 
-export function ProjectWorkload() {
+export const ProjectWorkload = memo(() => {
 	const [mode, setMode] = React.useState<"week" | "month">("week");
 	const [searchTerm, setSearchTerm] = React.useState("");
 	const { projectId } = useParams({ strict: false });
@@ -244,6 +245,8 @@ export function ProjectWorkload() {
 			</CardContent>
 		</Card>
 	);
-}
+});
+
+ProjectWorkload.displayName = "ProjectWorkload";
 
 export default ProjectWorkload;

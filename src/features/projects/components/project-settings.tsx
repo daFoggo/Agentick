@@ -190,7 +190,10 @@ export const ProjectSettings = ({
 						name="timezone"
 						label="Timezone"
 						options={TIMEZONES}
-						originalValue={project?.timezone || ""}
+						originalValue={
+							project?.timezone ||
+							Intl.DateTimeFormat().resolvedOptions().timeZone
+						}
 						isPending={update.isPending && updatingField === "timezone"}
 						keepVisible={recentlyUpdatedField === "timezone"}
 						disableAction={

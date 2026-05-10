@@ -111,6 +111,7 @@ export const CreateTaskSchema = z.object({
 	start_date: ApiDateSchema,
 	due_date: ApiDateSchema,
 	order: z.number().int(),
+	estimated_hours: z.number().nullable().optional(),
 });
 
 export type TCreateTaskInput = z.infer<typeof CreateTaskSchema>;

@@ -1,14 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Suspense } from "react";
 import { MyProjectsGrid, myProjectsQueryOptions } from "@/features/projects";
-import { TaskLine, taskQueries } from "@/features/tasks";
+import { TaskLine, TaskLineSkeleton, taskQueries } from "@/features/tasks";
 import { UserGreeting, userQueries } from "@/features/users";
 
 export const Route = createFileRoute("/dashboard/$teamId/overview/")({
-	loader: async ({ context }) => {
+	loader: async ({ context, params }) => {
 		await Promise.all([
 			context.queryClient.ensureQueryData(userQueries.me()),
 			context.queryClient.ensureQueryData(userQueries.stats("weekly")),
-			context.queryClient.ensureQueryData(taskQueries.myTasks()),
+			context.queryClient.ensureQueryData(taskQueries.myTasks(params.teamId)),
 			context.queryClient.ensureQueryData(myProjectsQueryOptions()),
 		]);
 	},
@@ -24,7 +25,9 @@ function RouteComponent() {
 			<UserGreeting />
 			<div className="grid grid-cols-1 gap-4 md:grid-cols-12">
 				<div className="md:col-span-7">
-					<TaskLine />
+					<Suspense fallback={<TaskLineSkeleton />}>
+						<TaskLine />
+					</Suspense>
 				</div>
 				<div className="md:col-span-5">
 					<MyProjectsGrid />

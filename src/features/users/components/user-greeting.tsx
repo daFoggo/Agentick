@@ -1,6 +1,6 @@
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { PackageCheck, SlidersHorizontal, Users } from "lucide-react";
-import { useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	ButtonGroup,
@@ -14,16 +14,17 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getUserGreeting } from "../helpers";
 import { userQueries } from "../queries";
 import type { TStatsPeriod } from "../schemas";
 
-export const UserGreeting = () => {
+export const UserGreeting = memo(() => {
 	const { data: user } = useSuspenseQuery(userQueries.me());
 	const greeting = useMemo(() => getUserGreeting(user.name), [user.name]);
 
 	const [period, setPeriod] = useState<TStatsPeriod>("weekly");
-	const { data: stats } = useQuery(userQueries.stats(period));
+	const { data: stats, isLoading } = useQuery(userQueries.stats(period));
 
 	return (
 		<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -49,9 +50,13 @@ export const UserGreeting = () => {
 					<ButtonGroupText className="cursor-default gap-2 border-none bg-transparent">
 						<PackageCheck className="size-3.5 text-muted-foreground" />
 						<div className="flex items-center gap-1">
-							<span className="font-semibold text-foreground">
-								{stats?.tasks_completed ?? "—"}
-							</span>
+							{isLoading || !stats ? (
+								<Skeleton className="h-4 w-6" />
+							) : (
+								<span className="font-semibold text-foreground">
+									{stats.tasks_completed}
+								</span>
+							)}
 							<span className="text-sm text-muted-foreground">
 								tasks completed
 							</span>
@@ -61,9 +66,13 @@ export const UserGreeting = () => {
 					<ButtonGroupText className="cursor-default gap-2 border-none bg-transparent">
 						<Users className="size-3.5 text-muted-foreground" />
 						<div className="flex items-center gap-1">
-							<span className="font-semibold text-foreground">
-								{stats?.collaborated_with ?? "—"}
-							</span>
+							{isLoading || !stats ? (
+								<Skeleton className="h-4 w-6" />
+							) : (
+								<span className="font-semibold text-foreground">
+									{stats.collaborated_with}
+								</span>
+							)}
 							<span className="text-sm text-muted-foreground">
 								collaborated with
 							</span>
@@ -78,4 +87,6 @@ export const UserGreeting = () => {
 			</div>
 		</div>
 	);
-};
+});
+
+UserGreeting.displayName = "UserGreeting";

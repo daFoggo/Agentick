@@ -5,6 +5,7 @@ import { CreateTaskSchema, FindTasksSchema, UpdateTaskSchema } from "./schemas";
 import {
 	createTask,
 	deleteTask,
+	estimateTask,
 	fetchMyTasks,
 	fetchTaskById,
 	fetchTasks,
@@ -86,3 +87,19 @@ export const deleteTaskFn = createServerFn({ method: "POST" })
 		}),
 	)
 	.handler(async ({ data }) => deleteTask(data.projectId, data.taskId));
+
+/**
+ * Server Function ước lượng thời gian hoàn thành task bằng AI
+ */
+export const estimateTaskFn = createServerFn({ method: "POST" })
+	.middleware([requestLoggerMiddleware])
+	.inputValidator(
+		z.object({
+			projectId: z.string(),
+			payload: z.object({
+				title: z.string(),
+				description: z.string().nullable(),
+			}),
+		}),
+	)
+	.handler(async ({ data }) => estimateTask(data.projectId, data.payload));

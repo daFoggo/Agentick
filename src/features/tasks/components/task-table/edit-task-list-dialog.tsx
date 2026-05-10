@@ -1,6 +1,6 @@
 import { useForm } from "@tanstack/react-form";
-import { Loader2 } from "lucide-react";
-import { useEffect } from "react";
+import { Loader2, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { DateTimePicker } from "@/components/common/date-picker";
@@ -22,6 +22,7 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
 	Select,
 	SelectContent,
@@ -38,6 +39,7 @@ import {
 } from "@/features/tasks/helpers";
 import { useTaskMutations } from "@/features/tasks/queries";
 import { type TTask, UpdateTaskSchema } from "@/features/tasks/schemas";
+import { TaskAIEstimationAlert } from "./task-ai-estimation-alert";
 
 interface IEditTaskListDialogProps {
 	task: TTask;
@@ -52,7 +54,35 @@ export const EditTaskListDialog = ({
 	onOpenChange,
 	options,
 }: IEditTaskListDialogProps) => {
-	const { update } = useTaskMutations();
+	const { update, estimate } = useTaskMutations();
+	const [aiExplanation, setAiExplanation] = useState<{
+		suggested_hours: number;
+		rationale: string;
+		reasoning_steps?: any;
+	} | null>(null);
+
+	const handleAIEstimate = async () => {
+		const title = form.getFieldValue("title");
+		const description = form.getFieldValue("description");
+		if (!title) {
+			toast.error("Vui lòng nhập tiêu đề task trước để AI phân tích!");
+			return;
+		}
+		try {
+			const result = await estimate.mutateAsync({
+				projectId: task.project_id,
+				payload: { title, description: description || null },
+			});
+			if (result && result.suggested_hours !== undefined) {
+				form.setFieldValue("estimated_hours", result.suggested_hours);
+
+				setAiExplanation(result);
+			}
+		} catch (error) {
+			toast.error("Không thể ước lượng thời gian bằng AI");
+			console.error(error);
+		}
+	};
 
 	const defaults = resolveDefaultTaskOptionIds(options);
 
@@ -68,6 +98,7 @@ export const EditTaskListDialog = ({
 			start_date: toCalendarDateValue(task.start_date) ?? new Date(),
 			due_date: toCalendarDateValue(task.due_date) ?? new Date(),
 			order: task.order ?? 0,
+			estimated_hours: task.estimated_hours ?? undefined,
 		},
 		validators: {
 			onSubmit: UpdateTaskSchema as any,
@@ -100,6 +131,11 @@ export const EditTaskListDialog = ({
 						start_date: startDateIso,
 						due_date: dueDateIso,
 						order: value.order,
+						estimated_hours:
+							value.estimated_hours !== undefined &&
+							(value.estimated_hours as any) !== ""
+								? Number(value.estimated_hours)
+								: null,
 					},
 				});
 				toast.success("Task updated successfully");
@@ -125,6 +161,7 @@ export const EditTaskListDialog = ({
 			start_date: toCalendarDateValue(task.start_date) ?? new Date(),
 			due_date: toCalendarDateValue(task.due_date) ?? new Date(),
 			order: task.order ?? 0,
+			estimated_hours: task.estimated_hours ?? undefined,
 		});
 	}, [
 		open,
@@ -154,85 +191,31 @@ export const EditTaskListDialog = ({
 						</DialogDescription>
 					</DialogHeader>
 
-					<FieldGroup>
-						<Field>
-							<FieldLabel>Project</FieldLabel>
-							<Input value={task.project_id} disabled className="bg-muted" />
-						</Field>
+					<ScrollArea className="max-h-[75vh] pr-4 -mr-4">
+						<FieldGroup className="pr-1">
+							<Field>
+								<FieldLabel>Project</FieldLabel>
+								<Input value={task.project_id} disabled className="bg-muted" />
+							</Field>
 
-						<form.Field
-							name="title"
-							children={(field) => {
-								const isInvalid =
-									field.state.meta.isTouched &&
-									!!field.state.meta.errors.length;
-								return (
-									<Field data-invalid={isInvalid}>
-										<FieldLabel htmlFor={field.name}>Title</FieldLabel>
-										<Input
-											id={field.name}
-											name={field.name}
-											value={field.state.value}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-											placeholder="e.g. Build task CRUD dialog"
-											aria-invalid={isInvalid}
-										/>
-										<FieldError errors={field.state.meta.errors} />
-									</Field>
-								);
-							}}
-						/>
-
-						<form.Field
-							name="description"
-							children={(field) => {
-								const isInvalid =
-									field.state.meta.isTouched &&
-									!!field.state.meta.errors.length;
-								return (
-									<Field data-invalid={isInvalid}>
-										<FieldLabel htmlFor={field.name}>Description</FieldLabel>
-										<Textarea
-											id={field.name}
-											name={field.name}
-											value={field.state.value ?? ""}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-											placeholder="Task details"
-											aria-invalid={isInvalid}
-										/>
-										<FieldError errors={field.state.meta.errors} />
-									</Field>
-								);
-							}}
-						/>
-
-						<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 							<form.Field
-								name="status_id"
+								name="title"
 								children={(field) => {
 									const isInvalid =
 										field.state.meta.isTouched &&
 										!!field.state.meta.errors.length;
 									return (
 										<Field data-invalid={isInvalid}>
-											<FieldLabel htmlFor={field.name}>Status</FieldLabel>
-											<Select
+											<FieldLabel htmlFor={field.name}>Title</FieldLabel>
+											<Input
+												id={field.name}
+												name={field.name}
 												value={field.state.value}
-												onValueChange={field.handleChange}
-											>
-												<SelectTrigger>
-													<SelectValue placeholder="Select status" />
-												</SelectTrigger>
-												<SelectContent>
-													{options.statuses.map((status) => (
-														<SelectItem key={status.id} value={status.id}>
-															{status.name}
-														</SelectItem>
-													))}
-												</SelectContent>
-											</Select>
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+												placeholder="e.g. Build task CRUD dialog"
+												aria-invalid={isInvalid}
+											/>
 											<FieldError errors={field.state.meta.errors} />
 										</Field>
 									);
@@ -240,208 +223,322 @@ export const EditTaskListDialog = ({
 							/>
 
 							<form.Field
-								name="type_id"
+								name="description"
 								children={(field) => {
 									const isInvalid =
 										field.state.meta.isTouched &&
 										!!field.state.meta.errors.length;
 									return (
 										<Field data-invalid={isInvalid}>
-											<FieldLabel htmlFor={field.name}>Type</FieldLabel>
-											<Select
-												value={field.state.value}
-												onValueChange={field.handleChange}
-											>
-												<SelectTrigger>
-													<SelectValue placeholder="Select type" />
-												</SelectTrigger>
-												<SelectContent>
-													{options.types.map((type) => (
-														<SelectItem key={type.id} value={type.id}>
-															{type.name}
-														</SelectItem>
-													))}
-												</SelectContent>
-											</Select>
+											<FieldLabel htmlFor={field.name}>Description</FieldLabel>
+											<Textarea
+												id={field.name}
+												name={field.name}
+												value={field.state.value ?? ""}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+												placeholder="Task details"
+												aria-invalid={isInvalid}
+											/>
 											<FieldError errors={field.state.meta.errors} />
 										</Field>
 									);
 								}}
 							/>
-						</div>
 
-						<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-							<form.Field
-								name="priority_id"
-								children={(field) => {
-									const isInvalid =
-										field.state.meta.isTouched &&
-										!!field.state.meta.errors.length;
-									return (
-										<Field data-invalid={isInvalid}>
-											<FieldLabel htmlFor={field.name}>Priority</FieldLabel>
-											<Select
-												value={field.state.value}
-												onValueChange={field.handleChange}
-											>
-												<SelectTrigger>
-													<SelectValue placeholder="Select priority" />
-												</SelectTrigger>
-												<SelectContent>
-													{options.priorities.map((priority) => (
-														<SelectItem key={priority.id} value={priority.id}>
-															{priority.name}
+							<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+								<form.Field
+									name="status_id"
+									children={(field) => {
+										const isInvalid =
+											field.state.meta.isTouched &&
+											!!field.state.meta.errors.length;
+										return (
+											<Field data-invalid={isInvalid}>
+												<FieldLabel htmlFor={field.name}>Status</FieldLabel>
+												<Select
+													value={field.state.value}
+													onValueChange={field.handleChange}
+												>
+													<SelectTrigger>
+														<SelectValue placeholder="Select status" />
+													</SelectTrigger>
+													<SelectContent>
+														{options.statuses.map((status) => (
+															<SelectItem key={status.id} value={status.id}>
+																{status.name}
+															</SelectItem>
+														))}
+													</SelectContent>
+												</Select>
+												<FieldError errors={field.state.meta.errors} />
+											</Field>
+										);
+									}}
+								/>
+
+								<form.Field
+									name="type_id"
+									children={(field) => {
+										const isInvalid =
+											field.state.meta.isTouched &&
+											!!field.state.meta.errors.length;
+										return (
+											<Field data-invalid={isInvalid}>
+												<FieldLabel htmlFor={field.name}>Type</FieldLabel>
+												<Select
+													value={field.state.value}
+													onValueChange={field.handleChange}
+												>
+													<SelectTrigger>
+														<SelectValue placeholder="Select type" />
+													</SelectTrigger>
+													<SelectContent>
+														{options.types.map((type) => (
+															<SelectItem key={type.id} value={type.id}>
+																{type.name}
+															</SelectItem>
+														))}
+													</SelectContent>
+												</Select>
+												<FieldError errors={field.state.meta.errors} />
+											</Field>
+										);
+									}}
+								/>
+							</div>
+
+							<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+								<form.Field
+									name="priority_id"
+									children={(field) => {
+										const isInvalid =
+											field.state.meta.isTouched &&
+											!!field.state.meta.errors.length;
+										return (
+											<Field data-invalid={isInvalid}>
+												<FieldLabel htmlFor={field.name}>Priority</FieldLabel>
+												<Select
+													value={field.state.value}
+													onValueChange={field.handleChange}
+												>
+													<SelectTrigger>
+														<SelectValue placeholder="Select priority" />
+													</SelectTrigger>
+													<SelectContent>
+														{options.priorities.map((priority) => (
+															<SelectItem key={priority.id} value={priority.id}>
+																{priority.name}
+															</SelectItem>
+														))}
+													</SelectContent>
+												</Select>
+												<FieldError errors={field.state.meta.errors} />
+											</Field>
+										);
+									}}
+								/>
+
+								<form.Field
+									name="estimated_hours"
+									children={(field) => {
+										const isInvalid =
+											field.state.meta.isTouched &&
+											!!field.state.meta.errors.length;
+										return (
+											<Field data-invalid={isInvalid}>
+												<div className="flex items-center justify-between">
+													<FieldLabel htmlFor={field.name}>
+														Estimated Hours
+													</FieldLabel>
+													<Button
+														type="button"
+														variant="outline"
+														size="xs"
+														onClick={handleAIEstimate}
+														disabled={estimate.isPending}
+													>
+														{estimate.isPending ? (
+															<Loader2 className="size-3 animate-spin" />
+														) : (
+															<Sparkles className="size-3 text-primary" />
+														)}
+														AI Estimate
+													</Button>
+												</div>
+												<Input
+													id={field.name}
+													name={field.name}
+													type="number"
+													step="0.5"
+													min="0"
+													value={field.state.value ?? ""}
+													onBlur={field.handleBlur}
+													onChange={(e) => {
+														const val = e.target.value;
+														field.handleChange(
+															val === "" ? undefined : Number(val),
+														);
+													}}
+													placeholder="e.g. 10"
+													aria-invalid={isInvalid}
+												/>
+												<FieldError errors={field.state.meta.errors} />
+											</Field>
+										);
+									}}
+								/>
+							</div>
+
+							<TaskAIEstimationAlert aiExplanation={aiExplanation} />
+
+							<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+								<form.Field
+									name="assigner_id"
+									children={(field) => {
+										const isInvalid =
+											field.state.meta.isTouched &&
+											!!field.state.meta.errors.length;
+										return (
+											<Field data-invalid={isInvalid}>
+												<FieldLabel htmlFor={field.name}>Assigner</FieldLabel>
+												<Select
+													value={field.state.value || "unassigned"}
+													onValueChange={(selectedValue) =>
+														field.handleChange(
+															selectedValue === "unassigned"
+																? ""
+																: selectedValue,
+														)
+													}
+												>
+													<SelectTrigger>
+														<SelectValue placeholder="Select assigner" />
+													</SelectTrigger>
+													<SelectContent>
+														<SelectItem value="unassigned">
+															Unassigned
 														</SelectItem>
-													))}
-												</SelectContent>
-											</Select>
-											<FieldError errors={field.state.meta.errors} />
-										</Field>
-									);
-								}}
-							/>
-						</div>
+														{options.members.map((member) => (
+															<SelectItem key={member.id} value={member.id}>
+																<div className="flex items-center gap-2">
+																	<Avatar className="size-5">
+																		<AvatarImage
+																			src={member.user?.avatar_url}
+																		/>
+																		<AvatarFallback>
+																			{member.user?.name?.charAt(0)}
+																		</AvatarFallback>
+																	</Avatar>
+																	<span className="text-sm">
+																		{member.user?.name ?? member.user_id}
+																	</span>
+																</div>
+															</SelectItem>
+														))}
+													</SelectContent>
+												</Select>
+												<FieldError errors={field.state.meta.errors} />
+											</Field>
+										);
+									}}
+								/>
 
-						<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-							<form.Field
-								name="assigner_id"
-								children={(field) => {
-									const isInvalid =
-										field.state.meta.isTouched &&
-										!!field.state.meta.errors.length;
-									return (
-										<Field data-invalid={isInvalid}>
-											<FieldLabel htmlFor={field.name}>Assigner</FieldLabel>
-											<Select
-												value={field.state.value || "unassigned"}
-												onValueChange={(selectedValue) =>
-													field.handleChange(
-														selectedValue === "unassigned" ? "" : selectedValue,
-													)
-												}
-											>
-												<SelectTrigger>
-													<SelectValue placeholder="Select assigner" />
-												</SelectTrigger>
-												<SelectContent>
-													<SelectItem value="unassigned">Unassigned</SelectItem>
-													{options.members.map((member) => (
-														<SelectItem key={member.id} value={member.id}>
-															<div className="flex items-center gap-2">
-																<Avatar className="size-5">
-																	<AvatarImage src={member.user?.avatar_url} />
-																	<AvatarFallback>
-																		{member.user?.name?.charAt(0)}
-																	</AvatarFallback>
-																</Avatar>
-																<span className="text-sm">
-																	{member.user?.name ?? member.user_id}
+								<form.Field
+									name="assignee_ids"
+									children={(field) => {
+										const isInvalid =
+											field.state.meta.isTouched &&
+											!!field.state.meta.errors.length;
+										return (
+											<Field data-invalid={isInvalid}>
+												<FieldLabel htmlFor={field.name}>Assignees</FieldLabel>
+												<MultiSelectCombobox
+													items={options.members}
+													value={options.members.filter((m) =>
+														field.state.value.includes(m.id),
+													)}
+													onValueChange={(vals) =>
+														field.handleChange(vals.map((m) => m.id))
+													}
+													itemToString={(m) => m.user?.name || ""}
+													itemToValue={(m) => m.id}
+													placeholder="Select assignees..."
+													renderItem={(m) => (
+														<div className="flex items-center gap-2">
+															<Avatar className="size-6">
+																<AvatarImage src={m.user?.avatar_url} />
+																<AvatarFallback>
+																	{m.user?.name?.charAt(0)}
+																</AvatarFallback>
+															</Avatar>
+															<div className="flex flex-col">
+																<span className="text-sm font-medium">
+																	{m.user?.name}
+																</span>
+																<span className="text-xs text-muted-foreground">
+																	{m.user?.email}
 																</span>
 															</div>
-														</SelectItem>
-													))}
-												</SelectContent>
-											</Select>
-											<FieldError errors={field.state.meta.errors} />
-										</Field>
-									);
-								}}
-							/>
-
-							<form.Field
-								name="assignee_ids"
-								children={(field) => {
-									const isInvalid =
-										field.state.meta.isTouched &&
-										!!field.state.meta.errors.length;
-									return (
-										<Field data-invalid={isInvalid}>
-											<FieldLabel htmlFor={field.name}>Assignees</FieldLabel>
-											<MultiSelectCombobox
-												items={options.members}
-												value={options.members.filter((m) =>
-													field.state.value.includes(m.id),
-												)}
-												onValueChange={(vals) =>
-													field.handleChange(vals.map((m) => m.id))
-												}
-												itemToString={(m) => m.user?.name || ""}
-												itemToValue={(m) => m.id}
-												placeholder="Select assignees..."
-												renderItem={(m) => (
-													<div className="flex items-center gap-2">
-														<Avatar className="size-6">
-															<AvatarImage src={m.user?.avatar_url} />
-															<AvatarFallback>
-																{m.user?.name?.charAt(0)}
-															</AvatarFallback>
-														</Avatar>
-														<div className="flex flex-col">
-															<span className="text-sm font-medium">
-																{m.user?.name}
-															</span>
-															<span className="text-xs text-muted-foreground">
-																{m.user?.email}
-															</span>
 														</div>
-													</div>
-												)}
-											/>
-											<FieldError errors={field.state.meta.errors} />
-										</Field>
-									);
-								}}
-							/>
-						</div>
+													)}
+												/>
+												<FieldError errors={field.state.meta.errors} />
+											</Field>
+										);
+									}}
+								/>
+							</div>
 
-						<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-							<form.Field
-								name="start_date"
-								children={(field) => {
-									const isInvalid =
-										field.state.meta.isTouched &&
-										!!field.state.meta.errors.length;
-									return (
-										<Field data-invalid={isInvalid}>
-											<FieldLabel>Start Date</FieldLabel>
-											<DateTimePicker
-												date={
-													field.state.value instanceof Date
-														? field.state.value
-														: new Date()
-												}
-												onChange={field.handleChange}
-											/>
-											<FieldError errors={field.state.meta.errors} />
-										</Field>
-									);
-								}}
-							/>
+							<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+								<form.Field
+									name="start_date"
+									children={(field) => {
+										const isInvalid =
+											field.state.meta.isTouched &&
+											!!field.state.meta.errors.length;
+										return (
+											<Field data-invalid={isInvalid}>
+												<FieldLabel>Start Date</FieldLabel>
+												<DateTimePicker
+													date={
+														field.state.value instanceof Date
+															? field.state.value
+															: new Date()
+													}
+													onChange={field.handleChange}
+												/>
+												<FieldError errors={field.state.meta.errors} />
+											</Field>
+										);
+									}}
+								/>
 
-							<form.Field
-								name="due_date"
-								children={(field) => {
-									const isInvalid =
-										field.state.meta.isTouched &&
-										!!field.state.meta.errors.length;
-									return (
-										<Field data-invalid={isInvalid}>
-											<FieldLabel>Due Date</FieldLabel>
-											<DateTimePicker
-												date={
-													field.state.value instanceof Date
-														? field.state.value
-														: new Date()
-												}
-												onChange={field.handleChange}
-											/>
-											<FieldError errors={field.state.meta.errors} />
-										</Field>
-									);
-								}}
-							/>
-						</div>
-					</FieldGroup>
+								<form.Field
+									name="due_date"
+									children={(field) => {
+										const isInvalid =
+											field.state.meta.isTouched &&
+											!!field.state.meta.errors.length;
+										return (
+											<Field data-invalid={isInvalid}>
+												<FieldLabel>Due Date</FieldLabel>
+												<DateTimePicker
+													date={
+														field.state.value instanceof Date
+															? field.state.value
+															: new Date()
+													}
+													onChange={field.handleChange}
+												/>
+												<FieldError errors={field.state.meta.errors} />
+											</Field>
+										);
+									}}
+								/>
+							</div>
+						</FieldGroup>
+					</ScrollArea>
 
 					<DialogFooter>
 						<Button

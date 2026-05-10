@@ -1,19 +1,46 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useParams } from "@tanstack/react-router";
 import { startOfToday } from "date-fns";
+import { memo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { userQueries } from "@/features/users";
 import { filterTasksForOverview } from "../../helpers";
 import { taskQueries } from "../../queries";
 import { TaskList } from "./task-list";
 
+export const TaskLineSkeleton = () => {
+	return (
+		<Card className="flex h-[400px] flex-col overflow-hidden p-4 space-y-4">
+			<div className="flex items-center gap-2">
+				<Skeleton className="size-10 rounded-full" />
+				<div className="space-y-2">
+					<Skeleton className="h-4 w-24" />
+				</div>
+			</div>
+			<div className="flex gap-2">
+				<Skeleton className="h-8 w-24 rounded" />
+				<Skeleton className="h-8 w-24 rounded" />
+				<Skeleton className="h-8 w-24 rounded" />
+			</div>
+			<div className="space-y-2 pt-4">
+				<Skeleton className="h-12 w-full rounded-lg" />
+				<Skeleton className="h-12 w-full rounded-lg" />
+				<Skeleton className="h-12 w-full rounded-lg" />
+			</div>
+		</Card>
+	);
+};
+
 /**
  * TaskLine component - Orchestrates the personal tasks widget on Dashboard Overview
  */
-export const TaskLine = () => {
+export const TaskLine = memo(() => {
+	const { teamId } = useParams({ strict: false });
 	const { data: user } = useSuspenseQuery(userQueries.me());
-	const { data: myTasksData } = useSuspenseQuery(taskQueries.myTasks());
+	const { data: myTasksData } = useSuspenseQuery(taskQueries.myTasks(teamId));
 
 	const today = startOfToday();
 	const tasks = myTasksData?.founds ?? [];
@@ -68,4 +95,6 @@ export const TaskLine = () => {
 			</Tabs>
 		</Card>
 	);
-};
+});
+
+TaskLine.displayName = "TaskLine";
