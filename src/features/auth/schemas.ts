@@ -32,11 +32,19 @@ export const SignUpSchema = z.object({
 	avatar_url: z.url().optional().or(z.literal("")),
 });
 
+export const SignUpFormSchema = SignUpSchema.extend({
+	confirmPassword: z.string().min(6),
+}).refine((data) => data.password === data.confirmPassword, {
+	message: "Passwords must match",
+	path: ["confirmPassword"],
+});
+
 export const SignUpResponseSchema = UserSchema;
 
 export type TSignInInput = z.infer<typeof SignInSchema>;
 export type TSignInResponse = z.infer<typeof SignInResponseSchema>;
 export type TSignUpInput = z.infer<typeof SignUpSchema>;
+export type TSignUpFormInput = z.infer<typeof SignUpFormSchema>;
 export type TSignUpResponse = z.infer<typeof SignUpResponseSchema>;
 export type TRefreshTokenInput = z.infer<typeof RefreshTokenInputSchema>;
 export type TTokenResponse = z.infer<typeof TokenResponseSchema>;

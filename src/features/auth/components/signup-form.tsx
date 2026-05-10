@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { SITE_CONFIG } from "@/configs/site";
 import { authMutationOptions } from "@/features/auth/queries";
-import { SignUpSchema, type TSignUpInput } from "@/features/auth/schemas";
+import { SignUpFormSchema, type TSignUpFormInput, type TSignUpInput } from "@/features/auth/schemas";
 
 export const SignUpForm = () => {
 	const navigate = useNavigate();
@@ -25,13 +25,14 @@ export const SignUpForm = () => {
 			name: "",
 			email: "",
 			password: "",
+			confirmPassword: "",
 			avatar_url: "",
-		} as TSignUpInput,
+		} as TSignUpFormInput,
 		validators: {
-			onSubmit: SignUpSchema,
+			onSubmit: SignUpFormSchema,
 		},
 		onSubmit: async ({ value }) => {
-			const { avatar_url, ...rest } = value;
+			const { avatar_url, confirmPassword, ...rest } = value;
 			const data: TSignUpInput = {
 				...rest,
 				avatar_url: avatar_url || undefined,
@@ -133,6 +134,33 @@ export const SignUpForm = () => {
 								return (
 									<Field data-invalid={isInvalid}>
 										<FieldLabel htmlFor={field.name}>Password</FieldLabel>
+										<Input
+											id={field.name}
+											name={field.name}
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={(e) => field.handleChange(e.target.value)}
+											type="password"
+											aria-invalid={isInvalid}
+											autoComplete="new-password"
+										/>
+										<FieldError errors={field.state.meta.errors} />
+									</Field>
+								);
+							}}
+						/>
+
+						<form.Field
+							name="confirmPassword"
+							children={(field) => {
+								const isInvalid =
+									field.state.meta.isTouched &&
+									!!field.state.meta.errors.length;
+								return (
+									<Field data-invalid={isInvalid}>
+										<FieldLabel htmlFor={field.name}>
+											Confirm password
+										</FieldLabel>
 										<Input
 											id={field.name}
 											name={field.name}
