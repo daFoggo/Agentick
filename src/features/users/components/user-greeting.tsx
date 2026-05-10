@@ -31,7 +31,7 @@ export const UserGreeting = memo(() => {
 			<p className="text-xl font-light">{greeting}</p>
 
 			<div className="flex items-center gap-2">
-				<ButtonGroup className="rounded-full border-none bg-muted/40">
+				<ButtonGroup className="rounded-full border-none bg-muted">
 					<Select
 						value={period}
 						onValueChange={(val) => setPeriod(val as TStatsPeriod)}
