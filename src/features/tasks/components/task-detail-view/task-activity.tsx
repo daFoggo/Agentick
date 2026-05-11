@@ -1,0 +1,258 @@
+/** biome-ignore-all lint/correctness/useExhaustiveDependencies: <idjk> */
+import { useQuery } from "@tanstack/react-query";
+import { formatDistanceToNow, isValid } from "date-fns";
+import { ArrowUp, Loader2, Logs, MoreHorizontal } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+	Empty,
+	EmptyDescription,
+	EmptyHeader,
+	EmptyMedia,
+	EmptyTitle,
+} from "@/components/ui/empty";
+import {
+	InputGroup,
+	InputGroupAddon,
+	InputGroupButton,
+	InputGroupTextarea,
+} from "@/components/ui/input-group";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
+import { taskQueries, useTaskMutations } from "@/features/tasks/queries";
+
+interface ITaskActivityProps {
+	taskId?: string;
+}
+
+const formatActivityDate = (dateStr: string) => {
+	const d = new Date(dateStr);
+	if (!isValid(d)) return "some time ago";
+	return formatDistanceToNow(d, { addSuffix: true });
+};
+
+const formatValue = (val: any) => {
+	if (!val) return "None";
+	return String(val);
+};
+
+export const TaskActivity = ({ taskId }: ITaskActivityProps) => {
+	const [commentText, setCommentText] = useState("");
+	const bottomRef = useRef<HTMLDivElement>(null);
+
+	const { data: activities, isLoading } = useQuery({
+		...taskQueries.activities(taskId || ""),
+		enabled: !!taskId,
+		select: (data) => [...data].reverse(), // Reverse to show oldest at top, newest at bottom (like standard timelines)
+	});
+
+	const { addComment } = useTaskMutations();
+
+	const timelineItems = activities || [];
+	const activitiesCount = activities?.length ?? 0;
+
+	useEffect(() => {
+		bottomRef.current?.scrollIntoView({ behavior: "instant" });
+	}, [activitiesCount]);
+
+	const handleSendComment = async (explicitContent?: string) => {
+		const finalContent = (explicitContent ?? commentText).trim();
+		if (!finalContent || !taskId) return;
+
+		try {
+			await addComment.mutateAsync({ taskId, content: finalContent });
+			setCommentText("");
+		} catch {
+			toast.error("Failed to send comment");
+		}
+	};
+
+	if (isLoading) {
+		return (
+			<div className="space-y-4">
+				<Skeleton className="h-8 w-32" />
+				<Skeleton className="h-10 w-full" />
+				<Skeleton className="h-10 w-full" />
+			</div>
+		);
+	}
+
+	return (
+		<div className="space-y-2">
+			<p className="text-lg font-semibold tracking-tight">Activity</p>
+
+			<ScrollArea className="h-90 pr-4">
+				{/* Main unified coordinate space spans entire height, full width */}
+				<div className="flex flex-col gap-4">
+					{/* 1. Relative block ONLY for historical entries + vertical timeline line */}
+					<div className="relative flex flex-col gap-4">
+						{/* The line only exists INSIDE this scope, terminating at the end of historical items */}
+						<div className="absolute left-3 top-3 bottom-3 w-0.5 -translate-x-1/2 rounded-full bg-muted z-0" />
+
+						{timelineItems.length === 0 ? (
+							<div className="relative z-10 bg-background">
+								<Empty>
+									<EmptyHeader>
+										<EmptyMedia variant="icon">
+											<Logs />
+										</EmptyMedia>
+										<EmptyTitle>No activity recorded yet.</EmptyTitle>
+										<EmptyDescription>
+											Modify your task or add comments to track updates.
+										</EmptyDescription>
+									</EmptyHeader>
+								</Empty>
+							</div>
+						) : (
+							timelineItems.map((activity: any) => {
+								const isComment = activity.activity_type === "comment";
+								const userName = activity.user?.name || "Someone";
+
+								if (isComment) {
+									return (
+										/* Comment block standardized exactly to InputGroup component layout */
+										<InputGroup
+											className="relative z-10 overflow-hidden bg-card! dark:bg-card!"
+											key={activity.id}
+										>
+											<InputGroupAddon
+												align="block-start"
+												className="flex items-center justify-between"
+											>
+												<div className="flex items-center gap-2">
+													<Avatar size="sm">
+														<AvatarImage src={activity.user?.avatar_url} />
+														<AvatarFallback>
+															{userName.charAt(0)}
+														</AvatarFallback>
+													</Avatar>
+													<div className="flex items-center gap-1.5 text-xs">
+														<span className="font-semibold text-foreground">
+															{userName}
+														</span>
+														<span className="text-muted-foreground font-normal">
+															commented{" "}
+															{formatActivityDate(activity.created_at)}
+														</span>
+													</div>
+												</div>
+												<Button
+													type="button"
+													variant="ghost"
+													size="icon"
+													className="size-6 text-muted-foreground"
+												>
+													<MoreHorizontal className="size-4" />
+												</Button>
+											</InputGroupAddon>
+
+											<InputGroupTextarea
+												readOnly
+												value={activity.content}
+												className="min-h-[unset]"
+											/>
+										</InputGroup>
+									);
+								}
+
+								let actionDisplay = <span>updated the card</span>;
+
+								if (activity.activity_type === "started") {
+									actionDisplay = (
+										<span className="text-muted-foreground">
+											started the task
+										</span>
+									);
+								} else if (activity.activity_type === "completed") {
+									actionDisplay = (
+										<span className="text-muted-foreground">
+											completed the task
+										</span>
+									);
+								} else if (activity.activity_type === "status_change") {
+									actionDisplay = (
+										<span className="text-muted-foreground">
+											moved status to{" "}
+											<span className="font-semibold text-foreground">
+												{formatValue(activity.new_value)}
+											</span>
+										</span>
+									);
+								} else if (activity.activity_type === "field_change") {
+									const fieldName =
+										activity.field_name?.replace("_", " ") || "item";
+									actionDisplay = (
+										<span className="text-muted-foreground">
+											changed the {fieldName} to{" "}
+											<span className="font-semibold text-foreground">
+												{formatValue(activity.new_value)}
+											</span>
+										</span>
+									);
+								}
+
+								return (
+									<div
+										key={activity.id}
+										className="relative z-10 flex w-full items-center gap-4"
+									>
+										<Avatar size="sm">
+											<AvatarImage src={activity.user?.avatar_url} />
+											<AvatarFallback>{userName.charAt(0)}</AvatarFallback>
+										</Avatar>
+										<div className="flex flex-wrap items-center gap-2 text-sm">
+											<span className="font-semibold text-foreground">
+												{userName}
+											</span>
+											{actionDisplay}
+											<span className="text-muted-foreground">
+												{formatActivityDate(activity.created_at)}
+											</span>
+										</div>
+									</div>
+								);
+							})
+						)}
+
+						<div ref={bottomRef} />
+					</div>
+				</div>
+			</ScrollArea>
+
+			{/* 2. The Add Comment input sits entirely OUTSIDE the timeline scope. No hacks or forced backgrounds needed anymore! */}
+			<InputGroup className="overflow-hidden">
+				<InputGroupTextarea
+					placeholder="Add comment... (Press Ctrl + Enter to send)"
+					className="min-h-20"
+					value={commentText}
+					onChange={(e) => setCommentText(e.target.value)}
+					onKeyDown={(e) => {
+						if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+							e.preventDefault();
+							e.stopPropagation();
+							handleSendComment(e.currentTarget.value);
+						}
+					}}
+				/>
+				<InputGroupAddon align="block-end" className="justify-end flex">
+					<InputGroupButton
+						type="button"
+						variant="default"
+						size="icon-sm"
+						disabled={!commentText.trim() || addComment.isPending}
+						onClick={() => handleSendComment()}
+					>
+						{addComment.isPending ? (
+							<Loader2 className="size-4 animate-spin" />
+						) : (
+							<ArrowUp className="size-4" />
+						)}
+					</InputGroupButton>
+				</InputGroupAddon>
+			</InputGroup>
+		</div>
+	);
+};

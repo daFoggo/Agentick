@@ -14,7 +14,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { SITE_CONFIG } from "@/configs/site";
 import { authMutationOptions } from "@/features/auth/queries";
-import { SignUpFormSchema, type TSignUpFormInput, type TSignUpInput } from "@/features/auth/schemas";
+import {
+	SignUpFormSchema,
+	type TSignUpFormInput,
+	type TSignUpInput,
+} from "@/features/auth/schemas";
 
 export const SignUpForm = () => {
 	const navigate = useNavigate();

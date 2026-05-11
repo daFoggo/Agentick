@@ -47,6 +47,7 @@ export const EditTaskPriorityDialog = ({
 	onOpenChange,
 }: IEditTaskPriorityDialogProps) => {
 	const { updatePriority } = useTaskConfigMutations();
+
 	const form = useForm({
 		defaultValues: {
 			name: priority.name,

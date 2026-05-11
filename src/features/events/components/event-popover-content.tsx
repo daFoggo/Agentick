@@ -63,7 +63,7 @@ export function EventPopoverContent({
 						max={5}
 						size="sm"
 						getAvatarInfo={(member) => ({
-							id: member.id,
+							id: member.user_id,
 							name: member.user?.name,
 							avatar_url: member.user?.avatar_url,
 						})}
@@ -76,14 +76,15 @@ export function EventPopoverContent({
 				{isTask ? (
 					<Button variant="outline" size="sm" className="gap-2" asChild>
 						<Link
-							to="/dashboard/$teamId/projects/$projectId/list"
+							to="/dashboard/$teamId/projects/$projectId/tasks/$taskId"
 							params={{
 								teamId: params.teamId,
 								projectId: projectId,
+								taskId: String(event.id),
 							}}
 						>
 							<ExternalLink className="size-3.5" />
-							<span>View in project </span>
+							<span>View task details</span>
 						</Link>
 					</Button>
 				) : (

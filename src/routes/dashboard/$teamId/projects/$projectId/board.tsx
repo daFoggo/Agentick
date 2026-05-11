@@ -91,9 +91,9 @@ function ProjectBoardView() {
 
 	const tasks = useMemo(() => {
 		return (tasksResponse?.founds ?? []).map((task) =>
-			mapTaskData(task, project?.members ?? [], taskOptions),
+			mapTaskData(task, taskOptions),
 		);
-	}, [tasksResponse, project?.members, taskOptions]);
+	}, [tasksResponse, taskOptions]);
 
 	if (!mounted) return null;
 

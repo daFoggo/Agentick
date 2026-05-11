@@ -1,3 +1,4 @@
+import { useNavigate, useParams } from "@tanstack/react-router";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -24,17 +25,11 @@ import {
 import { useTaskMutations } from "@/features/tasks/queries";
 import { generateColumns } from "@/lib/data-table";
 import { DeleteTaskListDialog } from "./delete-task-list-dialog";
-import { EditTaskListDialog } from "./edit-task-list-dialog";
 
-const TaskListActionCell = ({
-	task,
-	options,
-}: {
-	task: TTask;
-	options: ITaskListDialogOptions;
-}) => {
+const TaskListActionCell = ({ task }: { task: TTask }) => {
 	const { remove } = useTaskMutations();
-	const [isEditOpen, setIsEditOpen] = useState(false);
+	const navigate = useNavigate();
+	const params = useParams({ strict: false });
 	const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
 	const handleDelete = async (): Promise<boolean> => {
@@ -65,9 +60,20 @@ const TaskListActionCell = ({
 					</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="end">
-					<DropdownMenuItem onClick={() => setIsEditOpen(true)}>
+					<DropdownMenuItem
+						onClick={() =>
+							navigate({
+								to: "/dashboard/$teamId/projects/$projectId/tasks/$taskId",
+								params: {
+									teamId: params.teamId || "personal",
+									projectId: task.project_id,
+									taskId: task.id,
+								},
+							})
+						}
+					>
 						<Pencil className="size-4" />
-						Edit
+						Edit / View Details
 					</DropdownMenuItem>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem
@@ -80,12 +86,6 @@ const TaskListActionCell = ({
 				</DropdownMenuContent>
 			</DropdownMenu>
 
-			<EditTaskListDialog
-				task={task}
-				open={isEditOpen}
-				onOpenChange={setIsEditOpen}
-				options={options}
-			/>
 			<DeleteTaskListDialog
 				task={task}
 				open={isDeleteOpen}
@@ -127,38 +127,25 @@ export const getTaskColumns = (options: ITaskListDialogOptions) =>
 				if (!type) return null;
 
 				return (
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<TaskTypeBadge name={type.name} color={type.color} interactive />
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="start" className="min-w-32.5">
-							{options.types.map((opt) => (
-								<DropdownMenuItem
-									key={opt.id}
-									className="gap-2"
-									onClick={async (e) => {
-										e.stopPropagation();
-										try {
-											await update.mutateAsync({
-												projectId: task.project_id,
-												taskId: task.id,
-												payload: { type_id: opt.id },
-											});
-											toast.success("Type updated");
-										} catch (_error) {
-											toast.error("Failed to update type");
-										}
-									}}
-								>
-									<span
-										className="size-1.5 shrink-0 rounded-full"
-										style={{ backgroundColor: opt.color }}
-									/>
-									{opt.name}
-								</DropdownMenuItem>
-							))}
-						</DropdownMenuContent>
-					</DropdownMenu>
+					<TaskTypeBadge
+						name={type.name}
+						color={type.color}
+						interactive
+						options={options.types}
+						value={type.id}
+						onValueChange={async (newId) => {
+							try {
+								await update.mutateAsync({
+									projectId: task.project_id,
+									taskId: task.id,
+									payload: { type_id: newId },
+								});
+								toast.success("Type updated");
+							} catch (_error) {
+								toast.error("Failed to update type");
+							}
+						}}
+					/>
 				);
 			},
 		},
@@ -190,42 +177,24 @@ export const getTaskColumns = (options: ITaskListDialogOptions) =>
 				if (!status) return null;
 
 				return (
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<TaskStatusBadge
-								name={status.name}
-								color={status.color}
-								interactive
-							/>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="start" className="min-w-37.5">
-							{options.statuses.map((opt) => (
-								<DropdownMenuItem
-									key={opt.id}
-									className="gap-2"
-									onClick={async (e) => {
-										e.stopPropagation();
-										try {
-											await update.mutateAsync({
-												projectId: task.project_id,
-												taskId: task.id,
-												payload: { status_id: opt.id },
-											});
-											toast.success("Status updated");
-										} catch (_error) {
-											toast.error("Failed to update status");
-										}
-									}}
-								>
-									<span
-										className="size-1.5 shrink-0 rounded-full"
-										style={{ backgroundColor: opt.color }}
-									/>
-									{opt.name}
-								</DropdownMenuItem>
-							))}
-						</DropdownMenuContent>
-					</DropdownMenu>
+					<TaskStatusBadge
+						name={status.name}
+						color={status.color}
+						interactive
+						options={options.statuses}
+						value={status.id}
+						onValueChange={async (newId) => {
+							try {
+								await update.mutateAsync({
+									projectId: task.project_id,
+									taskId: task.id,
+									payload: { status_id: newId },
+								});
+							} catch (_error) {
+								toast.error("Failed to update status");
+							}
+						}}
+					/>
 				);
 			},
 		},
@@ -257,65 +226,47 @@ export const getTaskColumns = (options: ITaskListDialogOptions) =>
 				if (!priority) return null;
 
 				return (
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<TaskPriorityBadge
-								name={priority.name}
-								color={priority.color}
-								interactive
-							/>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="start" className="min-w-32.5">
-							{options.priorities.map((opt) => (
-								<DropdownMenuItem
-									key={opt.id}
-									className="gap-2"
-									onClick={async (e) => {
-										e.stopPropagation();
-										try {
-											await update.mutateAsync({
-												projectId: task.project_id,
-												taskId: task.id,
-												payload: { priority_id: opt.id },
-											});
-											toast.success("Priority updated");
-										} catch (_error) {
-											toast.error("Failed to update priority");
-										}
-									}}
-								>
-									<span
-										className="size-1.5 shrink-0 rounded-full"
-										style={{ backgroundColor: opt.color }}
-									/>
-									{opt.name}
-								</DropdownMenuItem>
-							))}
-						</DropdownMenuContent>
-					</DropdownMenu>
+					<TaskPriorityBadge
+						name={priority.name}
+						color={priority.color}
+						interactive
+						options={options.priorities}
+						value={priority.id}
+						onValueChange={async (newId) => {
+							try {
+								await update.mutateAsync({
+									projectId: task.project_id,
+									taskId: task.id,
+									payload: { priority_id: newId },
+								});
+							} catch (_error) {
+								toast.error("Failed to update priority");
+							}
+						}}
+					/>
 				);
 			},
 		},
 
 		{
-			accessorKey: "assignees",
-			label: "Assignees",
+			accessorKey: "task_members",
+			label: "Members",
 			size: 150,
 			cell: ({ getValue }) => {
-				const assignees = getValue() as TTask["assignees"];
-				if (!assignees || assignees.length === 0)
+				const members = getValue() as TTask["task_members"];
+				if (!members || members.length === 0)
 					return (
 						<span className="text-xs text-muted-foreground">Unassigned</span>
 					);
 				return (
 					<MemberAvatarGroup
-						items={assignees}
+						items={members}
 						max={3}
 						size="sm"
-						getAvatarInfo={(a) => ({
-							id: a.id,
-							name: a.user?.name,
-							avatar_url: a.user?.avatar_url,
+						getAvatarInfo={(m) => ({
+							id: m.user_id,
+							name: m.user?.name,
+							avatar_url: m.user?.avatar_url,
 						})}
 					/>
 				);
@@ -371,8 +322,6 @@ export const getTaskColumns = (options: ITaskListDialogOptions) =>
 			enablePinning: false,
 			enableReorder: false,
 			isActionColumn: true,
-			cell: ({ row }) => (
-				<TaskListActionCell task={row.original} options={options} />
-			),
+			cell: ({ row }) => <TaskListActionCell task={row.original} />,
 		},
 	]);

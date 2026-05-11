@@ -66,7 +66,7 @@ export const EditTaskStatusDialog = ({
 					statusId: status.id,
 					payload: value,
 				});
-				toast.success("Task status updated successfully");
+
 				onOpenChange(false);
 			} catch (error) {
 				toast.error("Failed to update task status");

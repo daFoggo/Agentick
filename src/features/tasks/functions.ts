@@ -3,12 +3,16 @@ import { z } from "zod";
 import { requestLoggerMiddleware } from "@/lib/middleware";
 import { CreateTaskSchema, FindTasksSchema, UpdateTaskSchema } from "./schemas";
 import {
+	completeTask,
 	createTask,
+	createTaskComment,
 	deleteTask,
 	estimateTask,
 	fetchMyTasks,
+	fetchTaskActivities,
 	fetchTaskById,
 	fetchTasks,
+	startTask,
 	updateTask,
 } from "./server";
 
@@ -103,3 +107,28 @@ export const estimateTaskFn = createServerFn({ method: "POST" })
 		}),
 	)
 	.handler(async ({ data }) => estimateTask(data.projectId, data.payload));
+
+export const startTaskFn = createServerFn({ method: "POST" })
+	.middleware([requestLoggerMiddleware])
+	.inputValidator(z.object({ taskId: z.string() }))
+	.handler(async ({ data }) => startTask(data.taskId));
+
+export const completeTaskFn = createServerFn({ method: "POST" })
+	.middleware([requestLoggerMiddleware])
+	.inputValidator(
+		z.object({
+			taskId: z.string(),
+			completedAt: z.string().optional(),
+		}),
+	)
+	.handler(async ({ data }) => completeTask(data.taskId, data.completedAt));
+
+export const fetchTaskActivitiesFn = createServerFn({ method: "GET" })
+	.middleware([requestLoggerMiddleware])
+	.inputValidator(z.object({ taskId: z.string() }))
+	.handler(async ({ data }) => fetchTaskActivities(data.taskId));
+
+export const createTaskCommentFn = createServerFn({ method: "POST" })
+	.middleware([requestLoggerMiddleware])
+	.inputValidator(z.object({ taskId: z.string(), content: z.string() }))
+	.handler(async ({ data }) => createTaskComment(data.taskId, data.content));

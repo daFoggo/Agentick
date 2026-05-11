@@ -146,3 +146,50 @@ export async function estimateTask(
 
 	return response.data;
 }
+
+/**
+ * Start a task lifecycle
+ */
+export async function startTask(taskId: string): Promise<TTask> {
+	const response = await api
+		.post(`tasks/${taskId}/start`)
+		.json<TBaseResponse<TTask>>();
+	return response.data;
+}
+
+/**
+ * Complete a task lifecycle
+ */
+export async function completeTask(
+	taskId: string,
+	completedAt?: string,
+): Promise<TTask> {
+	const response = await api
+		.post(`tasks/${taskId}/complete`, {
+			searchParams: completedAt ? { completed_at: completedAt } : {},
+		})
+		.json<TBaseResponse<TTask>>();
+	return response.data;
+}
+
+/**
+ * Fetch all activity logs for a specific task
+ */
+export async function fetchTaskActivities(taskId: string): Promise<any[]> {
+	const response = await api
+		.get(`tasks/${taskId}/activities`)
+		.json<TBaseResponse<any[]>>();
+	return response.data;
+}
+
+export async function createTaskComment(
+	taskId: string,
+	content: string,
+): Promise<any> {
+	const response = await api
+		.post(`tasks/${taskId}/comments`, {
+			json: { task_id: taskId, content, activity_type: "comment" },
+		})
+		.json<TBaseResponse<any>>();
+	return response.data;
+}

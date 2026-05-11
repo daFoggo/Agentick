@@ -91,15 +91,15 @@ export const KanbanCard = ({ task, onClick, isOverlay }: KanbanCardProps) => {
 							)}
 						</div>
 
-						{task.assignees && task.assignees.length > 0 && (
+						{task.task_members && task.task_members.length > 0 && (
 							<MemberAvatarGroup
-								items={task.assignees}
+								items={task.task_members}
 								max={2}
 								size="sm"
-								getAvatarInfo={(a) => ({
-									id: a.id,
-									name: a.user?.name,
-									avatar_url: a.user?.avatar_url,
+								getAvatarInfo={(m) => ({
+									id: m.user_id,
+									name: m.user?.name,
+									avatar_url: m.user?.avatar_url,
 								})}
 							/>
 						)}

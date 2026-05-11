@@ -19,7 +19,7 @@ export const inboxStatsQueryOptions = (params: GetInboxStatsInput = {}) =>
 		queryKey: inboxKeys.stats(),
 		queryFn: () => getInboxStatsFn({ data: params }) as Promise<TInboxStats>,
 		staleTime: 1000 * 60 * 2, // 2 minutes
-		refetchInterval: 2000, // Poll every 2 seconds for real-time updates
+		refetchInterval: 60000,
 	});
 
 export const inboxListQueryOptions = (
@@ -34,5 +34,5 @@ export const inboxListQueryOptions = (
 				TInboxItem[]
 			>,
 		staleTime: 1000 * 30, // 30 seconds
-		refetchInterval: 2000, // Poll every 2 seconds for real-time updates
+		refetchInterval: 60000,
 	});

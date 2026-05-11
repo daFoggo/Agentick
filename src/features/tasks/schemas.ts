@@ -6,7 +6,7 @@ import {
 	FindPageSizeWithAllSchema,
 } from "@/lib/zod-common";
 import type { TBaseFindResponse, TBaseSearchOptions } from "@/types/api";
-import type { TProjectMember } from "../project-members";
+import type { TUser } from "../users/schemas";
 
 /**
  * Schema cho Tag của Task
@@ -37,6 +37,21 @@ export const PhaseSchema = z.object({
 export type TPhase = z.infer<typeof PhaseSchema>;
 
 /**
+ * Schema cho Thành viên của Task (Thay thế cho Assignee thuần túy)
+ */
+export const TaskMemberSchema = z.object({
+	task_id: z.string(),
+	user_id: z.string(),
+	role: z.enum(["lead", "member"]),
+	joined_at: ApiDateSchema,
+	user: z.any().optional(), // Có thể fetch kèm user info
+});
+
+export type TTaskMember = z.infer<typeof TaskMemberSchema> & {
+	user?: TUser;
+};
+
+/**
  * Schema chính cho Task trong Project
  */
 export const ProjectTaskSchema = z.object({
@@ -50,10 +65,10 @@ export const ProjectTaskSchema = z.object({
 	status_id: z.string(),
 	type_id: z.string(),
 	priority_id: z.string(),
-	assigner_id: z.string(),
-	assignee_ids: z.array(z.string()).optional(),
+	// Removed assigner_id and assignee_ids
 	phase_id: z.string().nullable(),
-	start_date: ApiDateSchema.nullable().optional(),
+	started_at: ApiDateSchema.nullable().optional(),
+	completed_at: ApiDateSchema.nullable().optional(),
 	due_date: ApiDateSchema.nullable().optional(),
 	order: z.number(),
 	is_archived: z.boolean(),
@@ -68,7 +83,12 @@ export const ProjectTaskSchema = z.object({
 	status: z
 		.union([
 			z.string(),
-			z.object({ id: z.string(), name: z.string(), color: z.string() }),
+			z.object({
+				id: z.string(),
+				name: z.string(),
+				color: z.string(),
+				is_completed: z.boolean().optional(),
+			}),
 		])
 		.optional(),
 	priority: z
@@ -87,8 +107,7 @@ export const ProjectTaskSchema = z.object({
 export type TTask = z.infer<typeof ProjectTaskSchema> & {
 	tags?: TTag[];
 	phase?: TPhase;
-	assignees?: TProjectMember[];
-	assigner?: TProjectMember;
+	task_members?: TTaskMember[];
 	type_color?: string;
 	status_color?: string;
 	priority_color?: string;
@@ -105,10 +124,9 @@ export const CreateTaskSchema = z.object({
 	status_id: z.string(),
 	type_id: z.string(),
 	priority_id: z.string(),
-	assigner_id: z.string(),
-	assignee_ids: z.array(z.string()).optional(),
+	member_ids: z.array(z.string()).optional(), // Dùng thay cho assignee_ids
 	phase_id: z.string().nullable().optional(),
-	start_date: ApiDateSchema,
+	started_at: ApiDateSchema.optional().nullable(), // Nay có thể optional lúc tạo
 	due_date: ApiDateSchema,
 	order: z.number().int(),
 	estimated_hours: z.number().nullable().optional(),
@@ -125,6 +143,7 @@ export const UpdateTaskSchema = CreateTaskSchema.omit({
 	.partial()
 	.extend({
 		is_archived: z.boolean().optional(),
+		completed_at: ApiDateSchema.optional().nullable(),
 	});
 
 export type TUpdateTaskInput = z.infer<typeof UpdateTaskSchema>;
@@ -138,7 +157,7 @@ export const FindTasksSchema = z
 		title__ilike: z.string().optional(),
 		team_id__eq: z.string().optional(),
 		status_id__eq: z.string().optional(),
-		assignee_ids__contains: z.array(z.string()).optional(),
+		member_ids__contains: z.array(z.string()).optional(),
 		is_archived__eq: z.boolean().optional(),
 		is_deleted__eq: z.boolean().optional(),
 		page: FindPageSchema,

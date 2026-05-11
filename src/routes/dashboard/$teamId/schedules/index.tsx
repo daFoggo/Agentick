@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { CalendarPlus } from "lucide-react";
+import { format } from "date-fns";
+import { CalendarPlus, TriangleAlert } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
 	BigCalendar,
@@ -96,28 +97,34 @@ function RouteComponent() {
 		if (!taskData?.founds || !userData?.id) return [];
 		return taskData.founds
 			.filter((task) => {
-				if (!task.start_date || !task.due_date) return false;
+				if (!task.due_date) return false;
 
-				// Ensure the current user is assigned to this task or is the assigner
-				const isAssignedOrAssigner =
-					task.assignees?.some((a) => a.user_id === userData.id) ||
-					task.assigner?.user_id === userData.id;
+				// Ensure the current user is a member of this task
+				const isMember = task.task_members?.some(
+					(m: any) => m.user_id === userData.id,
+				);
 
-				return isAssignedOrAssigner;
+				return isMember;
 			})
-			.map((task) => ({
-				id: task.id,
-				title: task.title,
-				start: new Date(task.start_date || ""),
-				end: new Date(task.due_date || ""),
-				color: EVENT_TYPE_OPTIONS.find((opt) => opt.value === "task")
-					?.calendarColor,
-				meta: {
-					...task,
-					type: "task",
-					participants: task.assignees,
-				},
-			})) as IBigCalendarEvent[];
+			.map((task) => {
+				const dueDate = new Date(task.due_date || "");
+				// 3-hour duration leading to deadline
+				const startDate = new Date(dueDate.getTime() - 3 * 60 * 60 * 1000);
+
+				return {
+					id: task.id,
+					title: task.title,
+					start: startDate,
+					end: dueDate,
+					color: EVENT_TYPE_OPTIONS.find((opt) => opt.value === "task")
+						?.calendarColor,
+					meta: {
+						...task,
+						type: "task",
+						participants: task.task_members,
+					},
+				};
+			}) as IBigCalendarEvent[];
 	}, [taskData?.founds, userData?.id]);
 
 	const filteredEvents = useMemo(() => {
@@ -183,7 +190,6 @@ function RouteComponent() {
 				projectId: task.project_id,
 				taskId: event.id,
 				payload: {
-					start_date: start.toISOString(),
 					due_date: end.toISOString(),
 				},
 			});
@@ -243,10 +249,39 @@ function RouteComponent() {
 										/>
 									)}
 								>
-									<BigCalendarEventContent
-										event={event}
-										height={layout.height}
-									/>
+									{event.meta?.type === "task" ? (
+										<div
+											className="flex h-full w-full flex-col gap-1 overflow-hidden rounded-md border px-2 py-1.5 transition-all hover:brightness-95 shadow-sm backdrop-blur-xs"
+											style={{
+												borderColor: `color-mix(in oklch, ${event.color || "var(--primary)"} 30%, transparent)`,
+												backgroundColor: `color-mix(in oklch, ${event.color || "var(--primary)"} 15%, transparent)`,
+											}}
+										>
+											<div className="flex items-start gap-1.5 min-w-0">
+												<TriangleAlert
+													className="size-3 shrink-0 mt-0.5 opacity-90"
+													style={{ color: event.color || "var(--primary)" }}
+												/>
+												<span
+													className="truncate text-[11px] font-bold leading-snug tracking-tight"
+													style={{ color: event.color || "var(--primary)" }}
+												>
+													{event.title}
+												</span>
+											</div>
+											<div
+												className="text-[10px] font-bold opacity-85"
+												style={{ color: event.color || "var(--primary)" }}
+											>
+												Due: {format(event.end, "hh:mm a")}
+											</div>
+										</div>
+									) : (
+										<BigCalendarEventContent
+											event={event}
+											height={layout.height}
+										/>
+									)}
 								</BigCalendarEventPopover>
 							)}
 						/>
