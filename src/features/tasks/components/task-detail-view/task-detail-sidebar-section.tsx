@@ -5,6 +5,7 @@ import {
 	Clock,
 	Flag,
 	ListChecks,
+	Loader2,
 	Sparkles,
 	Users,
 } from "lucide-react";
@@ -263,7 +264,7 @@ export const TaskDetailSidebarSection = ({
 									disabled={isEstimating}
 								>
 									{isEstimating ? (
-										<Sparkles className="size-4 animate-spin" />
+										<Loader2 className="size-4 animate-spin" />
 									) : (
 										<Sparkles className="size-4 text-primary" />
 									)}
