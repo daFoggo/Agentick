@@ -1,3 +1,4 @@
+import type { ReactFormApi } from "@tanstack/react-form";
 import { z } from "zod";
 import {
 	ApiDateSchema,
@@ -6,35 +7,15 @@ import {
 	FindPageSizeWithAllSchema,
 } from "@/lib/zod-common";
 import type { TBaseFindResponse, TBaseSearchOptions } from "@/types/api";
-import type { TUser } from "../users/schemas";
-
-/**
- * Schema cho Tag của Task
- */
-export const TagSchema = z.object({
-	id: z.string(),
-	name: z.string(),
-	color: z.string(),
-	team_id: z.string(),
-	created_at: ApiDateSchema,
-});
-
-export type TTag = z.infer<typeof TagSchema>;
-
-/**
- * Schema cho Phase (Giai đoạn) của Task
- */
-export const PhaseSchema = z.object({
-	id: z.string(),
-	project_id: z.string(),
-	name: z.string(),
-	order: z.number(),
-	start_date: ApiDateSchema.optional(),
-	end_date: ApiDateSchema.optional(),
-	created_at: ApiDateSchema,
-});
-
-export type TPhase = z.infer<typeof PhaseSchema>;
+import type { TPhase } from "../phases";
+import type { TProjectMember } from "../project-members";
+import type {
+	TTaskPriority as TTaskPriorityOption,
+	TTaskStatus as TTaskStatusOption,
+	TTaskTag,
+	TTaskType as TTaskTypeOption,
+} from "../task-config";
+import type { TUser } from "../users";
 
 /**
  * Schema cho Thành viên của Task (Thay thế cho Assignee thuần túy)
@@ -51,10 +32,17 @@ export type TTaskMember = z.infer<typeof TaskMemberSchema> & {
 	user?: TUser;
 };
 
+export interface ITaskListDialogOptions {
+	statuses: TTaskStatusOption[];
+	types: TTaskTypeOption[];
+	priorities: TTaskPriorityOption[];
+	members: TProjectMember[];
+}
+
 /**
  * Schema chính cho Task trong Project
  */
-export const ProjectTaskSchema = z.object({
+export const TaskSchema = z.object({
 	id: z.string(),
 	created_at: ApiDateSchema,
 	updated_at: ApiDateSchema,
@@ -104,8 +92,8 @@ export const ProjectTaskSchema = z.object({
 /**
  * Type đầy đủ của một Task bao gồm các thông tin liên quan (Join)
  */
-export type TTask = z.infer<typeof ProjectTaskSchema> & {
-	tags?: TTag[];
+export type TTask = z.infer<typeof TaskSchema> & {
+	tags?: TTaskTag[];
 	phase?: TPhase;
 	task_members?: TTaskMember[];
 	type_color?: string;
@@ -133,6 +121,45 @@ export const CreateTaskSchema = z.object({
 });
 
 export type TCreateTaskInput = z.infer<typeof CreateTaskSchema>;
+
+/**
+ * Type cho state của form Task trong detail view
+ */
+export type TTaskDetailFormValues = Omit<
+	TCreateTaskInput,
+	"due_date" | "member_ids" | "estimated_hours"
+> & {
+	due_date: Date;
+	member_ids: string[];
+	estimated_hours?: number;
+};
+
+export type TTaskDetailFormApi = ReactFormApi<
+	TTaskDetailFormValues,
+	any,
+	any,
+	any,
+	any,
+	any,
+	any,
+	any,
+	any,
+	any,
+	any,
+	any
+>;
+
+export type TTaskAIEstimationReasoningSteps = {
+	similarity_analysis?: string;
+	variance_analysis?: string;
+};
+
+export type TTaskAIEstimationExplanation = {
+	suggested_hours: number;
+	rationale: string;
+	similar_cases_count?: number;
+	reasoning_steps?: TTaskAIEstimationReasoningSteps;
+};
 
 /**
  * Schema cho việc cập nhật Task

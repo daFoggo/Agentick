@@ -1,21 +1,13 @@
-import type { TProjectMember } from "@/features/project-members";
-import type {
-	TTaskPriority as TTaskPriorityOption,
-	TTaskStatus as TTaskStatusOption,
-	TTaskType as TTaskTypeOption,
-} from "@/features/task-config";
-import type { TTask } from "./schemas";
-
 /**
  * Interface cho các tùy chọn trong Dialog quản lý Task
  */
-export interface ITaskListDialogOptions {
-	statuses: TTaskStatusOption[];
-	types: TTaskTypeOption[];
-	priorities: TTaskPriorityOption[];
-	members: TProjectMember[];
-}
+import type {
+	ITaskListDialogOptions,
+	TTask,
+	TTaskDetailFormValues,
+} from "./schemas";
 
+export type { ITaskListDialogOptions } from "./schemas";
 export function getStatusOption(
 	value: string,
 	options: ITaskListDialogOptions,
@@ -141,6 +133,78 @@ export const resolveDefaultTaskOptionIds = (
 		priorityId,
 	};
 };
+
+export const getTaskDetailDefaultValues = (
+	task: TTask | undefined,
+	options: ITaskListDialogOptions,
+	defaultStatusId?: string,
+): TTaskDetailFormValues => {
+	const defaults = resolveDefaultTaskOptionIds(options);
+
+	return {
+		title: task?.title || "",
+		description: task?.description ?? "",
+		status_id: task?.status_id ?? defaultStatusId ?? defaults.statusId,
+		type_id: task?.type_id ?? defaults.typeId,
+		priority_id: task?.priority_id ?? defaults.priorityId,
+		member_ids: task?.task_members?.map((member) => member.user_id) ?? [],
+		due_date: toCalendarDateValue(task?.due_date) ?? new Date(),
+		order: task?.order ?? 0,
+		estimated_hours: task?.estimated_hours ?? undefined,
+	};
+};
+
+export const buildTaskDetailPayload = (value: TTaskDetailFormValues) => {
+	const dueDateIso = toIsoDateTime(
+		value.due_date instanceof Date ? value.due_date : undefined,
+	);
+
+	if (!dueDateIso) return null;
+
+	const estimatedHours =
+		value.estimated_hours !== undefined && value.estimated_hours !== null
+			? Number(value.estimated_hours)
+			: null;
+
+	return {
+		dueDateIso,
+		payload: {
+			title: value.title,
+			status_id: value.status_id,
+			type_id: value.type_id,
+			priority_id: value.priority_id,
+			member_ids: value.member_ids,
+			description: value.description || null,
+			due_date: dueDateIso,
+			estimated_hours: estimatedHours,
+		},
+	};
+};
+
+export const serializeTaskDetailFormValues = (value: TTaskDetailFormValues) =>
+	JSON.stringify({
+		title: value.title,
+		description: value.description,
+		status_id: value.status_id,
+		type_id: value.type_id,
+		priority_id: value.priority_id,
+		member_ids: value.member_ids,
+		due_date:
+			value.due_date instanceof Date ? value.due_date.toISOString() : null,
+		estimated_hours:
+			value.estimated_hours !== undefined && value.estimated_hours !== null
+				? Number(value.estimated_hours)
+				: null,
+	});
+
+export const cloneTaskDetailFormValues = (
+	value: TTaskDetailFormValues,
+): TTaskDetailFormValues => ({
+	...value,
+	member_ids: [...value.member_ids],
+	due_date:
+		value.due_date instanceof Date ? new Date(value.due_date) : new Date(),
+});
 
 /**
  * Lọc danh sách task theo trạng thái cho Dashboard Overview (Phương án B - Agile/Scrum).

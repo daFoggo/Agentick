@@ -1,17 +1,10 @@
 import { Sparkles } from "lucide-react";
 import { memo } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import type { TTaskAIEstimationExplanation } from "@/features/tasks/schemas";
 
 interface ITaskAIEstimationAlertProps {
-	aiExplanation: {
-		suggested_hours: number;
-		rationale: string;
-		similar_cases_count?: number;
-		reasoning_steps?: {
-			similarity_analysis?: string;
-			variance_analysis?: string;
-		};
-	} | null;
+	aiExplanation: TTaskAIEstimationExplanation | null;
 }
 
 export const TaskAIEstimationAlert = memo(

@@ -53,6 +53,7 @@ export const TaskActivity = ({ taskId }: ITaskActivityProps) => {
 
 	const timelineItems = activities || [];
 	const activitiesCount = activities?.length ?? 0;
+	const hasActivities = activitiesCount > 0;
 
 	useEffect(() => {
 		bottomRef.current?.scrollIntoView({ behavior: "instant" });
@@ -84,16 +85,17 @@ export const TaskActivity = ({ taskId }: ITaskActivityProps) => {
 		<div className="space-y-2">
 			<p className="text-lg font-semibold tracking-tight">Activity</p>
 
-			<ScrollArea className="h-90 pr-4">
+			<ScrollArea className={hasActivities ? "h-90 pr-4" : "pr-4"}>
 				{/* Main unified coordinate space spans entire height, full width */}
 				<div className="flex flex-col gap-4">
 					{/* 1. Relative block ONLY for historical entries + vertical timeline line */}
 					<div className="relative flex flex-col gap-4">
-						{/* The line only exists INSIDE this scope, terminating at the end of historical items */}
-						<div className="absolute left-3 top-3 bottom-3 w-0.5 -translate-x-1/2 rounded-full bg-muted z-0" />
+						{timelineItems.length > 0 ? (
+							<div className="absolute left-3 top-3 bottom-3 w-0.5 -translate-x-1/2 rounded-full bg-muted z-0" />
+						) : null}
 
 						{timelineItems.length === 0 ? (
-							<div className="relative z-10 bg-background">
+							<div className="relative z-10">
 								<Empty>
 									<EmptyHeader>
 										<EmptyMedia variant="icon">

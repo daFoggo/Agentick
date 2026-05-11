@@ -6,6 +6,7 @@ import {
 	type TCreateTaskInput,
 	type TFindTasksInput,
 	type TTask,
+	type TTaskAIEstimationExplanation,
 	type TTasksResponse,
 	type TUpdateTaskInput,
 	UpdateTaskSchema,
@@ -79,7 +80,7 @@ export async function createTask(
 	payload: TCreateTaskInput,
 ): Promise<TTask> {
 	const response = await api
-		.post(buildTaskPath(projectId), {
+		.post(`${buildTaskPath(projectId)}`, {
 			json: CreateTaskSchema.parse({
 				...payload,
 				project_id: payload.project_id ?? projectId,
@@ -127,22 +128,12 @@ export async function deleteTask(
 export async function estimateTask(
 	projectId: string,
 	payload: { title: string; description: string | null },
-): Promise<{
-	suggested_hours: number;
-	rationale: string;
-	reasoning_steps: any;
-}> {
+): Promise<TTaskAIEstimationExplanation> {
 	const response = await api
 		.post(`projects/${projectId}/tasks/estimate`, {
 			json: payload,
 		})
-		.json<
-			TBaseResponse<{
-				suggested_hours: number;
-				rationale: string;
-				reasoning_steps: any;
-			}>
-		>();
+		.json<TBaseResponse<TTaskAIEstimationExplanation>>();
 
 	return response.data;
 }
