@@ -4,12 +4,16 @@ import {
 	useQueryClient,
 } from "@tanstack/react-query";
 import {
+	completeTaskFn,
+	createTaskCommentFn,
 	createTaskFn,
 	deleteTaskFn,
 	estimateTaskFn,
 	fetchMyTasksFn,
+	fetchTaskActivitiesFn,
 	fetchTaskByIdFn,
 	fetchTasksFn,
+	startTaskFn,
 	updateTaskFn,
 } from "./functions";
 import type { TFindTasksInput } from "./schemas";
@@ -27,6 +31,8 @@ export const taskKeys = {
 		[...taskKeys.details(), projectId, taskId] as const,
 	myTasks: (teamId?: string) =>
 		[...taskKeys.all, "my-tasks", teamId ?? "all"] as const,
+	activities: (taskId: string) =>
+		[...taskKeys.details(), taskId, "activities"] as const,
 };
 
 /**
@@ -55,6 +61,11 @@ export const taskQueries = {
 						},
 					},
 				}),
+		}),
+	activities: (taskId: string) =>
+		queryOptions({
+			queryKey: taskKeys.activities(taskId),
+			queryFn: () => fetchTaskActivitiesFn({ data: { taskId } }),
 		}),
 };
 
@@ -100,6 +111,9 @@ export const useTaskMutations = () => {
 				queryClient.invalidateQueries({
 					queryKey: taskKeys.detail(variables.projectId, variables.taskId),
 				}),
+				queryClient.invalidateQueries({
+					queryKey: taskKeys.activities(variables.taskId),
+				}),
 				queryClient.invalidateQueries({ queryKey: taskKeys.myTasks() }),
 				queryClient.invalidateQueries({ queryKey: ["users", "stats"] }),
 				invalidateDashboardCharts(queryClient),
@@ -130,5 +144,56 @@ export const useTaskMutations = () => {
 		}) => estimateTaskFn({ data }),
 	});
 
-	return { create, update, remove, estimate };
+	const start = useMutation({
+		mutationFn: (data: { taskId: string; projectId: string }) =>
+			startTaskFn({ data: { taskId: data.taskId } }),
+		onSuccess: async (_, variables) => {
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: taskKeys.lists() }),
+				queryClient.invalidateQueries({
+					queryKey: taskKeys.detail(variables.projectId, variables.taskId),
+				}),
+				queryClient.invalidateQueries({
+					queryKey: taskKeys.activities(variables.taskId),
+				}),
+				invalidateDashboardCharts(queryClient),
+			]);
+		},
+	});
+
+	const complete = useMutation({
+		mutationFn: (data: {
+			taskId: string;
+			projectId: string;
+			completedAt?: string;
+		}) =>
+			completeTaskFn({
+				data: { taskId: data.taskId, completedAt: data.completedAt },
+			}),
+		onSuccess: async (_, variables) => {
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: taskKeys.lists() }),
+				queryClient.invalidateQueries({
+					queryKey: taskKeys.detail(variables.projectId, variables.taskId),
+				}),
+				queryClient.invalidateQueries({
+					queryKey: taskKeys.activities(variables.taskId),
+				}),
+				queryClient.invalidateQueries({ queryKey: ["users", "stats"] }),
+				invalidateDashboardCharts(queryClient),
+			]);
+		},
+	});
+
+	const addComment = useMutation({
+		mutationFn: (data: { taskId: string; content: string }) =>
+			createTaskCommentFn({ data }),
+		onSuccess: async (_, variables) => {
+			await queryClient.invalidateQueries({
+				queryKey: taskKeys.activities(variables.taskId),
+			});
+		},
+	});
+
+	return { create, update, remove, estimate, start, complete, addComment };
 };

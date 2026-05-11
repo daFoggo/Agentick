@@ -49,6 +49,7 @@ export interface IDataTableProps<TData> {
 	className?: string;
 	wrapperClassName?: string;
 	getRowId?: (row: TData) => string;
+	onRowClick?: (row: TData) => void;
 }
 
 /**
@@ -78,6 +79,7 @@ const DataTableInner = <TData,>({
 	getRowId,
 	enableColumnReorder = true,
 	enableColumnPinning = true,
+	onRowClick,
 }: IDataTableProps<TData>) => {
 	// ── State ────────────────────────────────────────────────────────────────
 	const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -291,7 +293,13 @@ const DataTableInner = <TData,>({
 										/>
 									);
 								}
-								return <DataTableRow key={row.id} row={row} />;
+								return (
+									<DataTableRow
+										key={row.id}
+										row={row}
+										onClick={(r) => onRowClick?.(r.original)}
+									/>
+								);
 							})
 						)}
 					</TableBody>

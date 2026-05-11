@@ -7,19 +7,23 @@ import { cn } from "@/lib/utils";
 interface IDataTableRowProps<TData> {
 	row: Row<TData>;
 	className?: string;
+	onClick?: (row: Row<TData>) => void;
 }
 
 export const DataTableRow = <TData,>({
 	row,
 	className,
+	onClick,
 }: IDataTableRowProps<TData>) => {
 	return (
 		<TableRow
 			data-state={row.getIsSelected() ? "selected" : undefined}
 			className={cn(
 				"group/row transition-colors duration-300 ease-in-out",
+				onClick && "cursor-pointer",
 				className,
 			)}
+			onClick={() => onClick?.(row)}
 		>
 			{row.getVisibleCells().map((cell) => (
 				<DataTableCell key={cell.id} cell={cell} />

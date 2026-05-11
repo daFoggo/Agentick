@@ -14,7 +14,8 @@ import {
 	SortableContext,
 	sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
-import { useEffect, useMemo } from "react";
+import { useNavigate, useParams } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { toast } from "sonner";
 
 import type { TProjectMember } from "@/features/project-members";
@@ -27,9 +28,7 @@ import {
 import { useKanbanStore } from "@/stores/use-kanban-store";
 import { useTaskMutations } from "../../queries";
 import type { TTask } from "../../schemas";
-import { CreateTaskListDialog } from "../task-table/create-task-list-dialog";
 import { DeleteTaskListDialog } from "../task-table/delete-task-list-dialog";
-import { EditTaskListDialog } from "../task-table/edit-task-list-dialog";
 import { KanbanCard } from "./kanban-card";
 import { KanbanColumn } from "./kanban-column";
 
@@ -46,26 +45,18 @@ export const TaskKanban = ({
 	projectId,
 	tasks: initialTasks,
 	statuses,
-	types,
-	priorities,
-	members,
+	types: _types,
+	priorities: _priorities,
+	members: _members,
 }: ITaskKanbanProps): React.ReactNode => {
 	const {
 		tasks,
 		setTasks,
 		activeTask,
 		activeColumn,
-		selectedTask,
 		taskToDelete,
-		isEditOpen,
-		isCreateOpen,
 		isDeleteOpen,
-		defaultStatusId,
-		setIsEditOpen,
-		setIsCreateOpen,
 		setIsDeleteOpen,
-		openCreateDialog,
-		openEditDialog,
 		openDeleteDialog,
 		closeDialogs,
 		handleDragStart,
@@ -73,8 +64,21 @@ export const TaskKanban = ({
 		handleDragEnd,
 	} = useKanbanStore();
 
+	const { teamId } = useParams({ strict: false });
+	const navigate = useNavigate();
 	const { update, remove } = useTaskMutations();
 	const { updateStatus } = useTaskConfigMutations();
+
+	const handleTaskClick = (task: TTask) => {
+		navigate({
+			to: "/dashboard/$teamId/projects/$projectId/tasks/$taskId",
+			params: {
+				teamId: teamId || "all",
+				projectId,
+				taskId: task.id,
+			},
+		});
+	};
 
 	useEffect(() => {
 		setTasks(initialTasks);
@@ -144,21 +148,6 @@ export const TaskKanban = ({
 		return pointerWithin(args);
 	};
 
-	const taskOptions = useMemo(
-		() => ({
-			statuses,
-			types,
-			priorities,
-			members,
-		}),
-		[statuses, types, priorities, members],
-	);
-
-	const nextOrder = useMemo(
-		() => tasks.reduce((max, t) => Math.max(max, t.order ?? -1), -1) + 1,
-		[tasks],
-	);
-
 	const handleConfirmDelete = async () => {
 		if (!taskToDelete) return false;
 		try {
@@ -219,9 +208,15 @@ export const TaskKanban = ({
 								id={status.id}
 								title={status.name}
 								tasks={tasks.filter((t) => t.status_id === status.id)}
-								onTaskClick={openEditDialog}
+								onTaskClick={handleTaskClick}
 								onDeleteTask={openDeleteDialog}
-								onAddTask={openCreateDialog}
+								onAddTask={(statusId) => {
+									navigate({
+										to: "/dashboard/$teamId/projects/$projectId/tasks/create",
+										params: { teamId: teamId || "personal", projectId },
+										search: { status_id: statusId } as any,
+									});
+								}}
 							/>
 						))}
 					</SortableContext>
@@ -247,24 +242,6 @@ export const TaskKanban = ({
 					)}
 				</DragOverlay>
 			</DndContext>
-
-			<CreateTaskListDialog
-				projectId={projectId}
-				nextOrder={nextOrder}
-				open={isCreateOpen}
-				onOpenChange={setIsCreateOpen}
-				options={taskOptions}
-				defaultStatusId={defaultStatusId}
-			/>
-
-			{selectedTask && (
-				<EditTaskListDialog
-					task={selectedTask}
-					open={isEditOpen}
-					onOpenChange={setIsEditOpen}
-					options={taskOptions}
-				/>
-			)}
 
 			{taskToDelete && (
 				<DeleteTaskListDialog

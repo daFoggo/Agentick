@@ -43,6 +43,10 @@ export const Route = createRootRouteWithContext<IRouterContext>()({
 				name: "description",
 				content: SITE_CONFIG.metadata.description,
 			},
+			{
+				name: "keywords",
+				content: SITE_CONFIG.metadata.keywords.join(", "),
+			},
 		],
 		links: [
 			{

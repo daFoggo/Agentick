@@ -1,3 +1,4 @@
+import type { ReactFormApi } from "@tanstack/react-form";
 import { z } from "zod";
 import {
 	ApiDateSchema,
@@ -6,40 +7,42 @@ import {
 	FindPageSizeWithAllSchema,
 } from "@/lib/zod-common";
 import type { TBaseFindResponse, TBaseSearchOptions } from "@/types/api";
+import type { TPhase } from "../phases";
 import type { TProjectMember } from "../project-members";
+import type {
+	TTaskPriority as TTaskPriorityOption,
+	TTaskStatus as TTaskStatusOption,
+	TTaskTag,
+	TTaskType as TTaskTypeOption,
+} from "../task-config";
+import type { TUser } from "../users";
 
 /**
- * Schema cho Tag của Task
+ * Schema cho Thành viên của Task (Thay thế cho Assignee thuần túy)
  */
-export const TagSchema = z.object({
-	id: z.string(),
-	name: z.string(),
-	color: z.string(),
-	team_id: z.string(),
-	created_at: ApiDateSchema,
+export const TaskMemberSchema = z.object({
+	task_id: z.string(),
+	user_id: z.string(),
+	role: z.enum(["lead", "member"]),
+	joined_at: ApiDateSchema,
+	user: z.any().optional(), // Có thể fetch kèm user info
 });
 
-export type TTag = z.infer<typeof TagSchema>;
+export type TTaskMember = z.infer<typeof TaskMemberSchema> & {
+	user?: TUser;
+};
 
-/**
- * Schema cho Phase (Giai đoạn) của Task
- */
-export const PhaseSchema = z.object({
-	id: z.string(),
-	project_id: z.string(),
-	name: z.string(),
-	order: z.number(),
-	start_date: ApiDateSchema.optional(),
-	end_date: ApiDateSchema.optional(),
-	created_at: ApiDateSchema,
-});
-
-export type TPhase = z.infer<typeof PhaseSchema>;
+export interface ITaskListDialogOptions {
+	statuses: TTaskStatusOption[];
+	types: TTaskTypeOption[];
+	priorities: TTaskPriorityOption[];
+	members: TProjectMember[];
+}
 
 /**
  * Schema chính cho Task trong Project
  */
-export const ProjectTaskSchema = z.object({
+export const TaskSchema = z.object({
 	id: z.string(),
 	created_at: ApiDateSchema,
 	updated_at: ApiDateSchema,
@@ -50,10 +53,10 @@ export const ProjectTaskSchema = z.object({
 	status_id: z.string(),
 	type_id: z.string(),
 	priority_id: z.string(),
-	assigner_id: z.string(),
-	assignee_ids: z.array(z.string()).optional(),
+	// Removed assigner_id and assignee_ids
 	phase_id: z.string().nullable(),
-	start_date: ApiDateSchema.nullable().optional(),
+	started_at: ApiDateSchema.nullable().optional(),
+	completed_at: ApiDateSchema.nullable().optional(),
 	due_date: ApiDateSchema.nullable().optional(),
 	order: z.number(),
 	is_archived: z.boolean(),
@@ -68,7 +71,12 @@ export const ProjectTaskSchema = z.object({
 	status: z
 		.union([
 			z.string(),
-			z.object({ id: z.string(), name: z.string(), color: z.string() }),
+			z.object({
+				id: z.string(),
+				name: z.string(),
+				color: z.string(),
+				is_completed: z.boolean().optional(),
+			}),
 		])
 		.optional(),
 	priority: z
@@ -84,11 +92,10 @@ export const ProjectTaskSchema = z.object({
 /**
  * Type đầy đủ của một Task bao gồm các thông tin liên quan (Join)
  */
-export type TTask = z.infer<typeof ProjectTaskSchema> & {
-	tags?: TTag[];
+export type TTask = z.infer<typeof TaskSchema> & {
+	tags?: TTaskTag[];
 	phase?: TPhase;
-	assignees?: TProjectMember[];
-	assigner?: TProjectMember;
+	task_members?: TTaskMember[];
 	type_color?: string;
 	status_color?: string;
 	priority_color?: string;
@@ -105,16 +112,54 @@ export const CreateTaskSchema = z.object({
 	status_id: z.string(),
 	type_id: z.string(),
 	priority_id: z.string(),
-	assigner_id: z.string(),
-	assignee_ids: z.array(z.string()).optional(),
+	member_ids: z.array(z.string()).optional(), // Dùng thay cho assignee_ids
 	phase_id: z.string().nullable().optional(),
-	start_date: ApiDateSchema,
+	started_at: ApiDateSchema.optional().nullable(), // Nay có thể optional lúc tạo
 	due_date: ApiDateSchema,
 	order: z.number().int(),
 	estimated_hours: z.number().nullable().optional(),
 });
 
 export type TCreateTaskInput = z.infer<typeof CreateTaskSchema>;
+
+/**
+ * Type cho state của form Task trong detail view
+ */
+export type TTaskDetailFormValues = Omit<
+	TCreateTaskInput,
+	"due_date" | "member_ids" | "estimated_hours"
+> & {
+	due_date: Date;
+	member_ids: string[];
+	estimated_hours?: number;
+};
+
+export type TTaskDetailFormApi = ReactFormApi<
+	TTaskDetailFormValues,
+	any,
+	any,
+	any,
+	any,
+	any,
+	any,
+	any,
+	any,
+	any,
+	any,
+	any
+>;
+
+export type TTaskAIEstimationReasoningSteps = {
+	similarity_analysis?: string;
+	variance_analysis?: string;
+};
+
+export type TTaskAIEstimationExplanation = {
+	suggested_hours: number;
+	rationale: string;
+	similar_cases_count?: number;
+	reasoning_steps?: TTaskAIEstimationReasoningSteps;
+};
 
 /**
  * Schema cho việc cập nhật Task
@@ -125,6 +170,7 @@ export const UpdateTaskSchema = CreateTaskSchema.omit({
 	.partial()
 	.extend({
 		is_archived: z.boolean().optional(),
+		completed_at: ApiDateSchema.optional().nullable(),
 	});
 
 export type TUpdateTaskInput = z.infer<typeof UpdateTaskSchema>;
@@ -138,7 +184,7 @@ export const FindTasksSchema = z
 		title__ilike: z.string().optional(),
 		team_id__eq: z.string().optional(),
 		status_id__eq: z.string().optional(),
-		assignee_ids__contains: z.array(z.string()).optional(),
+		member_ids__contains: z.array(z.string()).optional(),
 		is_archived__eq: z.boolean().optional(),
 		is_deleted__eq: z.boolean().optional(),
 		page: FindPageSchema,

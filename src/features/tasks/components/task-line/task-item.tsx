@@ -16,15 +16,17 @@ export const TaskItem = ({ task }: ITaskItemProps) => {
 
 	return (
 		<div
-			onClick={() =>
+			onClick={() => {
+				if (!task.id) return;
 				navigate({
-					to: "/dashboard/$teamId/projects/$projectId/list",
+					to: "/dashboard/$teamId/projects/$projectId/tasks/$taskId",
 					params: {
 						teamId: teamId || "personal",
 						projectId: task.project_id || "all",
+						taskId: task.id,
 					},
-				})
-			}
+				});
+			}}
 			className="group flex cursor-pointer items-center gap-2 rounded-lg p-2 transition-all hover:bg-muted/80"
 		>
 			<div className="relative flex size-4 shrink-0 items-center justify-center">

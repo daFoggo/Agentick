@@ -1,21 +1,13 @@
-import type { TProjectMember } from "@/features/project-members";
-import type {
-	TTaskPriority as TTaskPriorityOption,
-	TTaskStatus as TTaskStatusOption,
-	TTaskType as TTaskTypeOption,
-} from "@/features/task-config";
-import type { TTask } from "./schemas";
-
 /**
  * Interface cho các tùy chọn trong Dialog quản lý Task
  */
-export interface ITaskListDialogOptions {
-	statuses: TTaskStatusOption[];
-	types: TTaskTypeOption[];
-	priorities: TTaskPriorityOption[];
-	members: TProjectMember[];
-}
+import type {
+	ITaskListDialogOptions,
+	TTask,
+	TTaskDetailFormValues,
+} from "./schemas";
 
+export type { ITaskListDialogOptions } from "./schemas";
 export function getStatusOption(
 	value: string,
 	options: ITaskListDialogOptions,
@@ -121,7 +113,6 @@ export const resolveDefaultTaskOptionIds = (
 	statusId: string;
 	typeId: string;
 	priorityId: string;
-	assignerId: string;
 } => {
 	const statusId =
 		options.statuses.find((item) => item.is_default)?.id ??
@@ -135,15 +126,85 @@ export const resolveDefaultTaskOptionIds = (
 		options.priorities.find((item) => item.is_default)?.id ??
 		options.priorities[0]?.id ??
 		"";
-	const assignerId = options.members[0]?.id ?? "";
 
 	return {
 		statusId,
 		typeId,
 		priorityId,
-		assignerId,
 	};
 };
+
+export const getTaskDetailDefaultValues = (
+	task: TTask | undefined,
+	options: ITaskListDialogOptions,
+	defaultStatusId?: string,
+): TTaskDetailFormValues => {
+	const defaults = resolveDefaultTaskOptionIds(options);
+
+	return {
+		title: task?.title || "",
+		description: task?.description ?? "",
+		status_id: task?.status_id ?? defaultStatusId ?? defaults.statusId,
+		type_id: task?.type_id ?? defaults.typeId,
+		priority_id: task?.priority_id ?? defaults.priorityId,
+		member_ids: task?.task_members?.map((member) => member.user_id) ?? [],
+		due_date: toCalendarDateValue(task?.due_date) ?? new Date(),
+		order: task?.order ?? 0,
+		estimated_hours: task?.estimated_hours ?? undefined,
+	};
+};
+
+export const buildTaskDetailPayload = (value: TTaskDetailFormValues) => {
+	const dueDateIso = toIsoDateTime(
+		value.due_date instanceof Date ? value.due_date : undefined,
+	);
+
+	if (!dueDateIso) return null;
+
+	const estimatedHours =
+		value.estimated_hours !== undefined && value.estimated_hours !== null
+			? Number(value.estimated_hours)
+			: null;
+
+	return {
+		dueDateIso,
+		payload: {
+			title: value.title,
+			status_id: value.status_id,
+			type_id: value.type_id,
+			priority_id: value.priority_id,
+			member_ids: value.member_ids,
+			description: value.description || null,
+			due_date: dueDateIso,
+			estimated_hours: estimatedHours,
+		},
+	};
+};
+
+export const serializeTaskDetailFormValues = (value: TTaskDetailFormValues) =>
+	JSON.stringify({
+		title: value.title,
+		description: value.description,
+		status_id: value.status_id,
+		type_id: value.type_id,
+		priority_id: value.priority_id,
+		member_ids: value.member_ids,
+		due_date:
+			value.due_date instanceof Date ? value.due_date.toISOString() : null,
+		estimated_hours:
+			value.estimated_hours !== undefined && value.estimated_hours !== null
+				? Number(value.estimated_hours)
+				: null,
+	});
+
+export const cloneTaskDetailFormValues = (
+	value: TTaskDetailFormValues,
+): TTaskDetailFormValues => ({
+	...value,
+	member_ids: [...value.member_ids],
+	due_date:
+		value.due_date instanceof Date ? new Date(value.due_date) : new Date(),
+});
 
 /**
  * Lọc danh sách task theo trạng thái cho Dashboard Overview (Phương án B - Agile/Scrum).
@@ -178,38 +239,33 @@ export const filterTasksForOverview = (
 
 	const upcoming = tasks.filter((t) => {
 		if (isCompleted(t)) return false;
-		const startTime = getNormalizedTime(t.start_date);
-		return startTime !== null && startTime > todayTime;
+		// Nếu chưa start thì là upcoming cho đến khi pass deadline (handled by overdue)
+		return !t.started_at;
 	});
 
 	const inProgress = tasks.filter((t) => {
 		if (isCompleted(t)) return false;
 
 		const dueTime = getNormalizedTime(t.due_date);
-		const startTime = getNormalizedTime(t.start_date);
 
+		// Bắt đầu khi đã set started_at
+		const isStarted = !!t.started_at;
 		const isOverdue = dueTime !== null && dueTime < todayTime;
-		const isUpcoming = startTime !== null && startTime > todayTime;
 
-		return !isOverdue && !isUpcoming;
+		return isStarted && !isOverdue;
 	});
 
 	return { inProgress, upcoming, overdue };
 };
 
 export function mapTaskData(
-	task: any,
-	members: TProjectMember[],
+	task: TTask,
 	options: {
 		statuses: Array<{ id: string; name: string; color?: string }>;
 		types: Array<{ id: string; name: string; color?: string }>;
 		priorities: Array<{ id: string; name: string; color?: string }>;
 	},
 ): TTask {
-	const assignee_ids =
-		task.assignee_ids || (task.assignee_id ? [task.assignee_id] : []);
-	const assignees = members.filter((m) => assignee_ids.includes(m.id));
-
 	const display = (
 		id: string,
 		catalog: Array<{ id: string; name: string; color?: string }>,
@@ -228,7 +284,6 @@ export function mapTaskData(
 		status_id: task.status_id,
 		type_id: task.type_id,
 		priority_id: task.priority_id,
-		assigner_id: task.assigner_id || "",
 		type: typeOpt?.name ?? task.type_id,
 		status: statusOpt?.name ?? task.status_id,
 		priority: priorityOpt?.name ?? task.priority_id,
@@ -236,11 +291,13 @@ export function mapTaskData(
 		status_color: statusOpt?.color,
 		priority_color: priorityOpt?.color,
 		phase_id: task.phase_id ?? null,
-		assignee_ids,
-		assignees,
-		start_date: task.start_date
-			? new Date(task.start_date).toISOString()
-			: new Date().toISOString(),
+		task_members: task.task_members || [],
+		started_at: task.started_at
+			? new Date(task.started_at).toISOString()
+			: null,
+		completed_at: task.completed_at
+			? new Date(task.completed_at).toISOString()
+			: null,
 		due_date: task.due_date
 			? new Date(task.due_date).toISOString()
 			: new Date().toISOString(),

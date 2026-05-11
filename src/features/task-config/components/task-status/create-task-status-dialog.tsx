@@ -116,6 +116,7 @@ export const CreateTaskStatusDialog = ({
 										<FieldLabel htmlFor={field.name}>Status Name</FieldLabel>
 										<Input
 											id={field.name}
+											autoFocus
 											name={field.name}
 											value={field.state.value}
 											onBlur={field.handleBlur}

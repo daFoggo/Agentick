@@ -40,6 +40,8 @@ import { Route as DashboardTeamIdProjectsProjectIdListRouteImport } from './rout
 import { Route as DashboardTeamIdProjectsProjectIdDashboardRouteImport } from './routes/dashboard/$teamId/projects/$projectId/dashboard'
 import { Route as DashboardTeamIdProjectsProjectIdBoardRouteImport } from './routes/dashboard/$teamId/projects/$projectId/board'
 import { Route as DashboardTeamIdProjectsProjectIdSettingsIndexRouteImport } from './routes/dashboard/$teamId/projects/$projectId/settings.index'
+import { Route as DashboardTeamIdProjectsProjectIdTasksCreateRouteImport } from './routes/dashboard/$teamId/projects/$projectId/tasks.create'
+import { Route as DashboardTeamIdProjectsProjectIdTasksTaskIdRouteImport } from './routes/dashboard/$teamId/projects/$projectId/tasks.$taskId'
 import { Route as DashboardTeamIdProjectsProjectIdSettingsTaskTypesRouteImport } from './routes/dashboard/$teamId/projects/$projectId/settings.task-types'
 import { Route as DashboardTeamIdProjectsProjectIdSettingsTaskTagsRouteImport } from './routes/dashboard/$teamId/projects/$projectId/settings.task-tags'
 import { Route as DashboardTeamIdProjectsProjectIdSettingsTaskStatusesRouteImport } from './routes/dashboard/$teamId/projects/$projectId/settings.task-statuses'
@@ -224,6 +226,18 @@ const DashboardTeamIdProjectsProjectIdSettingsIndexRoute =
     path: '/',
     getParentRoute: () => DashboardTeamIdProjectsProjectIdSettingsRoute,
   } as any)
+const DashboardTeamIdProjectsProjectIdTasksCreateRoute =
+  DashboardTeamIdProjectsProjectIdTasksCreateRouteImport.update({
+    id: '/tasks/create',
+    path: '/tasks/create',
+    getParentRoute: () => DashboardTeamIdProjectsProjectIdRouteRoute,
+  } as any)
+const DashboardTeamIdProjectsProjectIdTasksTaskIdRoute =
+  DashboardTeamIdProjectsProjectIdTasksTaskIdRouteImport.update({
+    id: '/tasks/$taskId',
+    path: '/tasks/$taskId',
+    getParentRoute: () => DashboardTeamIdProjectsProjectIdRouteRoute,
+  } as any)
 const DashboardTeamIdProjectsProjectIdSettingsTaskTypesRoute =
   DashboardTeamIdProjectsProjectIdSettingsTaskTypesRouteImport.update({
     id: '/task-types',
@@ -291,6 +305,8 @@ export interface FileRoutesByFullPath {
   '/dashboard/$teamId/projects/$projectId/settings/task-statuses': typeof DashboardTeamIdProjectsProjectIdSettingsTaskStatusesRoute
   '/dashboard/$teamId/projects/$projectId/settings/task-tags': typeof DashboardTeamIdProjectsProjectIdSettingsTaskTagsRoute
   '/dashboard/$teamId/projects/$projectId/settings/task-types': typeof DashboardTeamIdProjectsProjectIdSettingsTaskTypesRoute
+  '/dashboard/$teamId/projects/$projectId/tasks/$taskId': typeof DashboardTeamIdProjectsProjectIdTasksTaskIdRoute
+  '/dashboard/$teamId/projects/$projectId/tasks/create': typeof DashboardTeamIdProjectsProjectIdTasksCreateRoute
   '/dashboard/$teamId/projects/$projectId/settings/': typeof DashboardTeamIdProjectsProjectIdSettingsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -324,6 +340,8 @@ export interface FileRoutesByTo {
   '/dashboard/$teamId/projects/$projectId/settings/task-statuses': typeof DashboardTeamIdProjectsProjectIdSettingsTaskStatusesRoute
   '/dashboard/$teamId/projects/$projectId/settings/task-tags': typeof DashboardTeamIdProjectsProjectIdSettingsTaskTagsRoute
   '/dashboard/$teamId/projects/$projectId/settings/task-types': typeof DashboardTeamIdProjectsProjectIdSettingsTaskTypesRoute
+  '/dashboard/$teamId/projects/$projectId/tasks/$taskId': typeof DashboardTeamIdProjectsProjectIdTasksTaskIdRoute
+  '/dashboard/$teamId/projects/$projectId/tasks/create': typeof DashboardTeamIdProjectsProjectIdTasksCreateRoute
   '/dashboard/$teamId/projects/$projectId/settings': typeof DashboardTeamIdProjectsProjectIdSettingsIndexRoute
 }
 export interface FileRoutesById {
@@ -363,6 +381,8 @@ export interface FileRoutesById {
   '/dashboard/$teamId/projects/$projectId/settings/task-statuses': typeof DashboardTeamIdProjectsProjectIdSettingsTaskStatusesRoute
   '/dashboard/$teamId/projects/$projectId/settings/task-tags': typeof DashboardTeamIdProjectsProjectIdSettingsTaskTagsRoute
   '/dashboard/$teamId/projects/$projectId/settings/task-types': typeof DashboardTeamIdProjectsProjectIdSettingsTaskTypesRoute
+  '/dashboard/$teamId/projects/$projectId/tasks/$taskId': typeof DashboardTeamIdProjectsProjectIdTasksTaskIdRoute
+  '/dashboard/$teamId/projects/$projectId/tasks/create': typeof DashboardTeamIdProjectsProjectIdTasksCreateRoute
   '/dashboard/$teamId/projects/$projectId/settings/': typeof DashboardTeamIdProjectsProjectIdSettingsIndexRoute
 }
 export interface FileRouteTypes {
@@ -403,6 +423,8 @@ export interface FileRouteTypes {
     | '/dashboard/$teamId/projects/$projectId/settings/task-statuses'
     | '/dashboard/$teamId/projects/$projectId/settings/task-tags'
     | '/dashboard/$teamId/projects/$projectId/settings/task-types'
+    | '/dashboard/$teamId/projects/$projectId/tasks/$taskId'
+    | '/dashboard/$teamId/projects/$projectId/tasks/create'
     | '/dashboard/$teamId/projects/$projectId/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -436,6 +458,8 @@ export interface FileRouteTypes {
     | '/dashboard/$teamId/projects/$projectId/settings/task-statuses'
     | '/dashboard/$teamId/projects/$projectId/settings/task-tags'
     | '/dashboard/$teamId/projects/$projectId/settings/task-types'
+    | '/dashboard/$teamId/projects/$projectId/tasks/$taskId'
+    | '/dashboard/$teamId/projects/$projectId/tasks/create'
     | '/dashboard/$teamId/projects/$projectId/settings'
   id:
     | '__root__'
@@ -474,6 +498,8 @@ export interface FileRouteTypes {
     | '/dashboard/$teamId/projects/$projectId/settings/task-statuses'
     | '/dashboard/$teamId/projects/$projectId/settings/task-tags'
     | '/dashboard/$teamId/projects/$projectId/settings/task-types'
+    | '/dashboard/$teamId/projects/$projectId/tasks/$taskId'
+    | '/dashboard/$teamId/projects/$projectId/tasks/create'
     | '/dashboard/$teamId/projects/$projectId/settings/'
   fileRoutesById: FileRoutesById
 }
@@ -705,6 +731,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardTeamIdProjectsProjectIdSettingsIndexRouteImport
       parentRoute: typeof DashboardTeamIdProjectsProjectIdSettingsRoute
     }
+    '/dashboard/$teamId/projects/$projectId/tasks/create': {
+      id: '/dashboard/$teamId/projects/$projectId/tasks/create'
+      path: '/tasks/create'
+      fullPath: '/dashboard/$teamId/projects/$projectId/tasks/create'
+      preLoaderRoute: typeof DashboardTeamIdProjectsProjectIdTasksCreateRouteImport
+      parentRoute: typeof DashboardTeamIdProjectsProjectIdRouteRoute
+    }
+    '/dashboard/$teamId/projects/$projectId/tasks/$taskId': {
+      id: '/dashboard/$teamId/projects/$projectId/tasks/$taskId'
+      path: '/tasks/$taskId'
+      fullPath: '/dashboard/$teamId/projects/$projectId/tasks/$taskId'
+      preLoaderRoute: typeof DashboardTeamIdProjectsProjectIdTasksTaskIdRouteImport
+      parentRoute: typeof DashboardTeamIdProjectsProjectIdRouteRoute
+    }
     '/dashboard/$teamId/projects/$projectId/settings/task-types': {
       id: '/dashboard/$teamId/projects/$projectId/settings/task-types'
       path: '/task-types'
@@ -821,6 +861,8 @@ interface DashboardTeamIdProjectsProjectIdRouteRouteChildren {
   DashboardTeamIdProjectsProjectIdSettingsRoute: typeof DashboardTeamIdProjectsProjectIdSettingsRouteWithChildren
   DashboardTeamIdProjectsProjectIdTimelineRoute: typeof DashboardTeamIdProjectsProjectIdTimelineRoute
   DashboardTeamIdProjectsProjectIdIndexRoute: typeof DashboardTeamIdProjectsProjectIdIndexRoute
+  DashboardTeamIdProjectsProjectIdTasksTaskIdRoute: typeof DashboardTeamIdProjectsProjectIdTasksTaskIdRoute
+  DashboardTeamIdProjectsProjectIdTasksCreateRoute: typeof DashboardTeamIdProjectsProjectIdTasksCreateRoute
 }
 
 const DashboardTeamIdProjectsProjectIdRouteRouteChildren: DashboardTeamIdProjectsProjectIdRouteRouteChildren =
@@ -839,6 +881,10 @@ const DashboardTeamIdProjectsProjectIdRouteRouteChildren: DashboardTeamIdProject
       DashboardTeamIdProjectsProjectIdTimelineRoute,
     DashboardTeamIdProjectsProjectIdIndexRoute:
       DashboardTeamIdProjectsProjectIdIndexRoute,
+    DashboardTeamIdProjectsProjectIdTasksTaskIdRoute:
+      DashboardTeamIdProjectsProjectIdTasksTaskIdRoute,
+    DashboardTeamIdProjectsProjectIdTasksCreateRoute:
+      DashboardTeamIdProjectsProjectIdTasksCreateRoute,
   }
 
 const DashboardTeamIdProjectsProjectIdRouteRouteWithChildren =

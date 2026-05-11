@@ -6,6 +6,7 @@ import {
 	type TCreateTaskInput,
 	type TFindTasksInput,
 	type TTask,
+	type TTaskAIEstimationExplanation,
 	type TTasksResponse,
 	type TUpdateTaskInput,
 	UpdateTaskSchema,
@@ -79,7 +80,7 @@ export async function createTask(
 	payload: TCreateTaskInput,
 ): Promise<TTask> {
 	const response = await api
-		.post(buildTaskPath(projectId), {
+		.post(`${buildTaskPath(projectId)}`, {
 			json: CreateTaskSchema.parse({
 				...payload,
 				project_id: payload.project_id ?? projectId,
@@ -127,22 +128,59 @@ export async function deleteTask(
 export async function estimateTask(
 	projectId: string,
 	payload: { title: string; description: string | null },
-): Promise<{
-	suggested_hours: number;
-	rationale: string;
-	reasoning_steps: any;
-}> {
+): Promise<TTaskAIEstimationExplanation> {
 	const response = await api
 		.post(`projects/${projectId}/tasks/estimate`, {
 			json: payload,
 		})
-		.json<
-			TBaseResponse<{
-				suggested_hours: number;
-				rationale: string;
-				reasoning_steps: any;
-			}>
-		>();
+		.json<TBaseResponse<TTaskAIEstimationExplanation>>();
 
+	return response.data;
+}
+
+/**
+ * Start a task lifecycle
+ */
+export async function startTask(taskId: string): Promise<TTask> {
+	const response = await api
+		.post(`tasks/${taskId}/start`)
+		.json<TBaseResponse<TTask>>();
+	return response.data;
+}
+
+/**
+ * Complete a task lifecycle
+ */
+export async function completeTask(
+	taskId: string,
+	completedAt?: string,
+): Promise<TTask> {
+	const response = await api
+		.post(`tasks/${taskId}/complete`, {
+			searchParams: completedAt ? { completed_at: completedAt } : {},
+		})
+		.json<TBaseResponse<TTask>>();
+	return response.data;
+}
+
+/**
+ * Fetch all activity logs for a specific task
+ */
+export async function fetchTaskActivities(taskId: string): Promise<any[]> {
+	const response = await api
+		.get(`tasks/${taskId}/activities`)
+		.json<TBaseResponse<any[]>>();
+	return response.data;
+}
+
+export async function createTaskComment(
+	taskId: string,
+	content: string,
+): Promise<any> {
+	const response = await api
+		.post(`tasks/${taskId}/comments`, {
+			json: { task_id: taskId, content, activity_type: "comment" },
+		})
+		.json<TBaseResponse<any>>();
 	return response.data;
 }
