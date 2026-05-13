@@ -18,8 +18,9 @@ export const inboxStatsQueryOptions = (params: GetInboxStatsInput = {}) =>
 	queryOptions({
 		queryKey: inboxKeys.stats(),
 		queryFn: () => getInboxStatsFn({ data: params }) as Promise<TInboxStats>,
-		staleTime: 1000 * 60 * 2, // 2 minutes
-		refetchInterval: 60000,
+		staleTime: 0,
+		refetchOnWindowFocus: true,
+		refetchInterval: 2000, // Update badge every 60 seconds
 	});
 
 export const inboxListQueryOptions = (
@@ -33,8 +34,8 @@ export const inboxListQueryOptions = (
 			getInboxListFn({ data: { status, isRead, isBookmarked } }) as Promise<
 				TInboxItem[]
 			>,
-		staleTime: 1000 * 30, // 30 seconds
-		refetchInterval: 60000,
+		staleTime: 0,
+		refetchOnWindowFocus: true,
 	});
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";

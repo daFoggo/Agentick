@@ -111,35 +111,49 @@ export const ProjectSettings = ({
 		}
 	};
 
-	const handleDeleteProject = async () => {
-		try {
-			await remove.mutateAsync(projectId);
-			toast.success("Project deleted successfully");
+const handleDeleteProject = async () => {
+        try {
+            await remove.mutateAsync(projectId);
+            toast.success("Project deleted successfully");
 
-			// Đọc cache myProjects đã được invalidate bởi mutation onSuccess
-			const remaining = queryClient.getQueryData<any[]>(
-				projectKeys.myProjects(),
-			);
+            // Lấy cache myProjects hiện tại (từ Overview)
+            let cachedProjects =
+                queryClient.getQueryData<any[]>(projectKeys.myProjects(teamId)) || [];
 
-			if (!remaining || remaining.length === 0) {
-				navigate({
-					to: "/dashboard/$teamId/overview",
-					params: { teamId },
-					replace: true,
-				});
-			} else {
-				navigate({
-					to: "/dashboard/$teamId/projects",
-					params: { teamId },
-					replace: true,
-				});
-			}
-			return true;
-		} catch (_error) {
-			toast.error("Failed to delete project");
-			return false;
-		}
-	};
+            // Nếu không thấy, thử lấy từ cache list (từ Sidebar)
+            if (cachedProjects.length === 0) {
+                const listData = queryClient.getQueryData<any>(
+                    projectKeys.list({ team_id__eq: teamId }),
+                );
+                if (listData?.founds) {
+                    cachedProjects = listData.founds;
+                }
+            }
+
+            // Tính số project còn lại TRONG CÙNG TEAM
+            const remainingInTeam = cachedProjects.filter(
+                (p) => p.id !== projectId,
+            );
+
+            if (remainingInTeam.length === 0) {
+                navigate({
+                    to: "/dashboard/$teamId/overview",
+                    params: { teamId },
+                    replace: true,
+                });
+            } else {
+                navigate({
+                    to: "/dashboard/$teamId/projects/$projectId/dashboard",
+                    params: { teamId, projectId: remainingInTeam[0].id },
+                    replace: true,
+                });
+            }
+            return true;
+        } catch (_error) {
+            toast.error("Failed to delete project");
+            return false;
+        }
+    };
 
 	return (
 		<div className="w-full space-y-8">

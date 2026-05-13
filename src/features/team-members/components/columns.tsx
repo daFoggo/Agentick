@@ -25,6 +25,7 @@ import {
 } from "../queries";
 import type { TTeamMember } from "../schemas";
 import { RemoveTeamMemberDialog } from "./remove-team-member-dialog";
+import { toast } from "sonner";
 
 const RoleCell = ({ row }: CellContext<TTeamMember, any>) => {
 	const member = row.original;
@@ -114,7 +115,16 @@ const ActionCell = ({ row }: CellContext<TTeamMember, any>) => {
 	)?.role;
 
 	if (currentUserRole !== "owner" && currentUserRole !== "manager") {
-		return null;
+		return (
+			<span
+				onClick={() => {
+					toast.warning("You do not have permission to action on this row");
+				}}
+				className="text-muted-foreground cursor-pointer"
+			>
+				---------
+			</span>
+		);
 	}
 
 	const handleRemoveClick = async () => {
