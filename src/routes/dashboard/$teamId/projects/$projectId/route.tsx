@@ -18,27 +18,23 @@ export const Route = createFileRoute("/dashboard/$teamId/projects/$projectId")({
 		);
 
 		// Các thông tin khác là tùy chọn, không để chúng làm sập trang
-		const prefetch = async (query: any) => {
-			try {
-				await context.queryClient.ensureQueryData(query);
-			} catch (e) {
-				console.error("Prefetch failed:", e);
-			}
-		};
-
-		await Promise.all([
-			prefetch(
-				taskQueries.list(projectId, {
-					ordering: "-id",
-					page: 1,
-					page_size: "all",
-					is_deleted__eq: false,
-				}),
-			),
-			prefetch(taskConfigQueries.statuses(projectId, commonParams)),
-			prefetch(taskConfigQueries.types(projectId, commonParams)),
-			prefetch(taskConfigQueries.priorities(projectId, commonParams)),
-		]);
+		void context.queryClient.prefetchQuery(
+			taskQueries.list(projectId, {
+				ordering: "-id",
+				page: 1,
+				page_size: "all",
+				is_deleted__eq: false,
+			}),
+		);
+		void context.queryClient.prefetchQuery(
+			taskConfigQueries.statuses(projectId, commonParams),
+		);
+		void context.queryClient.prefetchQuery(
+			taskConfigQueries.types(projectId, commonParams),
+		);
+		void context.queryClient.prefetchQuery(
+			taskConfigQueries.priorities(projectId, commonParams),
+		);
 
 		return project;
 	},
@@ -58,14 +54,14 @@ const ProjectHeaderWrapper = () => {
 function RouteComponent() {
 	const { teamId, projectId } = Route.useParams();
 	const matches = useMatches();
-	const hideViewModeList = matches.some((m) => m.staticData?.hideViewModes);
-	const isFixedHeight = matches.some((m) => m.staticData?.fixedHeight);
+	const hideViewModeList = matches.some((m) => m.staticData.hideViewModes);
+	const isFixedHeight = matches.some((m) => m.staticData.fixedHeight);
 
 	return (
 		<div
 			className={cn(
 				"flex flex-col gap-4 min-w-0",
-				isFixedHeight && "h-full overflow-hidden",
+				isFixedHeight && "flex-1 min-h-0 overflow-hidden",
 			)}
 		>
 			<div className="shrink-0">
@@ -76,7 +72,12 @@ function RouteComponent() {
 					hide={hideViewModeList}
 				/>
 			</div>
-			<div className={cn("flex-1 min-w-0", isFixedHeight && "overflow-hidden")}>
+			<div
+				className={cn(
+					"flex flex-col flex-1 min-h-0 min-w-0",
+					isFixedHeight && "overflow-hidden",
+				)}
+			>
 				<Outlet />
 			</div>
 		</div>

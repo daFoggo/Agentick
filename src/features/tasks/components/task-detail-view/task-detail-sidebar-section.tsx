@@ -9,7 +9,6 @@ import {
 	Sparkles,
 	Users,
 } from "lucide-react";
-
 import { DateTimePicker } from "@/components/common/date-picker";
 import { MultiSelectCombobox } from "@/components/common/multi-select-combobox";
 import { TaskPriorityBadge } from "@/components/common/task-priority-badge";
@@ -29,7 +28,10 @@ import type {
 	TTaskAIEstimationExplanation,
 	TTaskDetailFormApi,
 } from "@/features/tasks/schemas";
-import { TaskAIEstimationAlert } from "../task-table/task-ai-estimation-alert";
+import {
+	TaskAIEstimationAlert,
+	TaskAIEstimationAlertSkeleton,
+} from "../task-table/task-ai-estimation-alert";
 
 interface TaskDetailSidebarSectionProps {
 	form: TTaskDetailFormApi;
@@ -40,7 +42,7 @@ interface TaskDetailSidebarSectionProps {
 }
 
 const getOptionById = <T extends { id: string; name: string; color?: string }>(
-	items: T[],
+	items: Array<T>,
 	id: string,
 ) => items.find((item) => item.id === id);
 
@@ -170,7 +172,7 @@ export const TaskDetailSidebarSection = ({
 								<FieldLabel htmlFor={field.name} className="w-28 flex-none!">
 									<div className="flex items-center gap-2">
 										<Users className="size-3.5 text-muted-foreground" />
-										Team
+										Members
 									</div>
 								</FieldLabel>
 								<MultiSelectCombobox
@@ -276,7 +278,11 @@ export const TaskDetailSidebarSection = ({
 					}}
 				</form.Field>
 
-				<TaskAIEstimationAlert aiExplanation={aiExplanation} />
+				{isEstimating ? (
+					<TaskAIEstimationAlertSkeleton />
+				) : (
+					<TaskAIEstimationAlert aiExplanation={aiExplanation} />
+				)}
 			</FieldGroup>
 		</div>
 	);

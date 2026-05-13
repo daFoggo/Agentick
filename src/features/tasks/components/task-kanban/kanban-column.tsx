@@ -70,7 +70,7 @@ export const KanbanColumn = ({
 		>
 			<Card
 				className={cn(
-					"flex flex-col gap-2 p-2 transition-all duration-200",
+					"flex h-full flex-col gap-2 p-2 transition-all duration-200",
 					isOverlay
 						? "bg-background shadow-xl ring-1 ring-foreground/15"
 						: "border border-foreground/10 bg-card/40 ring-0!",

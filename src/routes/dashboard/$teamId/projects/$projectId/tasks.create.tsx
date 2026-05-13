@@ -11,6 +11,7 @@ export const Route = createFileRoute(
 )({
 	validateSearch: z.object({
 		status_id: z.string().optional(),
+		redirect_to: z.string().optional(),
 	}),
 	loader: async ({ context, params }) => {
 		const { projectId } = params;

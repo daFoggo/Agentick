@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQueries } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { projectQueryOptions } from "@/features/projects/queries";
@@ -14,44 +14,45 @@ export const Route = createFileRoute(
 
 function ProjectListView() {
 	const { projectId } = Route.useParams();
-
-	const { data: project } = useSuspenseQuery(projectQueryOptions(projectId));
-	const { data: tasksResponse } = useSuspenseQuery(
-		taskQueries.list(projectId, {
-			ordering: "-id",
-			page: 1,
-			page_size: "all",
-			is_deleted__eq: false,
-		}),
-	);
-
 	const commonParams = { page: 1, page_size: "all" } as const;
-	const { data: statusesResponse } = useSuspenseQuery(
-		taskConfigQueries.statuses(projectId, commonParams),
-	);
-	const { data: typesResponse } = useSuspenseQuery(
-		taskConfigQueries.types(projectId, commonParams),
-	);
-	const { data: prioritiesResponse } = useSuspenseQuery(
-		taskConfigQueries.priorities(projectId, commonParams),
-	);
+
+	const [
+		projectRes,
+		tasksResponseRes,
+		statusesResponseRes,
+		typesResponseRes,
+		prioritiesResponseRes,
+	] = useSuspenseQueries({
+		queries: [
+			projectQueryOptions(projectId),
+			taskQueries.list(projectId, {
+				ordering: "-id",
+				page: 1,
+				page_size: "all",
+				is_deleted__eq: false,
+			}),
+			taskConfigQueries.statuses(projectId, commonParams),
+			taskConfigQueries.types(projectId, commonParams),
+			taskConfigQueries.priorities(projectId, commonParams),
+		],
+	});
+
+	const project = projectRes.data;
+	const tasksResponse = tasksResponseRes.data;
+	const statusesResponse = statusesResponseRes.data;
+	const typesResponse = typesResponseRes.data;
+	const prioritiesResponse = prioritiesResponseRes.data;
 
 	const sortedStatuses = useMemo(() => {
-		return [...(statusesResponse?.founds ?? [])].sort(
-			(a, b) => (a.order ?? 0) - (b.order ?? 0),
-		);
+		return [...statusesResponse.founds].sort((a, b) => a.order - b.order);
 	}, [statusesResponse]);
 
 	const sortedTypes = useMemo(() => {
-		return [...(typesResponse?.founds ?? [])].sort(
-			(a, b) => (a.order ?? 0) - (b.order ?? 0),
-		);
+		return [...typesResponse.founds].sort((a, b) => a.order - b.order);
 	}, [typesResponse]);
 
 	const sortedPriorities = useMemo(() => {
-		return [...(prioritiesResponse?.founds ?? [])].sort(
-			(a, b) => (a.order ?? 0) - (b.order ?? 0),
-		);
+		return [...prioritiesResponse.founds].sort((a, b) => a.order - b.order);
 	}, [prioritiesResponse]);
 
 	const taskOptions = {
@@ -59,8 +60,9 @@ function ProjectListView() {
 		types: sortedTypes,
 		priorities: sortedPriorities,
 	};
+	const projectMembers = project?.members ?? [];
 
-	const tasks = (tasksResponse?.founds ?? []).map((task) =>
+	const tasks = tasksResponse.founds.map((task) =>
 		mapTaskData(task, taskOptions),
 	);
 
@@ -68,7 +70,7 @@ function ProjectListView() {
 		<TaskTable
 			projectId={projectId}
 			data={tasks}
-			members={project?.members ?? []}
+			members={projectMembers}
 			statuses={taskOptions.statuses}
 			types={taskOptions.types}
 			priorities={taskOptions.priorities}

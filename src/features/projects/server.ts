@@ -34,9 +34,11 @@ export async function fetchProjects(
 /**
  * Lấy danh sách các Project mà người dùng hiện tại đang tham gia.
  */
-export async function fetchMyProjects(): Promise<TProject[]> {
+export async function fetchMyProjects(teamId?: string): Promise<TProject[]> {
 	const response = await api
-		.get("projects/me")
+		.get("projects/me", {
+			searchParams: teamId ? { team_id: teamId } : {},
+		})
 		.json<TBaseResponse<TProject[]>>();
 	return response.data;
 }

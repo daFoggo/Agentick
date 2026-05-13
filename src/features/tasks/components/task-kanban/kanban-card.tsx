@@ -57,7 +57,7 @@ export const KanbanCard = ({ task, onClick, isOverlay }: KanbanCardProps) => {
 					"group/card relative overflow-hidden transition-all duration-200",
 					isOverlay
 						? "bg-background shadow-lg ring-1 ring-foreground/10"
-						: "border-none! bg-muted/40 shadow-none! ring-0! hover:bg-muted/80",
+						: "border-none! bg-muted shadow-none! ring-0! hover:bg-muted/70",
 				)}
 				size="sm"
 			>

@@ -1,5 +1,5 @@
 import { useForm } from "@tanstack/react-form";
-import { useNavigate, useParams } from "@tanstack/react-router";
+import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -40,7 +40,52 @@ export const TaskDetailView = ({
 }: ITaskDetailViewProps) => {
 	const navigate = useNavigate();
 	const { teamId, projectId } = useParams({ strict: false });
+	const search = useSearch({ strict: false });
+	const redirectTo = (search as any).redirect_to;
 	const { update, remove, estimate, create } = useTaskMutations();
+
+	const navigateBack = (overrideProjectId?: string) => {
+		const pId = overrideProjectId || projectId || task?.project_id || "";
+		const tId = teamId || "personal";
+		const common = {
+			params: {
+				teamId: tId,
+				projectId: pId,
+			},
+		};
+
+		switch (redirectTo) {
+			case "board":
+				navigate({
+					to: "/dashboard/$teamId/projects/$projectId/board",
+					...common,
+				});
+				break;
+			case "timeline":
+				navigate({
+					to: "/dashboard/$teamId/projects/$projectId/timeline",
+					...common,
+				});
+				break;
+			case "dashboard":
+				navigate({
+					to: "/dashboard/$teamId/projects/$projectId/dashboard",
+					...common,
+				});
+				break;
+			case "members":
+				navigate({
+					to: "/dashboard/$teamId/projects/$projectId/members",
+					...common,
+				});
+				break;
+			default:
+				navigate({
+					to: "/dashboard/$teamId/projects/$projectId/list",
+					...common,
+				});
+		}
+	};
 	const [aiExplanation, setAiExplanation] =
 		useState<TTaskAIEstimationExplanation | null>(null);
 	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -181,13 +226,7 @@ export const TaskDetailView = ({
 
 				// Only eject back to project context if performing absolute creation routines.
 				if (!task?.id) {
-					navigate({
-						to: "/dashboard/$teamId/projects/$projectId/list",
-						params: {
-							teamId: teamId || "personal",
-							projectId: targetProjectId,
-						},
-					});
+					navigateBack(targetProjectId);
 				}
 			} catch (_error) {
 				toast.error(task ? "Failed to update task" : "Failed to create task");
@@ -232,13 +271,7 @@ export const TaskDetailView = ({
 				taskId: task.id,
 			});
 			toast.success("Task deleted successfully");
-			navigate({
-				to: "/dashboard/$teamId/projects/$projectId/list",
-				params: {
-					teamId: teamId || "personal",
-					projectId: projectId || task.project_id,
-				},
-			});
+			navigateBack(projectId || task.project_id);
 			return true;
 		} catch {
 			toast.error("Failed to delete task");
@@ -279,15 +312,7 @@ export const TaskDetailView = ({
 						isPending={
 							update.isPending || create.isPending || form.state.isSubmitting
 						}
-						onBack={() =>
-							navigate({
-								to: "/dashboard/$teamId/projects/$projectId/list",
-								params: {
-									teamId: teamId || "personal",
-									projectId: projectId || task?.project_id || "",
-								},
-							})
-						}
+						onBack={() => navigateBack()}
 						onOpenDeleteDialog={() => setIsDeleteDialogOpen(true)}
 					/>
 					<CardContent>

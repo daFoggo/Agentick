@@ -21,7 +21,7 @@ export const projectKeys = {
 	lists: () => [...projectKeys.all, "list"] as const,
 	list: (params: TGetProjectsInput) =>
 		[...projectKeys.lists(), params] as const,
-	myProjects: () => ["projects", "me"] as const,
+	myProjects: (teamId?: string) => ["projects", "me", teamId ?? "all"] as const,
 	details: () => [...projectKeys.all, "detail"] as const,
 	detail: (id: string) => [...projectKeys.details(), id] as const,
 	taskStats: (projectId: string, period: TStatsPeriod) =>
@@ -38,10 +38,10 @@ export const projectsQueryOptions = (params: TGetProjectsInput = {}) =>
 		queryFn: () => getProjectsFn({ data: params }),
 	});
 
-export const myProjectsQueryOptions = () =>
+export const myProjectsQueryOptions = (teamId?: string) =>
 	queryOptions({
-		queryKey: projectKeys.myProjects(),
-		queryFn: () => getMyProjectsFn(),
+		queryKey: projectKeys.myProjects(teamId),
+		queryFn: () => getMyProjectsFn({ data: { teamId } }),
 	});
 
 export const projectQueryOptions = (projectId: string) =>
@@ -90,7 +90,7 @@ export const useProjectMutations = () => {
 		onSuccess: async () => {
 			await Promise.all([
 				queryClient.invalidateQueries({ queryKey: projectKeys.lists() }),
-				queryClient.invalidateQueries({ queryKey: projectKeys.myProjects() }),
+				queryClient.invalidateQueries({ queryKey: ["projects", "me"] }),
 			]);
 		},
 	});
@@ -103,7 +103,7 @@ export const useProjectMutations = () => {
 		onSuccess: async (_, variables) => {
 			await Promise.all([
 				queryClient.invalidateQueries({ queryKey: projectKeys.lists() }),
-				queryClient.invalidateQueries({ queryKey: projectKeys.myProjects() }),
+				queryClient.invalidateQueries({ queryKey: ["projects", "me"] }),
 				queryClient.invalidateQueries({
 					queryKey: projectKeys.detail(variables.projectId),
 				}),
@@ -116,7 +116,7 @@ export const useProjectMutations = () => {
 		onSuccess: async () => {
 			await Promise.all([
 				queryClient.invalidateQueries({ queryKey: projectKeys.lists() }),
-				queryClient.invalidateQueries({ queryKey: projectKeys.myProjects() }),
+				queryClient.invalidateQueries({ queryKey: ["projects", "me"] }),
 			]);
 		},
 	});

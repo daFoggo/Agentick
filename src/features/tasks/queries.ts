@@ -10,6 +10,7 @@ import {
 	deleteTaskFn,
 	estimateTaskFn,
 	fetchMyTasksFn,
+	fetchMyTasksOverviewFn,
 	fetchTaskActivitiesFn,
 	fetchTaskByIdFn,
 	fetchTasksFn,
@@ -31,6 +32,13 @@ export const taskKeys = {
 		[...taskKeys.details(), projectId, taskId] as const,
 	myTasks: (teamId?: string) =>
 		[...taskKeys.all, "my-tasks", teamId ?? "all"] as const,
+	myOverview: (teamId?: string, clientToday?: string) =>
+		[
+			...taskKeys.all,
+			"my-overview",
+			teamId ?? "all",
+			clientToday ?? "today",
+		] as const,
 	activities: (taskId: string) =>
 		[...taskKeys.details(), taskId, "activities"] as const,
 };
@@ -59,6 +67,17 @@ export const taskQueries = {
 							page_size: "all",
 							team_id__eq: teamId,
 						},
+					},
+				}),
+		}),
+	myOverview: (teamId?: string, clientToday?: string) =>
+		queryOptions({
+			queryKey: taskKeys.myOverview(teamId, clientToday),
+			queryFn: () =>
+				fetchMyTasksOverviewFn({
+					data: {
+						teamId,
+						clientToday,
 					},
 				}),
 		}),

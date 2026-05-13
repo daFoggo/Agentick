@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, useNavigate, useParams } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
 	CheckCircle2,
 	ChevronLeft,
@@ -36,14 +36,28 @@ const chartConfig = {
 
 export const TeamSwitcher = () => {
 	const navigate = useNavigate();
-	const { teamId } = useParams({ strict: false }) as { teamId?: string };
+	const { pathname } = useLocation();
+
+	// Extract teamId via regex directly from pathname for maximum hydration reliability
+	const match = pathname.match(/^\/dashboard\/([^/]+)/);
+	const teamId = match ? match[1] : undefined;
+	const activeTeamId = teamId && teamId !== "personal" ? teamId : undefined;
+
 	const { data: teamDetail, isLoading: isLoadingDetail } = useQuery({
-		...teamQueries.detail(teamId ?? ""),
-		enabled: !!teamId,
+		...teamQueries.detail(activeTeamId ?? ""),
+		enabled: !!activeTeamId,
 	});
 
-	const { data: myTeams } = useQuery(teamQueries.myTeams());
+	const { data: myTeams, isLoading: isLoadingTeams } = useQuery(
+		teamQueries.myTeams(),
+	);
 	const teams = myTeams ?? [];
+	const activeTeamFromList = activeTeamId
+		? teams.find((team) => team.id === activeTeamId)
+		: undefined;
+	const activeTeam = teamDetail ?? activeTeamFromList;
+	const isLoadingActiveTeam =
+		!!activeTeamId && !activeTeam && (isLoadingDetail || isLoadingTeams);
 
 	const [page, setPage] = useState(0);
 	const [isCreateTeamDialogOpen, setIsCreateTeamDialogOpen] = useState(false);
@@ -78,23 +92,28 @@ export const TeamSwitcher = () => {
 				<PopoverTrigger asChild>
 					<SidebarMenuButton>
 						<div className="relative flex size-6 items-center justify-center overflow-hidden rounded-md border bg-muted/50 shrink-0">
-							{teamDetail?.avatar_url && teamDetail.avatar_url !== "" ? (
+							{isLoadingActiveTeam ? (
+								<Skeleton className="size-full rounded-md" />
+							) : activeTeam?.avatar_url && activeTeam.avatar_url !== "" ? (
 								<img
-									src={teamDetail.avatar_url}
-									alt={teamDetail.name ?? "Team avatar"}
+									src={activeTeam.avatar_url}
+									alt={activeTeam.name ?? "Team avatar"}
 									className="h-full w-full object-cover"
 								/>
 							) : (
 								<div className="text-xs font-medium text-muted-foreground uppercase">
-									{(teamDetail?.name ?? "TM").slice(0, 2)}
+									{(
+										activeTeam?.name ?? (teamId === "personal" ? "PS" : "TM")
+									).slice(0, 2)}
 								</div>
 							)}
 						</div>
-						{isLoadingDetail ? (
+						{isLoadingActiveTeam ? (
 							<Skeleton className="h-6 w-24" />
 						) : (
 							<span className="text-sm font-medium line-clamp-1 pr-1">
-								{teamDetail?.name || "Select Team"}
+								{activeTeam?.name ||
+									(teamId === "personal" ? "Personal" : "Select Team")}
 							</span>
 						)}
 						<SidebarMenuBadge>
@@ -168,13 +187,14 @@ export const TeamSwitcher = () => {
 };
 
 const TeamTile = ({ team, index }: { team: TTeam; index: number }) => {
-	const data = Array.from({ length: 20 }, () => ({
-		tasks: Math.floor(Math.random() * 50) + 5,
-	}));
+	const totalTasks = team.stats?.total_tasks ?? 0;
+	const completedTasks = team.stats?.completed_tasks ?? 0;
+	const completionRate =
+		totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
-	const totalTasks = 12 + index * 5;
-	const completedTasks = 4 + index * 2;
-	const completionRate = Math.round((completedTasks / totalTasks) * 100);
+	const activityData =
+		team.stats?.weekly_activity?.map((count) => ({ tasks: count })) ??
+		Array.from({ length: 7 }, () => ({ tasks: 0 }));
 
 	return (
 		<div className="group relative border-t border-l border-dashed border-border transition-colors hover:bg-accent/50">
@@ -213,7 +233,7 @@ const TeamTile = ({ team, index }: { team: TTeam; index: number }) => {
 						config={chartConfig}
 						className="aspect-auto! h-full w-full"
 					>
-						<AreaChart data={data}>
+						<AreaChart data={activityData}>
 							<defs>
 								<linearGradient
 									id={`gradient-${team.id}`}

@@ -5,6 +5,7 @@ import {
 	CreateTaskSchema,
 	type TCreateTaskInput,
 	type TFindTasksInput,
+	type TMyTasksOverview,
 	type TTask,
 	type TTaskAIEstimationExplanation,
 	type TTasksResponse,
@@ -32,6 +33,25 @@ export async function fetchMyTasks(
 				| undefined,
 		})
 		.json<TBaseResponse<TTasksResponse>>();
+
+	return response.data;
+}
+
+/**
+ * Lấy Overview các Task được gán cho User hiện tại, phân loại sẵn từ Backend.
+ */
+export async function fetchMyTasksOverview(
+	teamId?: string,
+	clientToday?: string,
+): Promise<TMyTasksOverview> {
+	const response = await api
+		.get("users/me/tasks/overview", {
+			searchParams: {
+				...(teamId ? { team_id: teamId } : {}),
+				...(clientToday ? { client_today: clientToday } : {}),
+			},
+		})
+		.json<TBaseResponse<TMyTasksOverview>>();
 
 	return response.data;
 }

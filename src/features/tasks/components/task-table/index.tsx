@@ -59,6 +59,7 @@ export const TaskTable = ({
 					navigate({
 						to: "/dashboard/$teamId/projects/$projectId/tasks/create",
 						params: { teamId: teamId || "personal", projectId },
+						search: { redirect_to: "list" } as any,
 					})
 				}
 			>
@@ -74,6 +75,7 @@ export const TaskTable = ({
 					navigate({
 						to: "/dashboard/$teamId/projects/$projectId/tasks/$taskId",
 						params: { teamId: teamId || "all", projectId, taskId: row.id },
+						search: { redirect_to: "list" } as any,
 					})
 				}
 				defaultGrouping={groupBy ? [groupBy] : []}

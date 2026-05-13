@@ -3,6 +3,7 @@ export * from "./components/inbox-detail-dialog";
 export * from "./components/inbox-detail-panel";
 export * from "./components/inbox-item";
 export * from "./components/inbox-list";
+export * from "./components/inbox-mark-all-read-button";
 export * from "./components/inbox-view";
 export * from "./functions";
 export * from "./queries";

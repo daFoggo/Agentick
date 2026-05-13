@@ -1,6 +1,6 @@
 /** biome-ignore-all lint/correctness/useExhaustiveDependencies: <idjk> */
 import { useQuery } from "@tanstack/react-query";
-import { formatDistanceToNow, isValid } from "date-fns";
+import { format, formatDistanceToNow, isValid } from "date-fns";
 import { ArrowUp, Loader2, Logs, MoreHorizontal } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -56,7 +56,15 @@ export const TaskActivity = ({ taskId }: ITaskActivityProps) => {
 	const hasActivities = activitiesCount > 0;
 
 	useEffect(() => {
-		bottomRef.current?.scrollIntoView({ behavior: "instant" });
+		if (bottomRef.current) {
+			// Manually target the Radix viewport to avoid causing outer parent layout scrolls
+			const viewport = bottomRef.current.closest(
+				"[data-slot='scroll-area-viewport']",
+			);
+			if (viewport) {
+				viewport.scrollTop = viewport.scrollHeight;
+			}
+		}
 	}, [activitiesCount]);
 
 	const handleSendComment = async (explicitContent?: string) => {
@@ -186,12 +194,58 @@ export const TaskActivity = ({ taskId }: ITaskActivityProps) => {
 								} else if (activity.activity_type === "field_change") {
 									const fieldName =
 										activity.field_name?.replace("_", " ") || "item";
+
+									const isTextDetailed =
+										activity.field_name === "title" ||
+										activity.field_name === "description";
+
+									let formattedValue = formatValue(activity.new_value);
+									if (
+										activity.field_name === "due_date" &&
+										activity.new_value
+									) {
+										try {
+											const d = new Date(activity.new_value);
+											if (isValid(d)) {
+												formattedValue = format(d, "PPP");
+											}
+										} catch {
+											// fallback
+										}
+									}
+
 									actionDisplay = (
 										<span className="text-muted-foreground">
-											changed the {fieldName} to{" "}
+											changed the {fieldName}
+											{!isTextDetailed && (
+												<>
+													{" "}
+													to{" "}
+													<span className="font-semibold text-foreground">
+														{formattedValue}
+													</span>
+												</>
+											)}
+										</span>
+									);
+								} else if (activity.activity_type === "member_add") {
+									actionDisplay = (
+										<span className="text-muted-foreground">
+											added{" "}
 											<span className="font-semibold text-foreground">
-												{formatValue(activity.new_value)}
-											</span>
+												{activity.new_value}
+											</span>{" "}
+											to this task
+										</span>
+									);
+								} else if (activity.activity_type === "member_remove") {
+									actionDisplay = (
+										<span className="text-muted-foreground">
+											removed{" "}
+											<span className="font-semibold text-foreground">
+												{activity.old_value}
+											</span>{" "}
+											from this task
 										</span>
 									);
 								}

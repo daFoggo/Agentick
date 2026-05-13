@@ -23,7 +23,9 @@ export const MyProjectsGrid = memo(() => {
 	const { teamId } = useParams({ strict: false });
 	const [isCreateOpen, setIsCreateOpen] = useState(false);
 
-	const { data: projects = [], isLoading } = useQuery(myProjectsQueryOptions());
+	const { data: projects = [], isLoading } = useQuery(
+		myProjectsQueryOptions(teamId),
+	);
 
 	if (isLoading) {
 		return (

@@ -8,6 +8,7 @@ import { AppPageHeader } from "@/components/layout/app/page-header";
 import { AppSidebar } from "@/components/layout/app/sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { inboxStatsQueryOptions } from "@/features/inbox/queries";
+import { teamQueries } from "@/features/teams";
 import { userQueries } from "@/features/users";
 import { cn } from "@/lib/utils";
 
@@ -27,8 +28,9 @@ export const Route = createFileRoute("/dashboard")({
 	loader: async ({ context }) => {
 		await Promise.all([
 			context.queryClient.ensureQueryData(userQueries.me()),
-			context.queryClient.ensureQueryData(inboxStatsQueryOptions()),
+			context.queryClient.ensureQueryData(teamQueries.myTeams()),
 		]);
+		void context.queryClient.prefetchQuery(inboxStatsQueryOptions());
 	},
 	component: DashboardLayout,
 	staticData: {
@@ -38,7 +40,7 @@ export const Route = createFileRoute("/dashboard")({
 
 function DashboardLayout() {
 	const matches = useMatches();
-	const isFixedHeight = matches.some((m) => m.staticData?.fixedHeight);
+	const isFixedHeight = matches.some((m) => m.staticData.fixedHeight);
 
 	return (
 		<SidebarProvider className="h-svh overflow-hidden">

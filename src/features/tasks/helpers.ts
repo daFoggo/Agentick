@@ -206,58 +206,6 @@ export const cloneTaskDetailFormValues = (
 		value.due_date instanceof Date ? new Date(value.due_date) : new Date(),
 });
 
-/**
- * Lọc danh sách task theo trạng thái cho Dashboard Overview (Phương án B - Agile/Scrum).
- * - overdue:    task chưa hoàn thành, đã quá hạn chót (due_date < today)
- * - upcoming:   task chưa hoàn thành, chưa đến ngày bắt đầu (start_date > today)
- * - inProgress: task chưa hoàn thành, đang trong hạn hoặc không có hạn chót (start_date <= today <= due_date)
- */
-export const filterTasksForOverview = (
-	tasks: Partial<TTask>[],
-	today: Date,
-) => {
-	const isCompleted = (t: Partial<TTask>) => {
-		const status = (t as { status?: { is_completed?: boolean } }).status;
-		return status?.is_completed === true;
-	};
-
-	const todayTime = today.getTime();
-
-	const getNormalizedTime = (dateValue?: string | Date | null) => {
-		if (!dateValue) return null;
-		const d = new Date(dateValue);
-		if (Number.isNaN(d.getTime())) return null;
-		d.setHours(0, 0, 0, 0);
-		return d.getTime();
-	};
-
-	const overdue = tasks.filter((t) => {
-		if (isCompleted(t)) return false;
-		const dueTime = getNormalizedTime(t.due_date);
-		return dueTime !== null && dueTime < todayTime;
-	});
-
-	const upcoming = tasks.filter((t) => {
-		if (isCompleted(t)) return false;
-		// Nếu chưa start thì là upcoming cho đến khi pass deadline (handled by overdue)
-		return !t.started_at;
-	});
-
-	const inProgress = tasks.filter((t) => {
-		if (isCompleted(t)) return false;
-
-		const dueTime = getNormalizedTime(t.due_date);
-
-		// Bắt đầu khi đã set started_at
-		const isStarted = !!t.started_at;
-		const isOverdue = dueTime !== null && dueTime < todayTime;
-
-		return isStarted && !isOverdue;
-	});
-
-	return { inProgress, upcoming, overdue };
-};
-
 export function mapTaskData(
 	task: TTask,
 	options: {

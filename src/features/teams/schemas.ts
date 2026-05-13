@@ -3,6 +3,13 @@ import type { TBaseFindResponse, TBaseSearchOptions } from "@/types/api";
 import type { TProject } from "../projects";
 import type { TTeamMember } from "../team-members";
 
+export const TeamStatsSchema = z.object({
+	total_tasks: z.number(),
+	completed_tasks: z.number(),
+	weekly_activity: z.array(z.number()),
+});
+export type TTeamStats = z.infer<typeof TeamStatsSchema>;
+
 export const TeamSchema = z.object({
 	id: z.string(),
 	name: z.string().min(2, "Team name must be at least 2 characters"),
@@ -12,6 +19,7 @@ export const TeamSchema = z.object({
 	is_deleted: z.boolean().default(false),
 	created_at: z.string(),
 	updated_at: z.string().optional().nullable(),
+	stats: TeamStatsSchema.optional().nullable(),
 });
 
 export const CreateTeamSchema = z.object({

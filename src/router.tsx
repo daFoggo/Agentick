@@ -1,5 +1,6 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { createRouter as createTanStackRouter } from "@tanstack/react-router";
+import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
 import type { ReactNode } from "react";
 import { queryClient } from "@/lib/query-client";
 import type { IViewModeDefinition } from "@/types/view-mode-list";
@@ -19,6 +20,12 @@ export function getRouter() {
 		scrollRestoration: true,
 		defaultPreload: "intent",
 		defaultPreloadStaleTime: 0,
+	});
+
+	setupRouterSsrQueryIntegration({
+		router,
+		queryClient,
+		wrapQueryClient: false,
 	});
 
 	return router;

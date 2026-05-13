@@ -202,3 +202,9 @@ export type TTasksResponse = TBaseFindResponse<
 	TTask,
 	TBaseSearchOptions<number | "all", string>
 >;
+
+export type TMyTasksOverview = {
+	in_progress: TTask[];
+	upcoming: TTask[];
+	overdue: TTask[];
+};

@@ -1,13 +1,12 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQueries } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
-import { startOfToday } from "date-fns";
+import { format } from "date-fns";
 import { memo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { userQueries } from "@/features/users";
-import { filterTasksForOverview } from "../../helpers";
 import { taskQueries } from "../../queries";
 import { TaskList } from "./task-list";
 
@@ -39,19 +38,20 @@ export const TaskLineSkeleton = () => {
  */
 export const TaskLine = memo(() => {
 	const { teamId } = useParams({ strict: false });
-	const { data: user } = useSuspenseQuery(userQueries.me());
-	const { data: myTasksData } = useSuspenseQuery(taskQueries.myTasks(teamId));
+	const [userRes, overviewRes] = useSuspenseQueries({
+		queries: [
+			userQueries.me(),
+			taskQueries.myOverview(teamId, format(new Date(), "yyyy-MM-dd")),
+		],
+	});
+	const user = userRes.data;
+	const overview = overviewRes.data;
 
-	const today = startOfToday();
-	const tasks = myTasksData?.founds ?? [];
-	const { inProgress, upcoming, overdue } = filterTasksForOverview(
-		tasks,
-		today,
-	);
+	const { in_progress: inProgress, upcoming, overdue } = overview;
 
 	const initials =
 		user.name
-			?.split(" ")
+			.split(" ")
 			.map((n) => n[0])
 			.join("")
 			.slice(0, 2)

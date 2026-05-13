@@ -6,6 +6,7 @@ import {
 	deleteInboxItem,
 	fetchInboxList,
 	fetchInboxStats,
+	markAllInboxAsRead,
 	markInboxAsRead,
 	toggleInboxBookmark,
 	unarchiveInboxItem,
@@ -34,6 +35,10 @@ export const toggleInboxBookmarkFn = createServerFn({ method: "POST" })
 export const markInboxAsReadFn = createServerFn({ method: "POST" })
 	.inputValidator(z.object({ inboxItemId: z.string() }))
 	.handler(({ data }) => markInboxAsRead(data.inboxItemId));
+
+export const markAllInboxAsReadFn = createServerFn({ method: "POST" }).handler(
+	() => markAllInboxAsRead(),
+);
 
 export const archiveInboxFn = createServerFn({ method: "POST" })
 	.inputValidator(z.object({ inboxItemId: z.string() }))

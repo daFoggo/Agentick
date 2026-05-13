@@ -1,5 +1,10 @@
 import { queryOptions } from "@tanstack/react-query";
-import { fetchUserStatsFn, getUserMeFn, searchUsersFn } from "./functions";
+import {
+	fetchUserStatsFn,
+	getUserGreetingFn,
+	getUserMeFn,
+	searchUsersFn,
+} from "./functions";
 import type { TStatsPeriod } from "./schemas";
 
 /**
@@ -10,6 +15,12 @@ export const userQueries = {
 		queryOptions({
 			queryKey: ["users", "me"],
 			queryFn: () => getUserMeFn(),
+		}),
+
+	greeting: () =>
+		queryOptions({
+			queryKey: ["users", "greeting"],
+			queryFn: () => getUserGreetingFn() as Promise<string>,
 		}),
 
 	search: (

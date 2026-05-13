@@ -1,6 +1,7 @@
 import { useSuspenseQueries } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
+import { z } from "zod";
 
 import { projectMembersQueryOptions } from "@/features/project-members";
 import { taskConfigQueries } from "@/features/task-config";
@@ -9,6 +10,9 @@ import { TaskDetailView, taskQueries } from "@/features/tasks";
 export const Route = createFileRoute(
 	"/dashboard/$teamId/projects/$projectId/tasks/$taskId",
 )({
+	validateSearch: z.object({
+		redirect_to: z.string().optional(),
+	}),
 	loader: async ({ context, params }) => {
 		const { projectId, taskId } = params;
 		const commonParams = { page: 1, page_size: "all" } as const;
