@@ -73,7 +73,7 @@ const TaskListActionCell = ({ task }: { task: TTask }) => {
 						}
 					>
 						<Pencil className="size-4" />
-						Edit / View Details
+						Edit
 					</DropdownMenuItem>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem

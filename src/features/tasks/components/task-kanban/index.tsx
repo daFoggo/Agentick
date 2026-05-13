@@ -77,6 +77,7 @@ export const TaskKanban = ({
 				projectId,
 				taskId: task.id,
 			},
+			search: { redirect_to: "board" } as any,
 		});
 	};
 
@@ -197,7 +198,7 @@ export const TaskKanban = ({
 					)
 				}
 			>
-				<div className="flex h-full w-full items-start gap-4 overflow-x-auto overflow-y-hidden">
+				<div className="flex h-full w-full gap-4 overflow-x-auto overflow-y-hidden">
 					<SortableContext
 						items={statuses.map((s) => s.id)}
 						strategy={horizontalListSortingStrategy}
@@ -214,7 +215,10 @@ export const TaskKanban = ({
 									navigate({
 										to: "/dashboard/$teamId/projects/$projectId/tasks/create",
 										params: { teamId: teamId || "personal", projectId },
-										search: { status_id: statusId } as any,
+										search: {
+											status_id: statusId,
+											redirect_to: "board",
+										} as any,
 									});
 								}}
 							/>

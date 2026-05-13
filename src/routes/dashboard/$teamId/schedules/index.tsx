@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { CalendarPlus, TriangleAlert } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import type { IBigCalendarEvent } from "@/types/big-calendar";
 import {
 	BigCalendar,
 	BigCalendarEventContent,
@@ -20,29 +21,26 @@ import {
 	useEventMutations,
 } from "@/features/events";
 import {
+	WorkTimePattern,
 	formatSchedules,
 	mySchedulesQueryOptions,
-	WorkTimePattern,
 } from "@/features/schedules";
 import { taskQueries, useTaskMutations } from "@/features/tasks";
 import { userQueries } from "@/features/users";
-import type { IBigCalendarEvent } from "@/types/big-calendar";
 
 export const Route = createFileRoute("/dashboard/$teamId/schedules/")({
-	loader: async ({ context, params }) => {
-		await Promise.all([
-			context.queryClient.ensureQueryData(mySchedulesQueryOptions()),
-			context.queryClient.ensureQueryData(userQueries.me()),
-			context.queryClient.ensureQueryData(
-				eventsQueryOptions({ team_id__eq: params.teamId }),
-			),
-			context.queryClient.ensureQueryData(
-				taskQueries.list(undefined, {
-					team_id__eq: params.teamId,
-					page_size: "all",
-				}),
-			),
-		]);
+	loader: ({ context, params }) => {
+		void context.queryClient.prefetchQuery(mySchedulesQueryOptions());
+		void context.queryClient.prefetchQuery(userQueries.me());
+		void context.queryClient.prefetchQuery(
+			eventsQueryOptions({ team_id__eq: params.teamId }),
+		);
+		void context.queryClient.prefetchQuery(
+			taskQueries.list(undefined, {
+				team_id__eq: params.teamId,
+				page_size: "all",
+			}),
+		);
 	},
 	component: RouteComponent,
 	staticData: {
@@ -52,7 +50,7 @@ export const Route = createFileRoute("/dashboard/$teamId/schedules/")({
 });
 
 function RouteComponent() {
-	const [selectedEventTypes, setSelectedEventTypes] = useState<string[]>(
+	const [selectedEventTypes, setSelectedEventTypes] = useState<Array<string>>(
 		EVENT_TYPE_OPTIONS.map((opt) => opt.value),
 	);
 	const [isMounted, setIsMounted] = useState(false);
@@ -73,17 +71,21 @@ function RouteComponent() {
 	}, []);
 
 	const params = Route.useParams();
-	const { data: userData } = useQuery(userQueries.me());
-	const { data: eventsData } = useQuery(
+	const { data: userData, isLoading: isLoadingUser } = useQuery(userQueries.me());
+	const { data: eventsData, isLoading: isLoadingEvents } = useQuery(
 		eventsQueryOptions({ team_id__eq: params.teamId }),
 	);
-	const { data: taskData } = useQuery(
+	const { data: taskData, isLoading: isLoadingTasks } = useQuery(
 		taskQueries.list(undefined, {
 			team_id__eq: params.teamId,
 			page_size: "all",
 		}),
 	);
-	const { data: rawSchedules } = useQuery(mySchedulesQueryOptions());
+	const { data: rawSchedules, isLoading: isLoadingSchedules } = useQuery(
+		mySchedulesQueryOptions(),
+	);
+	const isCalendarDataLoading =
+		isLoadingUser || isLoadingEvents || isLoadingTasks || isLoadingSchedules;
 
 	const schedules = useMemo(
 		() => formatSchedules(rawSchedules, params.teamId, userData?.id),
@@ -124,7 +126,7 @@ function RouteComponent() {
 						participants: task.task_members,
 					},
 				};
-			}) as IBigCalendarEvent[];
+			}) as Array<IBigCalendarEvent>;
 	}, [taskData?.founds, userData?.id]);
 
 	const filteredEvents = useMemo(() => {
@@ -137,9 +139,8 @@ function RouteComponent() {
 	}, [selectedEventTypes, formattedEvents, taskEvents]);
 
 	const getSlotClassName = (date: Date, hour: number) => {
-		if (!schedules) return "";
 		const scheduleDay = schedules[date.getDay()];
-		if (!scheduleDay || scheduleDay.is_off) return "bg-stripes";
+		if (scheduleDay.is_off) return "bg-stripes";
 		const startH = scheduleDay.start_time
 			? parseInt(scheduleDay.start_time.split(":")[0], 10)
 			: 0;
@@ -226,7 +227,7 @@ function RouteComponent() {
 
 				{/* Right Side — BigCalendar */}
 				<section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-					{isMounted ? (
+					{isMounted && !isCalendarDataLoading ? (
 						<BigCalendar
 							events={filteredEvents}
 							weekStartsOn={1}

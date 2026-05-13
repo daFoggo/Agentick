@@ -13,8 +13,10 @@ interface ITimezoneViewerProps {
 
 export const TimezoneViewer = ({ timezone }: ITimezoneViewerProps) => {
 	const [time, setTime] = useState<string | null>(null);
+	const [clientTz, setClientTz] = useState<string | null>(null);
 
 	useEffect(() => {
+		setClientTz(Intl.DateTimeFormat().resolvedOptions().timeZone);
 		const fmt = () => {
 			try {
 				return new Date().toLocaleTimeString([], {
@@ -52,7 +54,7 @@ export const TimezoneViewer = ({ timezone }: ITimezoneViewerProps) => {
 						Active Timezone
 					</p>
 					<p className="font-mono text-xs font-semibold">
-						{timezone || Intl.DateTimeFormat().resolvedOptions().timeZone}
+						{timezone || clientTz || "UTC"}
 					</p>
 					<p className="text-xs text-muted-foreground leading-normal">
 						Current project time in the project's timezone. All dates, ranges,

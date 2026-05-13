@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { agentQueries, ProjectRiskDashboard } from "@/features/agent";
+import { ProjectRiskDashboard, agentQueries } from "@/features/agent";
 import {
 	ProjectAISummary,
 	ProjectStatusUpdate,
@@ -13,22 +13,18 @@ import {
 export const Route = createFileRoute(
 	"/dashboard/$teamId/projects/$projectId/dashboard",
 )({
-	loader: async ({ params, context }) => {
+	loader: ({ params, context }) => {
 		const { projectId } = params;
-		await Promise.all([
-			context.queryClient.ensureQueryData(
-				projectTaskStatsQueryOptions(projectId, "weekly"),
-			),
-			context.queryClient.ensureQueryData(
-				projectWorkloadQueryOptions(projectId, "weekly"),
-			),
-			context.queryClient.ensureQueryData(
-				projectRecentStatusUpdatesQueryOptions(projectId, 15),
-			),
-			context.queryClient.ensureQueryData(
-				agentQueries.projectRiskStats(projectId),
-			),
-		]);
+		void context.queryClient.prefetchQuery(
+			projectTaskStatsQueryOptions(projectId, "weekly"),
+		);
+		void context.queryClient.prefetchQuery(
+			projectWorkloadQueryOptions(projectId, "weekly"),
+		);
+		void context.queryClient.prefetchQuery(
+			projectRecentStatusUpdatesQueryOptions(projectId, 15),
+		);
+		void context.queryClient.prefetchQuery(agentQueries.projectRiskStats(projectId));
 	},
 	component: ProjectDashboardView,
 });

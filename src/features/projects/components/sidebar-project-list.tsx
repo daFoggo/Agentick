@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, useNavigate, useParams } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
 	CheckCircle2,
 	ChevronRight,
@@ -48,7 +48,12 @@ const chartConfig = {
  */
 export const SidebarProjectList = () => {
 	const navigate = useNavigate();
-	const { teamId } = useParams({ strict: false }) as { teamId: string };
+	const { pathname } = useLocation();
+
+	// Extract teamId reliably via regex directly from pathname to prevent hydration timing delay
+	const match = pathname.match(/^\/dashboard\/([^/]+)/);
+	const teamId = match ? match[1] : "";
+
 	const [isCreateProjectDialogOpen, setIsCreateProjectDialogOpen] =
 		useState(false);
 
@@ -187,12 +192,11 @@ const MoreProjectsPopover = ({
 				</PopoverHeader>
 
 				<div className="max-h-76 space-y-1 overflow-y-auto pr-1">
-					{projects.map((project, index) => (
+					{projects.map((project) => (
 						<ProjectListItem
 							key={project.id}
 							teamId={teamId}
 							project={project}
-							index={index}
 						/>
 					))}
 				</div>
@@ -209,23 +213,21 @@ const MoreProjectsPopover = ({
 const ProjectListItem = ({
 	project,
 	teamId,
-	index,
 }: {
 	project: TProject;
 	teamId: string;
-	index: number;
 }) => {
-	const data = useMemo(
-		() =>
-			Array.from({ length: 10 }, (_, i) => ({
-				tasks: (((index + 1) * 7 + i * 3) % 18) + 4,
-			})),
-		[index],
-	);
+	const totalTasks = project.stats?.total_tasks ?? 0;
+	const completedTasks = project.stats?.completed_tasks ?? 0;
+	const completionRate =
+		totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
-	const totalTasks = 16 + index * 4;
-	const completedTasks = Math.min(totalTasks, 5 + index * 3);
-	const completionRate = Math.round((completedTasks / totalTasks) * 100);
+	const activityData = useMemo(
+		() =>
+			project.stats?.weekly_activity?.map((count) => ({ tasks: count })) ??
+			Array.from({ length: 7 }, () => ({ tasks: 0 })),
+		[project.stats?.weekly_activity],
+	);
 
 	return (
 		<Link
@@ -243,7 +245,7 @@ const ProjectListItem = ({
 
 			<div className="h-5 w-full">
 				<ChartContainer config={chartConfig} className="h-full w-full">
-					<AreaChart data={data}>
+					<AreaChart data={activityData}>
 						<defs>
 							<linearGradient
 								id={`project-gradient-${project.id}`}

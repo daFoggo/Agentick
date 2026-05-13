@@ -44,6 +44,13 @@ export const markInboxAsRead = async (
 	return response.data;
 };
 
+export const markAllInboxAsRead = async (): Promise<boolean> => {
+	const response = await api
+		.post("notifications/read-all")
+		.json<TBaseResponse<boolean>>();
+	return response.data;
+};
+
 export const archiveInboxItem = async (
 	inboxItemId: string,
 ): Promise<TInboxItem> => {

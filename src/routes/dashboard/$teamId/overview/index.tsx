@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { format } from "date-fns";
 import { Suspense } from "react";
 import { MyProjectsGrid, myProjectsQueryOptions } from "@/features/projects";
 import { TaskLine, TaskLineSkeleton, taskQueries } from "@/features/tasks";
@@ -6,12 +7,16 @@ import { UserGreeting, userQueries } from "@/features/users";
 
 export const Route = createFileRoute("/dashboard/$teamId/overview/")({
 	loader: async ({ context, params }) => {
-		await Promise.all([
-			context.queryClient.ensureQueryData(userQueries.me()),
-			context.queryClient.ensureQueryData(userQueries.stats("weekly")),
-			context.queryClient.ensureQueryData(taskQueries.myTasks(params.teamId)),
-			context.queryClient.ensureQueryData(myProjectsQueryOptions()),
-		]);
+		const today = format(new Date(), "yyyy-MM-dd");
+
+		void context.queryClient.prefetchQuery(userQueries.me());
+		void context.queryClient.prefetchQuery(userQueries.stats("weekly"));
+		void context.queryClient.prefetchQuery(
+			taskQueries.myOverview(params.teamId, today),
+		);
+		void context.queryClient.prefetchQuery(myProjectsQueryOptions(params.teamId));
+
+		await context.queryClient.ensureQueryData(userQueries.greeting());
 	},
 	component: RouteComponent,
 	staticData: {

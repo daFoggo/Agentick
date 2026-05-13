@@ -9,6 +9,7 @@ import {
 	deleteTask,
 	estimateTask,
 	fetchMyTasks,
+	fetchMyTasksOverview,
 	fetchTaskActivities,
 	fetchTaskById,
 	fetchTasks,
@@ -36,6 +37,21 @@ export const fetchMyTasksFn = createServerFn({ method: "GET" })
 	.middleware([requestLoggerMiddleware])
 	.inputValidator(z.object({ params: FindTasksSchema }))
 	.handler(async ({ data }) => fetchMyTasks(data.params));
+
+/**
+ * Server Function lấy dashboard overview cá nhân, đã phân nhóm sẵn từ Backend.
+ */
+export const fetchMyTasksOverviewFn = createServerFn({ method: "GET" })
+	.middleware([requestLoggerMiddleware])
+	.inputValidator(
+		z.object({
+			teamId: z.string().optional(),
+			clientToday: z.string().optional(),
+		}),
+	)
+	.handler(async ({ data }) =>
+		fetchMyTasksOverview(data.teamId, data.clientToday),
+	);
 
 /**
  * Server Function lấy chi tiết một Task

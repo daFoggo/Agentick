@@ -19,7 +19,9 @@ export function MyProjectsList() {
 	const navigate = useNavigate();
 	const { teamId } = useParams({ strict: false });
 
-	const { data: projects = [], isLoading } = useQuery(myProjectsQueryOptions());
+	const { data: projects = [], isLoading } = useQuery(
+		myProjectsQueryOptions(teamId),
+	);
 
 	const content = (() => {
 		if (isLoading) {

@@ -27,6 +27,16 @@ export async function getAuthTokenForRequest() {
  * để kiểm tra nhanh trạng thái đăng nhập của người dùng mà không nhất thiết phải làm mới token.
  */
 export async function getAuthToken() {
+	if (typeof window === "undefined") {
+		try {
+			const { useAppSession: getAppSession } = await import("./session.server");
+			const session = await getAppSession();
+			return session.data.access_token ?? null;
+		} catch (_e) {
+			return null;
+		}
+	}
+
 	const cachedToken = getCachedToken();
 	if (cachedToken !== null) {
 		return cachedToken;

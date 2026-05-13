@@ -3,6 +3,13 @@ import type { TBaseFindResponse, TBaseSearchOptions } from "@/types/api";
 import type { TProjectMember } from "../project-members";
 import type { TTask } from "../tasks";
 
+export const ProjectStatsSchema = z.object({
+	total_tasks: z.number(),
+	completed_tasks: z.number(),
+	weekly_activity: z.array(z.number()),
+});
+export type TProjectStats = z.infer<typeof ProjectStatsSchema>;
+
 export const ProjectSchema = z.object({
 	id: z.string(),
 	team_id: z.string(),
@@ -16,6 +23,7 @@ export const ProjectSchema = z.object({
 	is_deleted: z.boolean().default(false),
 	created_at: z.string().datetime(),
 	updated_at: z.string().datetime().optional().nullable(),
+	stats: ProjectStatsSchema.optional().nullable(),
 });
 
 export const CreateProjectSchema = z.object({

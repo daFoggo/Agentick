@@ -30,8 +30,9 @@ export const getProjectsFn = createServerFn({ method: "GET" })
 
 export const getMyProjectsFn = createServerFn({ method: "GET" })
 	.middleware([requestLoggerMiddleware])
-	.handler(async () => {
-		const res = await fetchMyProjects();
+	.inputValidator(z.object({ teamId: z.string().optional() }).optional())
+	.handler(async ({ data }) => {
+		const res = await fetchMyProjects(data?.teamId);
 		return res ?? [];
 	});
 

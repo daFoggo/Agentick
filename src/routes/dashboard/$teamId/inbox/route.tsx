@@ -2,7 +2,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { ViewModeList } from "@/components/layout/app/view-mode-list";
 import { INBOX_VIEW_MODE_CATALOG } from "@/constants/view-mode-list";
-import type { TInboxStats } from "@/features/inbox";
+import { InboxMarkAllReadButton, type TInboxStats } from "@/features/inbox";
 import { inboxStatsQueryOptions } from "@/features/inbox/queries";
 
 const toInboxBadgeMap = (stats: TInboxStats) => ({
@@ -16,9 +16,7 @@ export const Route = createFileRoute("/dashboard/$teamId/inbox")({
 		context.queryClient.ensureQueryData(inboxStatsQueryOptions()),
 	component: RouteComponent,
 	staticData: {
-		header: {
-			render: () => <InboxStatsHeader />,
-		},
+		getTitle: () => "Inbox",
 		fixedHeight: true,
 	},
 });
@@ -30,24 +28,19 @@ function RouteComponent() {
 
 	return (
 		<div className="flex flex-col gap-4 flex-1 min-h-0 h-full">
-			<ViewModeList
-				catalog={INBOX_VIEW_MODE_CATALOG}
-				scope="inbox"
-				params={{ teamId }}
-				badgeMap={badgeMap}
-				allowCustomization={false}
-			/>
+			<div className="flex items-center w-full gap-2 shrink-0">
+				<ViewModeList
+					catalog={INBOX_VIEW_MODE_CATALOG}
+					scope="inbox"
+					params={{ teamId }}
+					badgeMap={badgeMap}
+					allowCustomization={false}
+				/>
+				<InboxMarkAllReadButton />
+			</div>
 			<div className="flex-1 flex flex-col min-h-0 overflow-hidden">
 				<Outlet />
 			</div>
-		</div>
-	);
-}
-
-function InboxStatsHeader() {
-	return (
-		<div className="flex w-full items-center justify-between gap-4">
-			<p className="text-xl font-semibold text-foreground">Inbox</p>
 		</div>
 	);
 }

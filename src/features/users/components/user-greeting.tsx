@@ -1,6 +1,6 @@
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { PackageCheck, SlidersHorizontal, Users } from "lucide-react";
-import { memo, useMemo, useState } from "react";
+import { memo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	ButtonGroup,
@@ -15,13 +15,11 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getUserGreeting } from "../helpers";
 import { userQueries } from "../queries";
 import type { TStatsPeriod } from "../schemas";
 
 export const UserGreeting = memo(() => {
-	const { data: user } = useSuspenseQuery(userQueries.me());
-	const greeting = useMemo(() => getUserGreeting(user.name), [user.name]);
+	const { data: greeting } = useSuspenseQuery(userQueries.greeting());
 
 	const [period, setPeriod] = useState<TStatsPeriod>("weekly");
 	const { data: stats, isLoading } = useQuery(userQueries.stats(period));

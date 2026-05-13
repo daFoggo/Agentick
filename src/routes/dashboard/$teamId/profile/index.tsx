@@ -4,12 +4,11 @@ import { MyTeamsList, teamQueries } from "@/features/teams";
 import { ProfileCard, userQueries } from "@/features/users";
 
 export const Route = createFileRoute("/dashboard/$teamId/profile/")({
-	loader: async ({ context }) => {
-		await Promise.all([
-			context.queryClient.ensureQueryData(userQueries.me()),
-			context.queryClient.ensureQueryData(myProjectsQueryOptions()),
-			context.queryClient.ensureQueryData(teamQueries.myTeams()),
-		]);
+	loader: async ({ context, params }) => {
+		void context.queryClient.prefetchQuery(myProjectsQueryOptions(params.teamId));
+		void context.queryClient.prefetchQuery(teamQueries.myTeams());
+
+		await context.queryClient.ensureQueryData(userQueries.me());
 	},
 	component: ProfileDashboardComponent,
 	staticData: {
