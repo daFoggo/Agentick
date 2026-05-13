@@ -1,14 +1,21 @@
 /** biome-ignore-all lint/correctness/useExhaustiveDependencies: <idjk> */
 import { useQuery } from "@tanstack/react-query";
 import { format, formatDistanceToNow, isValid } from "date-fns";
-import { ArrowUp, Loader2, Logs, MoreHorizontal } from "lucide-react";
+import {
+	ArrowUp,
+	Loader2,
+	Logs,
+	MoreHorizontal,
+	TriangleAlert,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
 	Empty,
+	EmptyContent,
 	EmptyDescription,
 	EmptyHeader,
 	EmptyMedia,
@@ -22,7 +29,8 @@ import {
 } from "@/components/ui/input-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { taskQueries, useTaskMutations } from "@/features/tasks/queries";
+import { taskActivitiesQueryOptions, useTaskMutations } from "@/features/tasks";
+import { getErrorMessage } from "@/lib/error";
 
 interface ITaskActivityProps {
 	taskId?: string;
@@ -43,8 +51,13 @@ export const TaskActivity = ({ taskId }: ITaskActivityProps) => {
 	const [commentText, setCommentText] = useState("");
 	const bottomRef = useRef<HTMLDivElement>(null);
 
-	const { data: activities, isLoading } = useQuery({
-		...taskQueries.activities(taskId || ""),
+	const {
+		data: activities,
+		isLoading,
+		isError,
+		error,
+	} = useQuery({
+		...taskActivitiesQueryOptions(taskId || ""),
 		enabled: !!taskId,
 		select: (data) => [...data].reverse(), // Reverse to show oldest at top, newest at bottom (like standard timelines)
 	});
@@ -74,14 +87,14 @@ export const TaskActivity = ({ taskId }: ITaskActivityProps) => {
 		try {
 			await addComment.mutateAsync({ taskId, content: finalContent });
 			setCommentText("");
-		} catch {
-			toast.error("Failed to send comment");
+		} catch (error) {
+			toast.error(getErrorMessage(error, "Failed to send comment"));
 		}
 	};
 
 	if (isLoading) {
 		return (
-			<div className="space-y-4">
+			<div className="flex flex-col gap-4">
 				<Skeleton className="h-8 w-32" />
 				<Skeleton className="h-10 w-full" />
 				<Skeleton className="h-10 w-full" />
@@ -89,8 +102,20 @@ export const TaskActivity = ({ taskId }: ITaskActivityProps) => {
 		);
 	}
 
+	if (isError) {
+		return (
+			<Alert variant="destructive">
+				<TriangleAlert className="size-4" />
+				<AlertTitle>Error loading activity</AlertTitle>
+				<AlertDescription>
+					{getErrorMessage(error, "Failed to load task activity.")}
+				</AlertDescription>
+			</Alert>
+		);
+	}
+
 	return (
-		<div className="space-y-2">
+		<div className="flex flex-col gap-2">
 			<p className="text-lg font-semibold tracking-tight">Activity</p>
 
 			<ScrollArea className={hasActivities ? "h-90 pr-4" : "pr-4"}>
@@ -99,7 +124,7 @@ export const TaskActivity = ({ taskId }: ITaskActivityProps) => {
 					{/* 1. Relative block ONLY for historical entries + vertical timeline line */}
 					<div className="relative flex flex-col gap-4">
 						{timelineItems.length > 0 ? (
-							<div className="absolute left-3 top-3 bottom-3 w-0.5 -translate-x-1/2 rounded-full bg-muted z-0" />
+							<div className="absolute top-3 bottom-3 left-3 z-0 w-0.5 -translate-x-1/2 rounded-full bg-muted" />
 						) : null}
 
 						{timelineItems.length === 0 ? (
@@ -114,6 +139,9 @@ export const TaskActivity = ({ taskId }: ITaskActivityProps) => {
 											Modify your task or add comments to track updates.
 										</EmptyDescription>
 									</EmptyHeader>
+									<EmptyContent>
+										Add a comment or update the task to start the activity log.
+									</EmptyContent>
 								</Empty>
 							</div>
 						) : (
@@ -143,7 +171,7 @@ export const TaskActivity = ({ taskId }: ITaskActivityProps) => {
 														<span className="font-semibold text-foreground">
 															{userName}
 														</span>
-														<span className="text-muted-foreground font-normal">
+														<span className="font-normal text-muted-foreground">
 															commented{" "}
 															{formatActivityDate(activity.created_at)}
 														</span>
@@ -293,7 +321,7 @@ export const TaskActivity = ({ taskId }: ITaskActivityProps) => {
 						}
 					}}
 				/>
-				<InputGroupAddon align="block-end" className="justify-end flex">
+				<InputGroupAddon align="block-end" className="flex justify-end">
 					<InputGroupButton
 						type="button"
 						variant="default"

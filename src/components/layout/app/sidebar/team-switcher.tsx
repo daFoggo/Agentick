@@ -11,7 +11,8 @@ import {
 import { useState } from "react";
 import { Area, AreaChart } from "recharts";
 import { Button } from "@/components/ui/button";
-import { type ChartConfig, ChartContainer } from "@/components/ui/chart";
+import type { ChartConfig } from "@/components/ui/chart";
+import { ChartContainer } from "@/components/ui/chart";
 import {
 	Popover,
 	PopoverContent,
@@ -25,7 +26,11 @@ import {
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { TTeam } from "@/features/teams";
-import { CreateTeamDialog, teamQueries } from "@/features/teams";
+import {
+	CreateTeamDialog,
+	myTeamsQueryOptions,
+	teamQueryOptions,
+} from "@/features/teams";
 
 const chartConfig = {
 	tasks: {
@@ -43,13 +48,12 @@ export const TeamSwitcher = () => {
 	const teamId = match ? match[1] : undefined;
 	const activeTeamId = teamId && teamId !== "personal" ? teamId : undefined;
 
-	const { data: teamDetail, isLoading: isLoadingDetail } = useQuery({
-		...teamQueries.detail(activeTeamId ?? ""),
-		enabled: !!activeTeamId,
-	});
+	const { data: teamDetail, isLoading: isLoadingDetail } = useQuery(
+		teamQueryOptions(activeTeamId ?? ""),
+	);
 
 	const { data: myTeams, isLoading: isLoadingTeams } = useQuery(
-		teamQueries.myTeams(),
+		myTeamsQueryOptions(),
 	);
 	const teams = myTeams ?? [];
 	const activeTeamFromList = activeTeamId
@@ -91,7 +95,7 @@ export const TeamSwitcher = () => {
 			<Popover>
 				<PopoverTrigger asChild>
 					<SidebarMenuButton>
-						<div className="relative flex size-6 items-center justify-center overflow-hidden rounded-md border bg-muted/50 shrink-0">
+						<div className="relative flex size-6 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-muted/50">
 							{isLoadingActiveTeam ? (
 								<Skeleton className="size-full rounded-md" />
 							) : activeTeam?.avatar_url && activeTeam.avatar_url !== "" ? (
@@ -111,7 +115,7 @@ export const TeamSwitcher = () => {
 						{isLoadingActiveTeam ? (
 							<Skeleton className="h-6 w-24" />
 						) : (
-							<span className="text-sm font-medium line-clamp-1 pr-1">
+							<span className="line-clamp-1 pr-1 text-sm font-medium">
 								{activeTeam?.name ||
 									(teamId === "personal" ? "Personal" : "Select Team")}
 							</span>
@@ -272,7 +276,7 @@ const TeamTile = ({ team, index }: { team: TTeam; index: number }) => {
 						<span className="font-semibold text-foreground">{totalTasks}</span>
 						<span>tasks</span>
 					</div>
-					<div className="flex items-center gap-1 font-medium text-emerald-500">
+					<div className="flex items-center gap-1 font-medium text-primary">
 						<CheckCircle2 className="size-2.5" />
 						{completionRate}%
 					</div>

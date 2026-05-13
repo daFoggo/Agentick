@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Home, RotateCcw } from "lucide-react";
+import { Home, RotateCcw, TriangleAlert } from "lucide-react";
 import { PixelBackground } from "@/components/decorations/pixel-background";
 import { AuthPageHeader } from "@/components/layout/auth/page-header";
 import { Button } from "@/components/ui/button";
@@ -69,5 +69,43 @@ export const ErrorFallback = ({ reset }: { reset: () => void }) => {
 				</main>
 			</div>
 		</PixelBackground>
+	);
+};
+
+/**
+ * Component hiển thị khi một layout lồng nhau bị lỗi (Nested Error Boundary),
+ * không crash toàn bộ app mà chỉ crash khu vực hiển thị của layout đó.
+ */
+export const NestedErrorFallback = ({
+	reset,
+	error,
+}: {
+	reset: () => void;
+	error?: any;
+}) => {
+	return (
+		<div className="flex flex-1 flex-col items-center justify-center space-y-4 p-8 text-center min-h-[300px] h-full w-full">
+			<div className="rounded-full bg-destructive/10 p-3 text-destructive shadow-inner">
+				<TriangleAlert className="size-8" />
+			</div>
+			<div className="space-y-2 max-w-md mx-auto">
+				<h3 className="text-lg font-semibold tracking-tight text-foreground">
+					Failed to load section
+				</h3>
+				<p className="text-sm text-muted-foreground leading-relaxed">
+					{error?.message ||
+						"An unexpected error occurred while rendering this view."}
+				</p>
+			</div>
+			<Button
+				onClick={() => reset()}
+				variant="outline"
+				size="sm"
+				className="mt-2 shadow-sm hover:shadow-md transition-all"
+			>
+				<RotateCcw className="size-3.5 mr-2" />
+				Try reloading section
+			</Button>
+		</div>
 	);
 };

@@ -28,6 +28,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { TAILWIND_COLOR_OPTIONS } from "@/constants/color-options";
+import { getErrorMessage } from "@/lib/error";
 import { useTaskConfigMutations } from "../../queries";
 import {
 	TaskTypeUpdateSchema,
@@ -67,7 +68,7 @@ export const EditTaskTypeDialog = ({
 				toast.success("Task type updated successfully");
 				onOpenChange(false);
 			} catch (error) {
-				toast.error("Failed to update task type");
+				toast.error(getErrorMessage(error, "Failed to update task type"));
 				console.error(error);
 			}
 		},

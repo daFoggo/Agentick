@@ -1,4 +1,4 @@
-import ky from "ky";
+import ky, { isHTTPError } from "ky";
 import { API_ENDPOINTS } from "@/configs/env";
 
 /**
@@ -64,6 +64,16 @@ export const api = ky.create({
 				return response;
 			},
 		],
+		beforeError: [
+			({ error }) => {
+				if (!isHTTPError(error)) {
+					return error;
+				}
+
+				error.message = getBackendErrorMessage(error.data, error.message);
+				return error;
+			},
+		],
 	},
 });
 
@@ -78,3 +88,55 @@ export const aiApi = api.extend({
 // --- Internal Constants & Configuration ---
 
 const AUTH_RETRY_HEADER = "x-auth-retry";
+
+const BACKEND_ERROR_MESSAGE_KEYS = ["message", "detail", "error"] as const;
+
+function getBackendErrorMessage(data: unknown, fallback: string) {
+	if (typeof data === "string") {
+		return data.trim() || fallback;
+	}
+
+	if (!isRecord(data)) {
+		return fallback;
+	}
+
+	for (const key of BACKEND_ERROR_MESSAGE_KEYS) {
+		const message = getReadableMessage(data[key]);
+		if (message) {
+			return message;
+		}
+	}
+
+	const errors = getReadableMessage(data.errors);
+	return errors || fallback;
+}
+
+function getReadableMessage(value: unknown): string | null {
+	if (typeof value === "string") {
+		return value.trim() || null;
+	}
+
+	if (Array.isArray(value)) {
+		for (const item of value) {
+			const message = getReadableMessage(item);
+			if (message) {
+				return message;
+			}
+		}
+	}
+
+	if (isRecord(value)) {
+		for (const key of BACKEND_ERROR_MESSAGE_KEYS) {
+			const message = getReadableMessage(value[key]);
+			if (message) {
+				return message;
+			}
+		}
+	}
+
+	return null;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null;
+}

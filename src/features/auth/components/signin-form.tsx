@@ -1,5 +1,4 @@
 import { useForm } from "@tanstack/react-form";
-import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Loader2, LogIn } from "lucide-react";
 import { toast } from "sonner";
@@ -13,12 +12,11 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { SITE_CONFIG } from "@/configs/site";
-import { authMutationOptions } from "@/features/auth/queries";
-import { SignInSchema } from "@/features/auth/schemas";
-import { queryClient } from "@/lib/query-client";
-
+import { getErrorMessage } from "@/lib/error";
 import { useDashboardStore } from "@/stores/use-dashboard-store";
 import { useViewModeListStore } from "@/stores/use-view-mode-list-store";
+import { useAuthMutations } from "../queries";
+import { SignInSchema } from "../schemas";
 
 interface ISignInFormProps {
 	redirect?: string;
@@ -30,7 +28,7 @@ interface ISignInFormProps {
  */
 export const SignInForm = ({ redirect }: ISignInFormProps) => {
 	const navigate = useNavigate();
-	const signInMutation = useMutation(authMutationOptions.signIn());
+	const { signIn: signInMutation } = useAuthMutations();
 
 	const form = useForm({
 		defaultValues: {
@@ -52,7 +50,6 @@ export const SignInForm = ({ redirect }: ISignInFormProps) => {
 				// Reset persistent stores and clear cache for the new user session
 				useDashboardStore.getState().reset();
 				useViewModeListStore.getState().resetAll();
-				queryClient.clear();
 
 				if (redirect) {
 					try {
@@ -69,7 +66,9 @@ export const SignInForm = ({ redirect }: ISignInFormProps) => {
 					navigate({ to: "/dashboard" });
 				}
 			} catch (error) {
-				toast.error("Sign in failed. Please try again.");
+				toast.error(
+					getErrorMessage(error, "Sign in failed. Please try again."),
+				);
 				console.error(error);
 			}
 		},

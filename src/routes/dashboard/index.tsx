@@ -1,14 +1,14 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { teamQueries } from "@/features/teams";
-import { userQueries } from "@/features/users";
+import { myTeamsQueryOptions } from "@/features/teams";
+import { userMeQueryOptions } from "@/features/users";
 import { useDashboardStore } from "@/stores/use-dashboard-store";
 
 export const Route = createFileRoute("/dashboard/")({
 	beforeLoad: async ({ context }) => {
-		await context.queryClient.ensureQueryData(userQueries.me());
+		await context.queryClient.ensureQueryData(userMeQueryOptions());
 
 		const teams = await context.queryClient.ensureQueryData(
-			teamQueries.myTeams(),
+			myTeamsQueryOptions(),
 		);
 		const lastTeamId = useDashboardStore.getState().last_team_id;
 		const hasLastTeam = teams?.some((t) => t.id === lastTeamId);

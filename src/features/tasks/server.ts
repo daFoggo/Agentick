@@ -80,16 +80,11 @@ export async function fetchTasks(
 export async function fetchTaskById(
 	projectId: string,
 	taskId: string,
-): Promise<TTask | null> {
-	try {
-		const response = await api
-			.get(`${buildTaskPath(projectId)}/${taskId}`)
-			.json<TBaseResponse<TTask>>();
-		return response.data;
-	} catch (error) {
-		console.error("error fetch task detail:", error);
-		return null;
-	}
+): Promise<TTask> {
+	const response = await api
+		.get(`${buildTaskPath(projectId)}/${taskId}`)
+		.json<TBaseResponse<TTask>>();
+	return response.data;
 }
 
 /**

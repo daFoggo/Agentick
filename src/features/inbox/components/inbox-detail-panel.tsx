@@ -1,4 +1,3 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
 	Bookmark,
 	BookmarkCheck,
@@ -11,21 +10,16 @@ import {
 import { CardDescription } from "@/components/ui/card";
 import {
 	Empty,
+	EmptyContent,
 	EmptyDescription,
 	EmptyHeader,
 	EmptyMedia,
 	EmptyTitle,
 } from "@/components/ui/empty";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import type { TInboxItem } from "@/features/inbox";
+import { useInboxMutations } from "@/features/inbox";
 import { cn } from "@/lib/utils";
-import {
-	deleteInboxFn,
-	markInboxAsReadFn,
-	toggleInboxBookmarkFn,
-	unarchiveInboxFn,
-} from "../functions";
-import { inboxKeys } from "../queries";
-import type { TInboxItem } from "../schemas";
 import { InboxActionButton } from "./inbox-action-button";
 import { InboxContent } from "./inbox-content";
 
@@ -34,49 +28,15 @@ interface IInboxDetailPanelProps {
 }
 
 export const InboxDetailPanel = ({ item }: IInboxDetailPanelProps) => {
-	const queryClient = useQueryClient();
-
-	const refreshInbox = () => {
-		queryClient.invalidateQueries({ queryKey: inboxKeys.all });
-	};
-
-	const markAsReadMutation = useMutation({
-		mutationFn: (id: string) =>
-			markInboxAsReadFn({ data: { inboxItemId: id } }),
-		onSuccess: () => {
-			refreshInbox();
-		},
-	});
-
-	const markAsUnreadMutation = useMutation({
-		mutationFn: (id: string) => unarchiveInboxFn({ data: { inboxItemId: id } }),
-		onSuccess: () => {
-			refreshInbox();
-		},
-	});
-
-	const toggleBookmarkMutation = useMutation({
-		mutationFn: (id: string) =>
-			toggleInboxBookmarkFn({ data: { inboxItemId: id } }),
-		onSuccess: () => {
-			refreshInbox();
-		},
-	});
-
-	const deleteMutation = useMutation({
-		mutationFn: (id: string) => deleteInboxFn({ data: { inboxItemId: id } }),
-		onSuccess: () => {
-			refreshInbox();
-		},
-	});
+	const { markAsRead, unarchive, toggleBookmark, remove } = useInboxMutations();
 
 	const handleToggleRead = (e: React.MouseEvent) => {
 		e.stopPropagation();
 		if (item?.id) {
 			if (item.status === "ACTIVE") {
-				markAsReadMutation.mutate(item.id);
+				markAsRead.mutate(item.id);
 			} else {
-				markAsUnreadMutation.mutate(item.id);
+				unarchive.mutate(item.id);
 			}
 		}
 	};
@@ -84,14 +44,14 @@ export const InboxDetailPanel = ({ item }: IInboxDetailPanelProps) => {
 	const handleToggleBookmark = (e: React.MouseEvent) => {
 		e.stopPropagation();
 		if (item?.id) {
-			toggleBookmarkMutation.mutate(item.id);
+			toggleBookmark.mutate(item.id);
 		}
 	};
 
 	const handleDelete = (e: React.MouseEvent) => {
 		e.stopPropagation();
 		if (item?.id) {
-			deleteMutation.mutate(item.id);
+			remove.mutate(item.id);
 		}
 	};
 
@@ -108,6 +68,9 @@ export const InboxDetailPanel = ({ item }: IInboxDetailPanelProps) => {
 							Select an inbox item to view details
 						</EmptyDescription>
 					</EmptyHeader>
+					<EmptyContent>
+						Choose a message from the inbox list to inspect its context.
+					</EmptyContent>
 				</Empty>
 			</div>
 		);
@@ -154,7 +117,7 @@ export const InboxDetailPanel = ({ item }: IInboxDetailPanelProps) => {
 							onClick={handleToggleBookmark}
 							className={cn(
 								item.status === "BOOKMARKED" &&
-									"text-yellow-500 hover:text-yellow-600",
+									"text-primary hover:text-primary",
 							)}
 						/>
 						<InboxActionButton
@@ -164,8 +127,7 @@ export const InboxDetailPanel = ({ item }: IInboxDetailPanelProps) => {
 							}
 							onClick={handleToggleRead}
 							className={cn(
-								item.status === "ARCHIVED" &&
-									"text-orange-500 hover:text-orange-600",
+								item.status === "ARCHIVED" && "text-primary hover:text-primary",
 							)}
 						/>
 						<InboxActionButton
@@ -180,7 +142,7 @@ export const InboxDetailPanel = ({ item }: IInboxDetailPanelProps) => {
 				{/* Content */}
 				<div className="flex-1 overflow-y-auto p-4">
 					<div className="space-y-4">
-						<CardDescription className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap leading-relaxed text-muted-foreground">
+						<CardDescription className="prose prose-sm dark:prose-invert max-w-none leading-relaxed whitespace-pre-wrap text-muted-foreground">
 							{item.content}
 						</CardDescription>
 						<InboxContent item={item} />

@@ -15,14 +15,18 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { userQueries } from "../queries";
+import { userGreetingQueryOptions, userStatsQueryOptions } from "../queries";
 import type { TStatsPeriod } from "../schemas";
 
 export const UserGreeting = memo(() => {
-	const { data: greeting } = useSuspenseQuery(userQueries.greeting());
+	const { data: greeting } = useSuspenseQuery(userGreetingQueryOptions());
 
 	const [period, setPeriod] = useState<TStatsPeriod>("weekly");
-	const { data: stats, isLoading } = useQuery(userQueries.stats(period));
+	const {
+		data: stats,
+		isLoading,
+		isError,
+	} = useQuery(userStatsQueryOptions(period));
 
 	return (
 		<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -48,8 +52,10 @@ export const UserGreeting = memo(() => {
 					<ButtonGroupText className="cursor-default gap-2 border-none bg-transparent">
 						<PackageCheck className="size-3.5 text-muted-foreground" />
 						<div className="flex items-center gap-1">
-							{isLoading || !stats ? (
+							{isLoading ? (
 								<Skeleton className="h-4 w-6" />
+							) : isError || !stats ? (
+								<span className="font-semibold text-destructive">N/A</span>
 							) : (
 								<span className="font-semibold text-foreground">
 									{stats.tasks_completed}
@@ -64,8 +70,10 @@ export const UserGreeting = memo(() => {
 					<ButtonGroupText className="cursor-default gap-2 border-none bg-transparent">
 						<Users className="size-3.5 text-muted-foreground" />
 						<div className="flex items-center gap-1">
-							{isLoading || !stats ? (
+							{isLoading ? (
 								<Skeleton className="h-4 w-6" />
+							) : isError || !stats ? (
+								<span className="font-semibold text-destructive">N/A</span>
 							) : (
 								<span className="font-semibold text-foreground">
 									{stats.collaborated_with}

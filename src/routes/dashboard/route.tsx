@@ -8,8 +8,8 @@ import { AppPageHeader } from "@/components/layout/app/page-header";
 import { AppSidebar } from "@/components/layout/app/sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { inboxStatsQueryOptions } from "@/features/inbox/queries";
-import { teamQueries } from "@/features/teams";
-import { userQueries } from "@/features/users";
+import { myTeamsQueryOptions } from "@/features/teams";
+import { userMeQueryOptions } from "@/features/users";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/dashboard")({
@@ -27,8 +27,8 @@ export const Route = createFileRoute("/dashboard")({
 	},
 	loader: async ({ context }) => {
 		await Promise.all([
-			context.queryClient.ensureQueryData(userQueries.me()),
-			context.queryClient.ensureQueryData(teamQueries.myTeams()),
+			context.queryClient.ensureQueryData(userMeQueryOptions()),
+			context.queryClient.ensureQueryData(myTeamsQueryOptions()),
 		]);
 		void context.queryClient.prefetchQuery(inboxStatsQueryOptions());
 	},

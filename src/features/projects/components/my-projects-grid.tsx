@@ -1,21 +1,20 @@
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { ArrowRight, Briefcase, FolderClosed, Plus } from "lucide-react";
 import { memo, useState } from "react";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	Empty,
+	EmptyContent,
 	EmptyDescription,
 	EmptyHeader,
 	EmptyMedia,
 	EmptyTitle,
 } from "@/components/ui/empty";
-import { Skeleton } from "@/components/ui/skeleton";
 import { myProjectsQueryOptions } from "@/features/projects/queries";
-
 import { CreateProjectDialog } from "./create-project-dialog";
 
 export const MyProjectsGrid = memo(() => {
@@ -23,29 +22,9 @@ export const MyProjectsGrid = memo(() => {
 	const { teamId } = useParams({ strict: false });
 	const [isCreateOpen, setIsCreateOpen] = useState(false);
 
-	const { data: projects = [], isLoading } = useQuery(
+	const { data: projects = [] } = useSuspenseQuery(
 		myProjectsQueryOptions(teamId),
 	);
-
-	if (isLoading) {
-		return (
-			<Card>
-				<CardHeader>
-					<CardTitle className="flex items-center gap-2">
-						<FolderClosed className="size-4 text-muted-foreground" />
-						<span>Projects</span>
-					</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-						{[1, 2, 3, 4].map((i) => (
-							<Skeleton key={i} className="h-14 w-full rounded-lg" />
-						))}
-					</div>
-				</CardContent>
-			</Card>
-		);
-	}
 
 	return (
 		<Card className="h-full">
@@ -115,7 +94,7 @@ export const MyProjectsGrid = memo(() => {
 					})}
 				</div>
 
-				{projects.length === 0 && !isLoading && (
+				{projects.length === 0 && (
 					<Empty>
 						<EmptyHeader>
 							<EmptyMedia variant="icon">
@@ -126,6 +105,16 @@ export const MyProjectsGrid = memo(() => {
 								Start by creating your first project.
 							</EmptyDescription>
 						</EmptyHeader>
+						<EmptyContent>
+							<Button
+								type="button"
+								variant="outline"
+								onClick={() => setIsCreateOpen(true)}
+							>
+								<Plus className="size-4" />
+								New Project
+							</Button>
+						</EmptyContent>
 					</Empty>
 				)}
 			</CardContent>

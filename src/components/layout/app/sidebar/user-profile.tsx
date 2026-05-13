@@ -1,4 +1,4 @@
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import {
 	ChevronsUpDown,
@@ -18,16 +18,16 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
-import { authMutationOptions } from "@/features/auth";
-import { userQueries } from "@/features/users";
-import { queryClient } from "@/lib/query-client";
+import { useAuthMutations } from "@/features/auth";
+import { userMeQueryOptions } from "@/features/users";
+import { getErrorMessage } from "@/lib/error";
 import { useDashboardStore } from "@/stores/use-dashboard-store";
 import { useViewModeListStore } from "@/stores/use-view-mode-list-store";
 
 export const UserProfile = () => {
 	const navigate = useNavigate();
-	const { data: user } = useSuspenseQuery(userQueries.me());
-	const logoutMutation = useMutation(authMutationOptions.signOut());
+	const { data: user } = useSuspenseQuery(userMeQueryOptions());
+	const { signOut: logoutMutation } = useAuthMutations();
 
 	const handleLogout = async () => {
 		try {
@@ -38,12 +38,11 @@ export const UserProfile = () => {
 			// Clear client-side data
 			useDashboardStore.getState().reset();
 			useViewModeListStore.getState().resetAll();
-			queryClient.clear();
 
 			toast.success("Logged out successfully");
 			navigate({ to: "/auth/sign-in" });
-		} catch (_error) {
-			toast.error("Logout failed. Please try again.");
+		} catch (error) {
+			toast.error(getErrorMessage(error, "Logout failed. Please try again."));
 		}
 	};
 

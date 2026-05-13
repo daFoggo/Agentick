@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { TIMEZONES } from "@/constants/timezone";
+import { getErrorMessage } from "@/lib/error";
 import {
 	projectKeys,
 	projectQueryOptions,
@@ -104,8 +105,13 @@ export const ProjectSettings = ({
 			}, 800);
 
 			toast.success(`Updated ${fieldName.replace("_", " ")}`);
-		} catch (_error) {
-			toast.error(`Failed to update ${fieldName.replace("_", " ")}`);
+		} catch (error) {
+			toast.error(
+				getErrorMessage(
+					error,
+					`Failed to update ${fieldName.replace("_", " ")}`,
+				),
+			);
 		} finally {
 			setUpdatingField((current) => (current === fieldName ? null : current));
 		}
@@ -118,7 +124,7 @@ export const ProjectSettings = ({
 
 			// Đọc cache myProjects đã được invalidate bởi mutation onSuccess
 			const remaining = queryClient.getQueryData<any[]>(
-				projectKeys.myProjects(),
+				projectKeys.myProjects(teamId),
 			);
 
 			if (!remaining || remaining.length === 0) {
@@ -135,8 +141,8 @@ export const ProjectSettings = ({
 				});
 			}
 			return true;
-		} catch (_error) {
-			toast.error("Failed to delete project");
+		} catch (error) {
+			toast.error(getErrorMessage(error, "Failed to delete project"));
 			return false;
 		}
 	};

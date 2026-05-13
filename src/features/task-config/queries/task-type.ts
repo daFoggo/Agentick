@@ -13,17 +13,24 @@ import {
 import type { TTaskTypeFindInput } from "../schemas";
 import { taskConfigKeys } from "./keys";
 
+export const taskTypesQueryOptions = (
+	projectId: string,
+	params?: TTaskTypeFindInput,
+) =>
+	queryOptions({
+		queryKey: taskConfigKeys.types(projectId, params),
+		queryFn: () => getTaskTypesFn({ data: { projectId, params } }),
+	});
+
+export const taskTypeQueryOptions = (projectId: string, typeId: string) =>
+	queryOptions({
+		queryKey: taskConfigKeys.typeDetail(projectId, typeId),
+		queryFn: () => getTaskTypeByIdFn({ data: { projectId, typeId } }),
+	});
+
 export const taskTypeQueries = {
-	types: (projectId: string, params?: TTaskTypeFindInput) =>
-		queryOptions({
-			queryKey: taskConfigKeys.types(projectId, params),
-			queryFn: () => getTaskTypesFn({ data: { projectId, params } }),
-		}),
-	typeDetail: (projectId: string, typeId: string) =>
-		queryOptions({
-			queryKey: taskConfigKeys.typeDetail(projectId, typeId),
-			queryFn: () => getTaskTypeByIdFn({ data: { projectId, typeId } }),
-		}),
+	types: taskTypesQueryOptions,
+	typeDetail: taskTypeQueryOptions,
 };
 
 export const useTaskTypeMutations = () => {

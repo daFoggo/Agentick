@@ -1,6 +1,7 @@
 import type { CellContext } from "@tanstack/react-table";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -11,6 +12,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { generateColumns } from "@/lib/data-table";
+import { getErrorMessage } from "@/lib/error";
 import { useTaskConfigMutations } from "../../queries";
 import type { TTaskPriority } from "../../schemas";
 import { DeleteTaskPriorityDialog } from "./delete-task-priority-dialog";
@@ -61,6 +63,7 @@ const ActionCell = ({ row }: CellContext<TTaskPriority, any>) => {
 			});
 			return true;
 		} catch (error) {
+			toast.error(getErrorMessage(error, "Failed to delete task priority"));
 			console.error("Failed to delete task priority:", error);
 			return false;
 		}

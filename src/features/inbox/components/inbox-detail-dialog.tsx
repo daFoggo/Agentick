@@ -16,8 +16,8 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import type { TInboxItem } from "@/features/inbox";
 import { cn } from "@/lib/utils";
-import type { TInboxItem } from "../schemas";
 import { InboxContent } from "./inbox-content";
 
 interface IInboxDetailDialogProps {
@@ -65,7 +65,7 @@ export const InboxDetailDialog = ({
 								className={cn(
 									"rounded-md",
 									item.status === "BOOKMARKED" &&
-										"text-yellow-500 hover:text-yellow-600",
+										"text-primary hover:text-primary",
 								)}
 								onClick={handleToggleBookmark}
 								aria-label={
@@ -86,7 +86,7 @@ export const InboxDetailDialog = ({
 								className={cn(
 									"rounded-md",
 									item.status === "ARCHIVED" &&
-										"text-orange-500 hover:text-orange-600",
+										"text-primary hover:text-primary",
 								)}
 								onClick={handleToggleRead}
 								aria-label={

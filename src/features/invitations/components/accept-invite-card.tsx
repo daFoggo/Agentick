@@ -20,10 +20,15 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-
-import { userQueries } from "@/features/users";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+	invitationDetailQueryOptions,
+	navigateAfterInvitationAccept,
+	useInvitationMutations,
+} from "@/features/invitations";
+import { userMeQueryOptions } from "@/features/users";
 import { deleteAuthToken, getAuthToken } from "@/lib/auth-token";
-import { invitationQueries, useInvitationMutations } from "../queries";
+import { getErrorMessage } from "@/lib/error";
 
 interface IAcceptInviteCardProps {
 	invitationId: string;
@@ -37,23 +42,72 @@ export function AcceptInviteCard({ invitationId }: IAcceptInviteCardProps) {
 	>("idle");
 	const [errorMessage, setErrorMessage] = useState("");
 
-	const { data: invitation, isLoading: isFetchingInvitation } = useQuery(
-		invitationQueries.getById(invitationId),
-	);
+	const {
+		data: invitation,
+		isLoading: isFetchingInvitation,
+		isError: isInvitationError,
+		error: invitationError,
+	} = useQuery(invitationDetailQueryOptions(invitationId));
 	const { data: currentUser, isLoading: isFetchingUser } = useQuery({
-		...userQueries.me(),
+		...userMeQueryOptions(),
 		retry: false,
 	});
 
 	const isLoading = isFetchingInvitation || isFetchingUser;
+	const { accept, decline } = useInvitationMutations();
+
+	if (isLoading) {
+		return (
+			<Card className="w-full max-w-md border-primary/10 shadow-lg">
+				<CardHeader className="text-center">
+					<Skeleton className="mx-auto h-8 w-64" />
+					<Skeleton className="mx-auto mt-2 h-4 w-72" />
+					<Skeleton className="mx-auto h-4 w-56" />
+				</CardHeader>
+				<CardContent className="flex flex-col items-center gap-4 py-6">
+					<Skeleton className="size-20 rounded-full" />
+					<Skeleton className="h-4 w-48" />
+				</CardContent>
+				<CardFooter className="flex w-full flex-col gap-2">
+					<Skeleton className="h-10 w-full" />
+					<Skeleton className="h-10 w-full" />
+				</CardFooter>
+			</Card>
+		);
+	}
+
+	if (isInvitationError) {
+		return (
+			<Card className="w-full max-w-md border-primary/10 shadow-lg">
+				<CardHeader className="text-center">
+					<CardTitle className="text-2xl font-bold tracking-tight">
+						Invitation unavailable
+					</CardTitle>
+					<CardDescription>
+						We could not load the invitation details.
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<Alert variant="destructive">
+						<AlertCircle className="size-4" />
+						<AlertTitle>Error loading invitation</AlertTitle>
+						<AlertDescription>
+							{getErrorMessage(
+								invitationError,
+								"Failed to load the invitation.",
+							)}
+						</AlertDescription>
+					</Alert>
+				</CardContent>
+			</Card>
+		);
+	}
 
 	const isEmailMismatch =
 		currentUser &&
 		invitation &&
 		currentUser.email.trim().toLowerCase() !==
 			invitation.email.trim().toLowerCase();
-
-	const { accept, decline } = useInvitationMutations();
 
 	const handleAccept = async () => {
 		const currentToken = await getAuthToken();
@@ -70,12 +124,14 @@ export function AcceptInviteCard({ invitationId }: IAcceptInviteCardProps) {
 
 		setStatus("loading");
 		try {
-			await accept.mutateAsync(invitationId);
-			setStatus("success");
-			toast.success("Successfully joined the organization");
-		} catch (error: any) {
+			const result = await accept.mutateAsync(invitationId);
+			toast.success("Invitation accepted successfully");
+			navigateAfterInvitationAccept(result, navigate);
+		} catch (error) {
 			setStatus("error");
-			setErrorMessage(error?.message || "Failed to accept the invitation");
+			const message = getErrorMessage(error, "Failed to accept the invitation");
+			setErrorMessage(message);
+			toast.error(message);
 		}
 	};
 
@@ -96,9 +152,14 @@ export function AcceptInviteCard({ invitationId }: IAcceptInviteCardProps) {
 			await decline.mutateAsync(invitationId);
 			toast.success("Invitation declined");
 			navigate({ to: "/dashboard" });
-		} catch (error: any) {
+		} catch (error) {
 			setStatus("error");
-			setErrorMessage(error?.message || "Failed to decline the invitation");
+			const message = getErrorMessage(
+				error,
+				"Failed to decline the invitation",
+			);
+			setErrorMessage(message);
+			toast.error(message);
 		}
 	};
 
@@ -148,13 +209,9 @@ export function AcceptInviteCard({ invitationId }: IAcceptInviteCardProps) {
 				)}
 
 				<div className="flex flex-col items-center justify-center gap-4 py-4">
-					{(status === "idle" || isLoading) && (
+					{status === "idle" && (
 						<div className="flex size-20 items-center justify-center rounded-full bg-primary/10 text-primary shadow-inner">
-							{isLoading ? (
-								<Loader2 className="size-10 animate-spin" />
-							) : (
-								<CheckCircle2 className="size-10" />
-							)}
+							<CheckCircle2 className="size-10" />
 						</div>
 					)}
 					{status === "loading" && (
@@ -167,10 +224,10 @@ export function AcceptInviteCard({ invitationId }: IAcceptInviteCardProps) {
 					)}
 					{status === "success" && (
 						<div className="flex animate-in flex-col items-center gap-3 duration-300 zoom-in-95">
-							<div className="flex size-20 items-center justify-center rounded-full bg-green-100 text-green-600 shadow-inner dark:bg-green-900/30 dark:text-green-500">
+							<div className="flex size-20 items-center justify-center rounded-full bg-primary/10 text-primary shadow-inner">
 								<CheckCircle2 className="size-10" />
 							</div>
-							<span className="text-lg font-semibold text-green-600 dark:text-green-500">
+							<span className="text-lg font-semibold text-primary">
 								Accepted Successfully!
 							</span>
 						</div>

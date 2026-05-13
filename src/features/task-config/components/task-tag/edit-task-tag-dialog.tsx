@@ -27,6 +27,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { TAILWIND_COLOR_OPTIONS } from "@/constants/color-options";
+import { getErrorMessage } from "@/lib/error";
 import { useTaskConfigMutations } from "../../queries";
 import {
 	TaskTagUpdateSchema,
@@ -59,7 +60,7 @@ export const EditTaskTagDialog = ({
 				toast.success("Task tag updated successfully");
 				onOpenChange(false);
 			} catch (error) {
-				toast.error("Failed to update task tag");
+				toast.error(getErrorMessage(error, "Failed to update task tag"));
 				console.error(error);
 			}
 		},

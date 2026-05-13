@@ -63,13 +63,14 @@ export const Route = createRootRouteWithContext<IRouterContext>()({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
 	const theme = Route.useLoaderData();
+	const { queryClient } = Route.useRouteContext();
 	return (
 		<html lang="en" className={theme} suppressHydrationWarning>
 			<head>
 				<HeadContent />
 			</head>
 			<body suppressHydrationWarning>
-				<QueryProvider>
+				<QueryProvider client={queryClient}>
 					<ThemeProvider theme={theme}>
 						<TooltipProvider>{children}</TooltipProvider>
 						<ToasterProvider />

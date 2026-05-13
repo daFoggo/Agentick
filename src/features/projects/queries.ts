@@ -21,7 +21,9 @@ export const projectKeys = {
 	lists: () => [...projectKeys.all, "list"] as const,
 	list: (params: TGetProjectsInput) =>
 		[...projectKeys.lists(), params] as const,
-	myProjects: (teamId?: string) => ["projects", "me", teamId ?? "all"] as const,
+	myProjectsAll: () => [...projectKeys.all, "me"] as const,
+	myProjects: (teamId?: string) =>
+		[...projectKeys.myProjectsAll(), teamId ?? "all"] as const,
 	details: () => [...projectKeys.all, "detail"] as const,
 	detail: (id: string) => [...projectKeys.details(), id] as const,
 	taskStats: (projectId: string, period: TStatsPeriod) =>
@@ -57,7 +59,6 @@ export const projectTaskStatsQueryOptions = (
 	queryOptions({
 		queryKey: projectKeys.taskStats(projectId, period),
 		queryFn: () => fetchProjectTaskStatsFn({ data: { projectId, period } }),
-		enabled: !!projectId,
 	});
 
 export const projectWorkloadQueryOptions = (
@@ -68,7 +69,6 @@ export const projectWorkloadQueryOptions = (
 		queryKey: projectKeys.workload(projectId, period),
 		queryFn: () =>
 			fetchProjectMemberWorkloadFn({ data: { projectId, period } }),
-		enabled: !!projectId,
 	});
 
 export const projectRecentStatusUpdatesQueryOptions = (
@@ -79,7 +79,6 @@ export const projectRecentStatusUpdatesQueryOptions = (
 		queryKey: projectKeys.recentUpdates(projectId),
 		queryFn: () =>
 			fetchProjectRecentStatusUpdatesFn({ data: { projectId, limit } }),
-		enabled: !!projectId,
 	});
 
 export const useProjectMutations = () => {
@@ -90,7 +89,9 @@ export const useProjectMutations = () => {
 		onSuccess: async () => {
 			await Promise.all([
 				queryClient.invalidateQueries({ queryKey: projectKeys.lists() }),
-				queryClient.invalidateQueries({ queryKey: ["projects", "me"] }),
+				queryClient.invalidateQueries({
+					queryKey: projectKeys.myProjectsAll(),
+				}),
 			]);
 		},
 	});
@@ -103,7 +104,9 @@ export const useProjectMutations = () => {
 		onSuccess: async (_, variables) => {
 			await Promise.all([
 				queryClient.invalidateQueries({ queryKey: projectKeys.lists() }),
-				queryClient.invalidateQueries({ queryKey: ["projects", "me"] }),
+				queryClient.invalidateQueries({
+					queryKey: projectKeys.myProjectsAll(),
+				}),
 				queryClient.invalidateQueries({
 					queryKey: projectKeys.detail(variables.projectId),
 				}),
@@ -116,7 +119,9 @@ export const useProjectMutations = () => {
 		onSuccess: async () => {
 			await Promise.all([
 				queryClient.invalidateQueries({ queryKey: projectKeys.lists() }),
-				queryClient.invalidateQueries({ queryKey: ["projects", "me"] }),
+				queryClient.invalidateQueries({
+					queryKey: projectKeys.myProjectsAll(),
+				}),
 			]);
 		},
 	});

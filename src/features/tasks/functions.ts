@@ -1,4 +1,6 @@
+import { notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
+import { isHTTPError } from "ky";
 import { z } from "zod";
 import { requestLoggerMiddleware } from "@/lib/middleware";
 import { CreateTaskSchema, FindTasksSchema, UpdateTaskSchema } from "./schemas";
@@ -64,7 +66,16 @@ export const fetchTaskByIdFn = createServerFn({ method: "GET" })
 			taskId: z.string(),
 		}),
 	)
-	.handler(async ({ data }) => fetchTaskById(data.projectId, data.taskId));
+	.handler(async ({ data }) => {
+		try {
+			return await fetchTaskById(data.projectId, data.taskId);
+		} catch (error) {
+			if (isHTTPError(error) && error.response.status === 404) {
+				throw notFound();
+			}
+			throw error;
+		}
+	});
 
 /**
  * Server Function tạo mới một Task

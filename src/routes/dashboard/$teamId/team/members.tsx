@@ -1,7 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { TeamMemberList } from "@/features/team-members";
+import {
+	TeamMemberList,
+	teamMembersQueryOptions,
+} from "@/features/team-members";
 
 export const Route = createFileRoute("/dashboard/$teamId/team/members")({
+	loader: ({ context, params }) =>
+		context.queryClient.ensureQueryData(teamMembersQueryOptions(params.teamId)),
 	component: TeamMembersView,
 });
 

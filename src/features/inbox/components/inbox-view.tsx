@@ -5,8 +5,8 @@ import {
 	ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import type { TInboxItem } from "@/features/inbox";
 import { useInboxStore } from "@/stores/use-inbox-store";
-import type { TInboxItem } from "../schemas";
 import { InboxDetailPanel } from "./inbox-detail-panel";
 import { InboxList } from "./inbox-list";
 

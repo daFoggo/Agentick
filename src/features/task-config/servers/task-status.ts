@@ -31,16 +31,11 @@ export async function fetchTaskStatuses(
 export async function fetchTaskStatusById(
 	projectId: string,
 	statusId: string,
-): Promise<TTaskStatus | null> {
-	try {
-		const response = await api
-			.get(`${buildSectionPath(projectId, "statuses")}/${statusId}`)
-			.json<TBaseResponse<TTaskStatus>>();
-		return response.data;
-	} catch (error) {
-		console.error("error fetch task status detail:", error);
-		return null;
-	}
+): Promise<TTaskStatus> {
+	const response = await api
+		.get(`${buildSectionPath(projectId, "statuses")}/${statusId}`)
+		.json<TBaseResponse<TTaskStatus>>();
+	return response.data;
 }
 
 export async function createTaskStatus(

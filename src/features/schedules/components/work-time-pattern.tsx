@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
-import { CalendarRange, Settings2Icon } from "lucide-react";
+import { AlertCircle, CalendarRange, Settings2Icon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
 	Dialog,
@@ -11,13 +11,14 @@ import {
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DAYS_OF_WEEK, DISPLAY_ORDER_MON_SUN } from "@/constants/days";
-import { userQueries } from "@/features/users";
-import { cn } from "@/lib/utils";
 import {
 	formatSchedules,
 	mySchedulesQueryOptions,
 	useScheduleMutations,
-} from "../queries";
+} from "@/features/schedules";
+import { userMeQueryOptions } from "@/features/users";
+import { getErrorMessage } from "@/lib/error";
+import { cn } from "@/lib/utils";
 import { WorkTimePatternEditor } from "./work-time-pattern-editor";
 
 export const WorkTimePattern = () => {
@@ -25,8 +26,17 @@ export const WorkTimePattern = () => {
 	const params = useParams({ from: "/dashboard/$teamId/schedules/" });
 	const teamId = params.teamId;
 
-	const { data: user } = useQuery(userQueries.me());
-	const { data: rawSchedules, isLoading } = useQuery(mySchedulesQueryOptions());
+	const {
+		data: user,
+		isError: isUserError,
+		error: userError,
+	} = useQuery(userMeQueryOptions());
+	const {
+		data: rawSchedules,
+		isLoading,
+		isError: isSchedulesError,
+		error: schedulesError,
+	} = useQuery(mySchedulesQueryOptions());
 	const { upsert } = useScheduleMutations();
 
 	const schedules = useMemo(
@@ -39,7 +49,25 @@ export const WorkTimePattern = () => {
 		setMounted(true);
 	}, []);
 
-	if (!mounted || isLoading || !schedules) {
+	if (!mounted || isLoading) {
+		return <Skeleton className="h-24 w-full rounded-xl" />;
+	}
+
+	if (isUserError || isSchedulesError) {
+		return (
+			<div className="flex items-center gap-1.5 px-2 py-3 text-xs text-destructive">
+				<AlertCircle className="size-3.5 shrink-0" />
+				<span>
+					{getErrorMessage(
+						userError ?? schedulesError,
+						"Could not load work days.",
+					)}
+				</span>
+			</div>
+		);
+	}
+
+	if (!schedules) {
 		return <Skeleton className="h-24 w-full rounded-xl" />;
 	}
 

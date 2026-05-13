@@ -9,6 +9,8 @@ import {
 	BigCalendarEventPopover,
 	BigCalendarSkeleton,
 } from "@/components/common/big-calendar";
+import { NestedErrorFallback } from "@/components/common/error-pages";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
 	DeleteEventDialog,
@@ -24,19 +26,21 @@ import {
 	mySchedulesQueryOptions,
 	WorkTimePattern,
 } from "@/features/schedules";
-import { taskQueries, useTaskMutations } from "@/features/tasks";
-import { userQueries } from "@/features/users";
+import { tasksQueryOptions, useTaskMutations } from "@/features/tasks";
+import { userMeQueryOptions } from "@/features/users";
+import { getErrorMessage } from "@/lib/error";
 import type { IBigCalendarEvent } from "@/types/big-calendar";
 
 export const Route = createFileRoute("/dashboard/$teamId/schedules/")({
+	errorComponent: NestedErrorFallback,
 	loader: ({ context, params }) => {
 		void context.queryClient.prefetchQuery(mySchedulesQueryOptions());
-		void context.queryClient.prefetchQuery(userQueries.me());
+		void context.queryClient.prefetchQuery(userMeQueryOptions());
 		void context.queryClient.prefetchQuery(
 			eventsQueryOptions({ team_id__eq: params.teamId }),
 		);
 		void context.queryClient.prefetchQuery(
-			taskQueries.list(undefined, {
+			tasksQueryOptions(undefined, {
 				team_id__eq: params.teamId,
 				page_size: "all",
 			}),
@@ -71,23 +75,42 @@ function RouteComponent() {
 	}, []);
 
 	const params = Route.useParams();
-	const { data: userData, isLoading: isLoadingUser } = useQuery(
-		userQueries.me(),
-	);
-	const { data: eventsData, isLoading: isLoadingEvents } = useQuery(
-		eventsQueryOptions({ team_id__eq: params.teamId }),
-	);
-	const { data: taskData, isLoading: isLoadingTasks } = useQuery(
-		taskQueries.list(undefined, {
+	const {
+		data: userData,
+		isLoading: isLoadingUser,
+		isError: isErrorUser,
+		error: userError,
+	} = useQuery(userMeQueryOptions());
+	const {
+		data: eventsData,
+		isLoading: isLoadingEvents,
+		isError: isErrorEvents,
+		error: eventsError,
+	} = useQuery(eventsQueryOptions({ team_id__eq: params.teamId }));
+	const {
+		data: taskData,
+		isLoading: isLoadingTasks,
+		isError: isErrorTasks,
+		error: tasksError,
+	} = useQuery(
+		tasksQueryOptions(undefined, {
 			team_id__eq: params.teamId,
 			page_size: "all",
 		}),
 	);
-	const { data: rawSchedules, isLoading: isLoadingSchedules } = useQuery(
-		mySchedulesQueryOptions(),
-	);
+	const {
+		data: rawSchedules,
+		isLoading: isLoadingSchedules,
+		isError: isErrorSchedules,
+		error: schedulesError,
+	} = useQuery(mySchedulesQueryOptions());
+
 	const isCalendarDataLoading =
 		isLoadingUser || isLoadingEvents || isLoadingTasks || isLoadingSchedules;
+	const isCalendarError =
+		isErrorUser || isErrorEvents || isErrorTasks || isErrorSchedules;
+	const calendarError =
+		userError ?? eventsError ?? tasksError ?? schedulesError ?? null;
 
 	const schedules = useMemo(
 		() => formatSchedules(rawSchedules, params.teamId, userData?.id),
@@ -229,7 +252,20 @@ function RouteComponent() {
 
 				{/* Right Side — BigCalendar */}
 				<section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-					{isMounted && !isCalendarDataLoading ? (
+					{isMounted && isCalendarError ? (
+						<div className="flex flex-1 items-center justify-center p-8">
+							<Alert variant="destructive" className="max-w-md">
+								<TriangleAlert className="size-4" />
+								<AlertTitle>Error loading schedules</AlertTitle>
+								<AlertDescription>
+									{getErrorMessage(
+										calendarError,
+										"We encountered an error trying to load your schedule, task, and event data. Please try refreshing the page.",
+									)}
+								</AlertDescription>
+							</Alert>
+						</div>
+					) : isMounted && !isCalendarDataLoading ? (
 						<BigCalendar
 							events={filteredEvents}
 							weekStartsOn={1}
@@ -254,26 +290,26 @@ function RouteComponent() {
 								>
 									{event.meta?.type === "task" ? (
 										<div
-											className="flex h-full w-full flex-col gap-1 overflow-hidden rounded-md border px-2 py-1.5 transition-all hover:brightness-95 shadow-sm backdrop-blur-xs"
+											className="flex h-full w-full flex-col gap-1 overflow-hidden rounded-md border px-2 py-1.5 shadow-sm backdrop-blur-xs transition-all hover:brightness-95"
 											style={{
 												borderColor: `color-mix(in oklch, ${event.color || "var(--primary)"} 30%, transparent)`,
 												backgroundColor: `color-mix(in oklch, ${event.color || "var(--primary)"} 15%, transparent)`,
 											}}
 										>
-											<div className="flex items-start gap-1.5 min-w-0">
+											<div className="flex min-w-0 items-start gap-1.5">
 												<TriangleAlert
-													className="size-3 shrink-0 mt-0.5 opacity-90"
+													className="mt-0.5 size-3 shrink-0 opacity-90"
 													style={{ color: event.color || "var(--primary)" }}
 												/>
 												<span
-													className="truncate text-[11px] font-bold leading-snug tracking-tight"
+													className="truncate text-xs leading-snug font-bold tracking-tight"
 													style={{ color: event.color || "var(--primary)" }}
 												>
 													{event.title}
 												</span>
 											</div>
 											<div
-												className="text-[10px] font-bold opacity-85"
+												className="text-xs font-bold opacity-85"
 												style={{ color: event.color || "var(--primary)" }}
 											>
 												Due: {format(event.end, "hh:mm a")}

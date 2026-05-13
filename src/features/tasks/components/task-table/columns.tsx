@@ -14,16 +14,17 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { TTask } from "@/features/tasks";
 import {
 	formatCalendarDate,
 	getPriorityOption,
 	getStatusOption,
 	getTypeOption,
 	type ITaskListDialogOptions,
-} from "@/features/tasks/helpers";
-import { useTaskMutations } from "@/features/tasks/queries";
+	type TTask,
+	useTaskMutations,
+} from "@/features/tasks";
 import { generateColumns } from "@/lib/data-table";
+import { getErrorMessage } from "@/lib/error";
 import { DeleteTaskListDialog } from "./delete-task-list-dialog";
 
 const TaskListActionCell = ({ task }: { task: TTask }) => {
@@ -40,6 +41,7 @@ const TaskListActionCell = ({ task }: { task: TTask }) => {
 			});
 			return true;
 		} catch (error) {
+			toast.error(getErrorMessage(error, "Failed to delete task"));
 			console.error("Failed to delete task:", error);
 			return false;
 		}
@@ -141,8 +143,8 @@ export const getTaskColumns = (options: ITaskListDialogOptions) =>
 									payload: { type_id: newId },
 								});
 								toast.success("Type updated");
-							} catch (_error) {
-								toast.error("Failed to update type");
+							} catch (error) {
+								toast.error(getErrorMessage(error, "Failed to update type"));
 							}
 						}}
 					/>
@@ -190,8 +192,8 @@ export const getTaskColumns = (options: ITaskListDialogOptions) =>
 									taskId: task.id,
 									payload: { status_id: newId },
 								});
-							} catch (_error) {
-								toast.error("Failed to update status");
+							} catch (error) {
+								toast.error(getErrorMessage(error, "Failed to update status"));
 							}
 						}}
 					/>
@@ -239,8 +241,10 @@ export const getTaskColumns = (options: ITaskListDialogOptions) =>
 									taskId: task.id,
 									payload: { priority_id: newId },
 								});
-							} catch (_error) {
-								toast.error("Failed to update priority");
+							} catch (error) {
+								toast.error(
+									getErrorMessage(error, "Failed to update priority"),
+								);
 							}
 						}}
 					/>

@@ -12,29 +12,32 @@ import {
 	updateTeamFn,
 } from "./functions";
 
-export const teamQueries = {
-	all: (params?: { name__ilike?: string; page?: number; size?: number }) =>
-		queryOptions({
-			queryKey: ["teams", "list", params],
-			queryFn: () => fetchTeamsFn({ data: params }),
-		}),
-	myTeams: () =>
-		queryOptions({
-			queryKey: ["teams", "me"],
-			queryFn: () => fetchMyTeamsFn(),
-		}),
-	detail: (teamId?: string) =>
-		queryOptions({
-			queryKey: ["teams", "detail", teamId ?? null],
-			enabled: typeof teamId === "string" && teamId.length > 0,
-			queryFn: () => {
-				if (!teamId) {
-					throw new Error("Missing teamId for team detail query");
-				}
-				return fetchTeamByIdFn({ data: teamId });
-			},
-		}),
+export const teamKeys = {
+	all: ["teams"] as const,
+	lists: () => [...teamKeys.all, "list"] as const,
+	list: (params?: any) => [...teamKeys.lists(), params] as const,
+	myTeams: () => [...teamKeys.all, "me"] as const,
+	details: () => [...teamKeys.all, "detail"] as const,
+	detail: (id: string) => [...teamKeys.details(), id] as const,
 };
+
+export const teamsQueryOptions = (params?: any) =>
+	queryOptions({
+		queryKey: teamKeys.list(params),
+		queryFn: () => fetchTeamsFn({ data: params }),
+	});
+
+export const myTeamsQueryOptions = () =>
+	queryOptions({
+		queryKey: teamKeys.myTeams(),
+		queryFn: () => fetchMyTeamsFn(),
+	});
+
+export const teamQueryOptions = (teamId: string) =>
+	queryOptions({
+		queryKey: teamKeys.detail(teamId),
+		queryFn: () => fetchTeamByIdFn({ data: teamId }),
+	});
 
 export const useTeamMutations = () => {
 	const queryClient = useQueryClient();
@@ -43,8 +46,8 @@ export const useTeamMutations = () => {
 		mutationFn: (payload: any) => createTeamFn({ data: payload }),
 		onSuccess: async () => {
 			await Promise.all([
-				queryClient.invalidateQueries({ queryKey: ["teams", "list"] }),
-				queryClient.invalidateQueries({ queryKey: ["teams", "me"] }),
+				queryClient.invalidateQueries({ queryKey: teamKeys.lists() }),
+				queryClient.invalidateQueries({ queryKey: teamKeys.myTeams() }),
 			]);
 		},
 	});
@@ -54,10 +57,10 @@ export const useTeamMutations = () => {
 			updateTeamFn({ data }),
 		onSuccess: async (_, variables) => {
 			await Promise.all([
-				queryClient.invalidateQueries({ queryKey: ["teams", "list"] }),
-				queryClient.invalidateQueries({ queryKey: ["teams", "me"] }),
+				queryClient.invalidateQueries({ queryKey: teamKeys.lists() }),
+				queryClient.invalidateQueries({ queryKey: teamKeys.myTeams() }),
 				queryClient.invalidateQueries({
-					queryKey: ["teams", "detail", variables.teamId],
+					queryKey: teamKeys.detail(variables.teamId),
 				}),
 			]);
 		},
@@ -67,8 +70,8 @@ export const useTeamMutations = () => {
 		mutationFn: (teamId: string) => deleteTeamFn({ data: teamId }),
 		onSuccess: async () => {
 			await Promise.all([
-				queryClient.invalidateQueries({ queryKey: ["teams", "list"] }),
-				queryClient.invalidateQueries({ queryKey: ["teams", "me"] }),
+				queryClient.invalidateQueries({ queryKey: teamKeys.lists() }),
+				queryClient.invalidateQueries({ queryKey: teamKeys.myTeams() }),
 			]);
 		},
 	});

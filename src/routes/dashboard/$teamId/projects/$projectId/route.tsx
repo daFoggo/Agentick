@@ -1,13 +1,15 @@
 import { createFileRoute, Outlet, useMatches } from "@tanstack/react-router";
+import { NestedErrorFallback } from "@/components/common/error-pages";
 import { ViewModeList } from "@/components/layout/app/view-mode-list";
 import { PROJECT_VIEW_MODE_CATALOG } from "@/constants/view-mode-list";
 import { ProjectDetailsHeader } from "@/features/projects/components/project-details-header";
 import { projectQueryOptions } from "@/features/projects/queries";
 import { taskConfigQueries } from "@/features/task-config";
-import { taskQueries } from "@/features/tasks";
+import { tasksQueryOptions } from "@/features/tasks";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/dashboard/$teamId/projects/$projectId")({
+	errorComponent: NestedErrorFallback,
 	loader: async ({ context, params }) => {
 		const { projectId } = params;
 		const commonParams = { page: 1, page_size: "all" } as const;
@@ -19,7 +21,7 @@ export const Route = createFileRoute("/dashboard/$teamId/projects/$projectId")({
 
 		// Các thông tin khác là tùy chọn, không để chúng làm sập trang
 		void context.queryClient.prefetchQuery(
-			taskQueries.list(projectId, {
+			tasksQueryOptions(projectId, {
 				ordering: "-id",
 				page: 1,
 				page_size: "all",

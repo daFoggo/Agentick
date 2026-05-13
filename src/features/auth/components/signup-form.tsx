@@ -1,5 +1,4 @@
 import { useForm } from "@tanstack/react-form";
-import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -13,16 +12,17 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { SITE_CONFIG } from "@/configs/site";
-import { authMutationOptions } from "@/features/auth/queries";
+import { getErrorMessage } from "@/lib/error";
+import { useAuthMutations } from "../queries";
 import {
 	SignUpFormSchema,
 	type TSignUpFormInput,
 	type TSignUpInput,
-} from "@/features/auth/schemas";
+} from "../schemas";
 
 export const SignUpForm = () => {
 	const navigate = useNavigate();
-	const signUpMutation = useMutation(authMutationOptions.signUp());
+	const { signUp: signUpMutation } = useAuthMutations();
 
 	const form = useForm({
 		defaultValues: {
@@ -47,7 +47,9 @@ export const SignUpForm = () => {
 				navigate({ to: "/auth/sign-in" });
 			} catch (error) {
 				console.error("Mutation failed:", error);
-				toast.error("Registration failed. Please try again.");
+				toast.error(
+					getErrorMessage(error, "Registration failed. Please try again."),
+				);
 			}
 		},
 	});
@@ -121,7 +123,7 @@ export const SignUpForm = () => {
 											placeholder="name@example.com"
 											type="email"
 											aria-invalid={isInvalid}
-											autoComplete="email"
+											autoComplete="username"
 										/>
 										<FieldError errors={field.state.meta.errors} />
 									</Field>

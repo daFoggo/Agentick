@@ -31,16 +31,11 @@ export async function fetchTaskPriorities(
 export async function fetchTaskPriorityById(
 	projectId: string,
 	priorityId: string,
-): Promise<TTaskPriority | null> {
-	try {
-		const response = await api
-			.get(`${buildSectionPath(projectId, "priorities")}/${priorityId}`)
-			.json<TBaseResponse<TTaskPriority>>();
-		return response.data;
-	} catch (error) {
-		console.error("error fetch task priority detail:", error);
-		return null;
-	}
+): Promise<TTaskPriority> {
+	const response = await api
+		.get(`${buildSectionPath(projectId, "priorities")}/${priorityId}`)
+		.json<TBaseResponse<TTaskPriority>>();
+	return response.data;
 }
 
 export async function createTaskPriority(

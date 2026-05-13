@@ -5,10 +5,10 @@ import { Calendar, Mail, User as UserIcon, UserRoundPen } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { userQueries } from "../queries";
+import { userMeQueryOptions } from "../queries";
 
 export function ProfileCard() {
-	const { data: user } = useSuspenseQuery(userQueries.me());
+	const { data: user } = useSuspenseQuery(userMeQueryOptions());
 
 	const initials =
 		user.name

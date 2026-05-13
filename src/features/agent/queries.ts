@@ -16,13 +16,11 @@ export const agentKeys = {
 		[...agentKeys.all, "project-risk", projectId] as const,
 };
 
-export const agentQueries = {
-	projectRiskStats: (projectId: string) =>
-		queryOptions({
-			queryKey: agentKeys.projectRisk(projectId),
-			queryFn: () => fetchProjectRiskStatsFn({ data: { projectId } }),
-		}),
-};
+export const projectRiskStatsQueryOptions = (projectId: string) =>
+	queryOptions({
+		queryKey: agentKeys.projectRisk(projectId),
+		queryFn: () => fetchProjectRiskStatsFn({ data: { projectId } }),
+	});
 
 export const useAgentMutations = () => {
 	const queryClient = useQueryClient();

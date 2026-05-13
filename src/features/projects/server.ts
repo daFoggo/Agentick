@@ -46,18 +46,11 @@ export async function fetchMyProjects(teamId?: string): Promise<TProject[]> {
 /**
  * Lấy thông tin chi tiết của một Project theo ID.
  */
-export async function fetchProjectById(
-	projectId: string,
-): Promise<TProject | null> {
-	try {
-		const response = await api
-			.get(`projects/${projectId}`)
-			.json<TBaseResponse<TProject>>();
-		return response.data;
-	} catch (error) {
-		console.error("error fetch project detail: ", error);
-		return null;
-	}
+export async function fetchProjectById(projectId: string): Promise<TProject> {
+	const response = await api
+		.get(`projects/${projectId}`)
+		.json<TBaseResponse<TProject>>();
+	return response.data;
 }
 
 /**

@@ -3,12 +3,37 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { projectQueryOptions } from "@/features/projects/queries";
 import { taskConfigQueries } from "@/features/task-config";
-import { TaskTable, taskQueries } from "@/features/tasks";
+import { TaskTable, tasksQueryOptions } from "@/features/tasks";
 import { mapTaskData } from "@/features/tasks/helpers";
 
 export const Route = createFileRoute(
 	"/dashboard/$teamId/projects/$projectId/list",
 )({
+	loader: async ({ context, params }) => {
+		const { projectId } = params;
+		const commonParams = { page: 1, page_size: "all" } as const;
+
+		await Promise.all([
+			context.queryClient.ensureQueryData(projectQueryOptions(projectId)),
+			context.queryClient.ensureQueryData(
+				tasksQueryOptions(projectId, {
+					ordering: "-id",
+					page: 1,
+					page_size: "all",
+					is_deleted__eq: false,
+				}),
+			),
+			context.queryClient.ensureQueryData(
+				taskConfigQueries.statuses(projectId, commonParams),
+			),
+			context.queryClient.ensureQueryData(
+				taskConfigQueries.types(projectId, commonParams),
+			),
+			context.queryClient.ensureQueryData(
+				taskConfigQueries.priorities(projectId, commonParams),
+			),
+		]);
+	},
 	component: ProjectListView,
 });
 
@@ -25,7 +50,7 @@ function ProjectListView() {
 	] = useSuspenseQueries({
 		queries: [
 			projectQueryOptions(projectId),
-			taskQueries.list(projectId, {
+			tasksQueryOptions(projectId, {
 				ordering: "-id",
 				page: 1,
 				page_size: "all",

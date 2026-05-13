@@ -1,19 +1,33 @@
 import { useQuery } from "@tanstack/react-query";
-import { Users } from "lucide-react";
+import { AlertCircle, Plus, Users } from "lucide-react";
+import { useState } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	Empty,
+	EmptyContent,
 	EmptyDescription,
 	EmptyHeader,
 	EmptyMedia,
 	EmptyTitle,
 } from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
-import { teamQueries } from "@/features/teams/queries";
+import { myTeamsQueryOptions } from "@/features/teams/queries";
+import { getErrorMessage } from "@/lib/error";
+import { CreateTeamDialog } from "./create-team-dialog";
 
 export function MyTeamsList() {
-	const { data: teams = [], isLoading } = useQuery(teamQueries.myTeams());
+	const [isCreateOpen, setIsCreateOpen] = useState(false);
+	const {
+		data: teamsData,
+		isLoading,
+		isError,
+		error,
+	} = useQuery(myTeamsQueryOptions());
+
+	const teams = teamsData ?? [];
 
 	const content = (() => {
 		if (isLoading) {
@@ -23,6 +37,18 @@ export function MyTeamsList() {
 						<Skeleton key={i} className="h-16 w-full rounded-xl" />
 					))}
 				</div>
+			);
+		}
+
+		if (isError) {
+			return (
+				<Alert variant="destructive">
+					<AlertCircle className="size-4" />
+					<AlertTitle>Error loading teams</AlertTitle>
+					<AlertDescription>
+						{getErrorMessage(error, "Could not load your teams.")}
+					</AlertDescription>
+				</Alert>
 			);
 		}
 
@@ -36,6 +62,16 @@ export function MyTeamsList() {
 						<EmptyTitle>No teams</EmptyTitle>
 						<EmptyDescription>You haven't joined any teams.</EmptyDescription>
 					</EmptyHeader>
+					<EmptyContent>
+						<Button
+							type="button"
+							variant="outline"
+							onClick={() => setIsCreateOpen(true)}
+						>
+							<Plus className="size-4" />
+							New Team
+						</Button>
+					</EmptyContent>
 				</Empty>
 			);
 		}
@@ -73,17 +109,22 @@ export function MyTeamsList() {
 	})();
 
 	return (
-		<Card>
-			<CardHeader className="flex flex-row items-center justify-between">
-				<CardTitle className="flex items-center gap-2">
-					<Users className="size-4 text-muted-foreground" />
-					<span>My Teams</span>
-				</CardTitle>
-				<Badge variant="secondary" className="font-mono">
-					{teams.length}
-				</Badge>
-			</CardHeader>
-			<CardContent className="max-h-72 overflow-y-auto">{content}</CardContent>
-		</Card>
+		<>
+			<Card>
+				<CardHeader className="flex flex-row items-center justify-between">
+					<CardTitle className="flex items-center gap-2">
+						<Users className="size-4 text-muted-foreground" />
+						<span>My Teams</span>
+					</CardTitle>
+					<Badge variant="secondary" className="font-mono">
+						{teams.length}
+					</Badge>
+				</CardHeader>
+				<CardContent className="max-h-72 overflow-y-auto">
+					{content}
+				</CardContent>
+			</Card>
+			<CreateTeamDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} />
+		</>
 	);
 }

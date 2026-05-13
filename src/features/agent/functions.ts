@@ -1,4 +1,3 @@
-// Trigger Vite re-render
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requestLoggerMiddleware } from "@/lib/middleware";

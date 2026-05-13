@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
-import { AcceptInviteCard, invitationQueries } from "@/features/invitations";
-import { userQueries } from "@/features/users";
+import {
+	AcceptInviteCard,
+	invitationDetailQueryOptions,
+} from "@/features/invitations";
+import { userMeQueryOptions } from "@/features/users";
 
 export const Route = createFileRoute("/invite/accept")({
 	validateSearch: z.object({
@@ -11,8 +14,8 @@ export const Route = createFileRoute("/invite/accept")({
 	loader: async ({ context, deps: { id } }) => {
 		// Prefetch invitation data
 		await Promise.all([
-			context.queryClient.ensureQueryData(invitationQueries.getById(id)),
-			context.queryClient.ensureQueryData(userQueries.me()),
+			context.queryClient.ensureQueryData(invitationDetailQueryOptions(id)),
+			context.queryClient.ensureQueryData(userMeQueryOptions()),
 		]);
 	},
 	component: AcceptInvitePage,
