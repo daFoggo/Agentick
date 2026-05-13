@@ -1,4 +1,4 @@
-import { Outlet, createFileRoute, useParams } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useParams } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { projectsQueryOptions } from "@/features/projects";
 import { teamQueries } from "@/features/teams";
@@ -7,7 +7,9 @@ import { useDashboardStore } from "@/stores/use-dashboard-store";
 export const Route = createFileRoute("/dashboard/$teamId")({
 	loader: async ({ context, params }) => {
 		if (params.teamId && params.teamId !== "personal") {
-			await context.queryClient.ensureQueryData(teamQueries.detail(params.teamId));
+			await context.queryClient.ensureQueryData(
+				teamQueries.detail(params.teamId),
+			);
 			void context.queryClient.prefetchQuery(
 				projectsQueryOptions({ team_id__eq: params.teamId }),
 			);

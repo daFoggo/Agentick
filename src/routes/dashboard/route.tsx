@@ -1,6 +1,6 @@
 import {
-	Outlet,
 	createFileRoute,
+	Outlet,
 	redirect,
 	useMatches,
 } from "@tanstack/react-router";

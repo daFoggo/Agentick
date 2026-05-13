@@ -1,3 +1,4 @@
+import type { AnyFieldApi } from "@tanstack/react-form";
 import {
 	CalendarDays,
 	CircleDashed,
@@ -8,17 +9,6 @@ import {
 	Sparkles,
 	Users,
 } from "lucide-react";
-import {
-	TaskAIEstimationAlert,
-	TaskAIEstimationAlertSkeleton,
-} from "../task-table/task-ai-estimation-alert";
-import type { AnyFieldApi } from "@tanstack/react-form";
-
-import type {
-	ITaskListDialogOptions,
-	TTaskAIEstimationExplanation,
-	TTaskDetailFormApi,
-} from "@/features/tasks/schemas";
 import { DateTimePicker } from "@/components/common/date-picker";
 import { MultiSelectCombobox } from "@/components/common/multi-select-combobox";
 import { TaskPriorityBadge } from "@/components/common/task-priority-badge";
@@ -33,6 +23,15 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import type {
+	ITaskListDialogOptions,
+	TTaskAIEstimationExplanation,
+	TTaskDetailFormApi,
+} from "@/features/tasks/schemas";
+import {
+	TaskAIEstimationAlert,
+	TaskAIEstimationAlertSkeleton,
+} from "../task-table/task-ai-estimation-alert";
 
 interface TaskDetailSidebarSectionProps {
 	form: TTaskDetailFormApi;

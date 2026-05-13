@@ -27,7 +27,6 @@ export const InboxMarkAllReadButton = () => {
 			variant="outline"
 			onClick={handleMarkAll}
 			disabled={markAllAsRead.isPending}
-
 		>
 			{markAllAsRead.isPending ? (
 				<Loader2 className="animate-spin size-4" />

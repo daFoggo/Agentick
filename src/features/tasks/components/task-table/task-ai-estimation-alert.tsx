@@ -1,8 +1,8 @@
 import { Sparkles } from "lucide-react";
 import { memo } from "react";
-import type { TTaskAIEstimationExplanation } from "@/features/tasks/schemas";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { TTaskAIEstimationExplanation } from "@/features/tasks/schemas";
 
 interface ITaskAIEstimationAlertProps {
 	aiExplanation: TTaskAIEstimationExplanation | null;

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ProjectRiskDashboard, agentQueries } from "@/features/agent";
+import { agentQueries, ProjectRiskDashboard } from "@/features/agent";
 import {
 	ProjectAISummary,
 	ProjectStatusUpdate,
@@ -24,7 +24,9 @@ export const Route = createFileRoute(
 		void context.queryClient.prefetchQuery(
 			projectRecentStatusUpdatesQueryOptions(projectId, 15),
 		);
-		void context.queryClient.prefetchQuery(agentQueries.projectRiskStats(projectId));
+		void context.queryClient.prefetchQuery(
+			agentQueries.projectRiskStats(projectId),
+		);
 	},
 	component: ProjectDashboardView,
 });

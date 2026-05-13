@@ -2,13 +2,13 @@ import { useSuspenseQueries } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { memo } from "react";
-import { taskQueries } from "../../queries";
-import { TaskList } from "./task-list";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { userQueries } from "@/features/users";
+import { taskQueries } from "../../queries";
+import { TaskList } from "./task-list";
 
 export const TaskLineSkeleton = () => {
 	return (
@@ -47,11 +47,7 @@ export const TaskLine = memo(() => {
 	const user = userRes.data;
 	const overview = overviewRes.data;
 
-	const {
-		in_progress: inProgress,
-		upcoming,
-		overdue,
-	} = overview;
+	const { in_progress: inProgress, upcoming, overdue } = overview;
 
 	const initials =
 		user.name

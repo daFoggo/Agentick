@@ -3,7 +3,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { CalendarPlus, TriangleAlert } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import type { IBigCalendarEvent } from "@/types/big-calendar";
 import {
 	BigCalendar,
 	BigCalendarEventContent,
@@ -21,12 +20,13 @@ import {
 	useEventMutations,
 } from "@/features/events";
 import {
-	WorkTimePattern,
 	formatSchedules,
 	mySchedulesQueryOptions,
+	WorkTimePattern,
 } from "@/features/schedules";
 import { taskQueries, useTaskMutations } from "@/features/tasks";
 import { userQueries } from "@/features/users";
+import type { IBigCalendarEvent } from "@/types/big-calendar";
 
 export const Route = createFileRoute("/dashboard/$teamId/schedules/")({
 	loader: ({ context, params }) => {
@@ -71,7 +71,9 @@ function RouteComponent() {
 	}, []);
 
 	const params = Route.useParams();
-	const { data: userData, isLoading: isLoadingUser } = useQuery(userQueries.me());
+	const { data: userData, isLoading: isLoadingUser } = useQuery(
+		userQueries.me(),
+	);
 	const { data: eventsData, isLoading: isLoadingEvents } = useQuery(
 		eventsQueryOptions({ team_id__eq: params.teamId }),
 	);

@@ -14,7 +14,9 @@ export const Route = createFileRoute("/dashboard/$teamId/overview/")({
 		void context.queryClient.prefetchQuery(
 			taskQueries.myOverview(params.teamId, today),
 		);
-		void context.queryClient.prefetchQuery(myProjectsQueryOptions(params.teamId));
+		void context.queryClient.prefetchQuery(
+			myProjectsQueryOptions(params.teamId),
+		);
 
 		await context.queryClient.ensureQueryData(userQueries.greeting());
 	},

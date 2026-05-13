@@ -39,12 +39,12 @@ export const inboxListQueryOptions = (
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+	archiveInboxFn,
+	deleteInboxFn,
 	markAllInboxAsReadFn,
 	markInboxAsReadFn,
 	toggleInboxBookmarkFn,
-	archiveInboxFn,
 	unarchiveInboxFn,
-	deleteInboxFn,
 } from "./functions";
 
 export const useInboxMutations = () => {

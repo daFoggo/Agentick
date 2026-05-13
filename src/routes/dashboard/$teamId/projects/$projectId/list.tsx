@@ -62,7 +62,9 @@ function ProjectListView() {
 	};
 	const projectMembers = project?.members ?? [];
 
-	const tasks = tasksResponse.founds.map((task) => mapTaskData(task, taskOptions));
+	const tasks = tasksResponse.founds.map((task) =>
+		mapTaskData(task, taskOptions),
+	);
 
 	return (
 		<TaskTable
