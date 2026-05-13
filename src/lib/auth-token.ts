@@ -1,5 +1,19 @@
 import { createServerFn } from "@tanstack/react-start";
 
+const getServerToken = createServerFn({ method: "GET" }).handler(async () => {
+	const { useAppSession } = await import("./session.server");
+	const session = await useAppSession();
+	return session.data.access_token;
+});
+
+const clearServerSession = createServerFn({ method: "POST" }).handler(
+	async () => {
+		const { useAppSession } = await import("./session.server");
+		const session = await useAppSession();
+		await session.clear();
+	},
+);
+
 /**
  * Lấy token để sử dụng cho các yêu cầu API trong src/lib/ky.ts.
  * Hàm này tự động kiểm tra nếu token sắp hết hạn (dựa trên ACCESS_REFRESH_SKEW_MS)
@@ -27,16 +41,6 @@ export async function getAuthTokenForRequest() {
  * để kiểm tra nhanh trạng thái đăng nhập của người dùng mà không nhất thiết phải làm mới token.
  */
 export async function getAuthToken() {
-	if (typeof window === "undefined") {
-		try {
-			const { useAppSession: getAppSession } = await import("./session.server");
-			const session = await getAppSession();
-			return session.data.access_token ?? null;
-		} catch (_e) {
-			return null;
-		}
-	}
-
 	const cachedToken = getCachedToken();
 	if (cachedToken !== null) {
 		return cachedToken;
@@ -111,20 +115,6 @@ export async function deleteAuthToken() {
 }
 
 // --- Internal Helpers & Server Functions ---
-
-const getServerToken = createServerFn({ method: "GET" }).handler(async () => {
-	const { useAppSession } = await import("./session.server");
-	const session = await useAppSession();
-	return session.data.access_token;
-});
-
-const clearServerSession = createServerFn({ method: "POST" }).handler(
-	async () => {
-		const { useAppSession } = await import("./session.server");
-		const session = await useAppSession();
-		await session.clear();
-	},
-);
 
 let tokenCache: { value: string | null; updatedAt: number } = {
 	value: null,
