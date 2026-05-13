@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { type MarkdownResult, renderMarkdown } from "@/lib/markdown";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
+import { getErrorMessage } from "@/lib/error";
+import type { MarkdownResult } from "@/lib/markdown";
+import { renderMarkdown } from "@/lib/markdown";
 import { cn } from "@/lib/utils";
 
 interface IMarkdownRendererProps {
@@ -21,15 +25,19 @@ export const MarkdownRenderer = ({
 }: IMarkdownRendererProps) => {
 	const [result, setResult] = useState<MarkdownResult | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<unknown>(null);
 
 	useEffect(() => {
 		const render = async () => {
 			setIsLoading(true);
+			setError(null);
 			try {
 				const rendered = await renderMarkdown(content);
 				setResult(rendered);
 			} catch (error) {
 				console.error("Failed to render markdown:", error);
+				setError(error);
+				setResult(null);
 			} finally {
 				setIsLoading(false);
 			}
@@ -40,11 +48,22 @@ export const MarkdownRenderer = ({
 
 	if (isLoading) {
 		return (
-			<div className={cn("animate-pulse space-y-4", className)}>
-				<div className="h-4 w-3/4 rounded bg-muted"></div>
-				<div className="h-4 w-full rounded bg-muted"></div>
-				<div className="h-4 w-5/6 rounded bg-muted"></div>
+			<div className={cn("flex flex-col gap-4", className)}>
+				<Skeleton className="h-4 w-3/4" />
+				<Skeleton className="h-4 w-full" />
+				<Skeleton className="h-4 w-5/6" />
 			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<Alert variant="destructive" className={className}>
+				<AlertTitle>Error rendering content</AlertTitle>
+				<AlertDescription>
+					{getErrorMessage(error, "Failed to render markdown content.")}
+				</AlertDescription>
+			</Alert>
 		);
 	}
 

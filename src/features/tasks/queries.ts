@@ -3,6 +3,8 @@ import {
 	useMutation,
 	useQueryClient,
 } from "@tanstack/react-query";
+import { projectKeys } from "@/features/projects";
+import { userKeys } from "@/features/users";
 import {
 	completeTaskFn,
 	createTaskCommentFn,
@@ -46,59 +48,73 @@ export const taskKeys = {
 /**
  * Các Query Object dùng cho việc Fetch data (React Query)
  */
-export const taskQueries = {
-	list: (projectId?: string, params?: TFindTasksInput) =>
-		queryOptions({
-			queryKey: taskKeys.list(projectId, params),
-			queryFn: () => fetchTasksFn({ data: { projectId, params } }),
-		}),
-	detail: (projectId: string, taskId: string) =>
-		queryOptions({
-			queryKey: taskKeys.detail(projectId, taskId),
-			queryFn: () => fetchTaskByIdFn({ data: { projectId, taskId } }),
-		}),
-	myTasks: (teamId?: string) =>
-		queryOptions({
-			queryKey: taskKeys.myTasks(teamId),
-			queryFn: () =>
-				fetchMyTasksFn({
-					data: {
-						params: {
-							page_size: "all",
-							team_id__eq: teamId,
-						},
+export const tasksQueryOptions = (
+	projectId?: string,
+	params?: TFindTasksInput,
+) =>
+	queryOptions({
+		queryKey: taskKeys.list(projectId, params),
+		queryFn: () => fetchTasksFn({ data: { projectId, params } }),
+	});
+
+export const taskQueryOptions = (projectId: string, taskId: string) =>
+	queryOptions({
+		queryKey: taskKeys.detail(projectId, taskId),
+		queryFn: () => fetchTaskByIdFn({ data: { projectId, taskId } }),
+	});
+
+export const myTasksQueryOptions = (teamId?: string) =>
+	queryOptions({
+		queryKey: taskKeys.myTasks(teamId),
+		queryFn: () =>
+			fetchMyTasksFn({
+				data: {
+					params: {
+						page_size: "all",
+						team_id__eq: teamId,
 					},
-				}),
-		}),
-	myOverview: (teamId?: string, clientToday?: string) =>
-		queryOptions({
-			queryKey: taskKeys.myOverview(teamId, clientToday),
-			queryFn: () =>
-				fetchMyTasksOverviewFn({
-					data: {
-						teamId,
-						clientToday,
-					},
-				}),
-		}),
-	activities: (taskId: string) =>
-		queryOptions({
-			queryKey: taskKeys.activities(taskId),
-			queryFn: () => fetchTaskActivitiesFn({ data: { taskId } }),
-		}),
-};
+				},
+			}),
+	});
+
+export const myTasksOverviewQueryOptions = (
+	teamId?: string,
+	clientToday?: string,
+) =>
+	queryOptions({
+		queryKey: taskKeys.myOverview(teamId, clientToday),
+		queryFn: () =>
+			fetchMyTasksOverviewFn({
+				data: {
+					teamId,
+					clientToday,
+				},
+			}),
+	});
+
+export const taskActivitiesQueryOptions = (taskId: string) =>
+	queryOptions({
+		queryKey: taskKeys.activities(taskId),
+		queryFn: () => fetchTaskActivitiesFn({ data: { taskId } }),
+	});
 
 /**
  * Invalidate tất cả query liên quan đến dashboard charts của project.
- * Dùng prefix ["projects"] để bắt cả task-stats lẫn workload mà không cần projectId cụ thể.
+ * Dùng prefix projectKeys.all để invalidate các queries con
  */
 const invalidateDashboardCharts = (
 	queryClient: ReturnType<typeof useQueryClient>,
 ) =>
 	Promise.all([
-		queryClient.invalidateQueries({ queryKey: ["projects", "task-stats"] }),
-		queryClient.invalidateQueries({ queryKey: ["projects", "workload"] }),
-		queryClient.invalidateQueries({ queryKey: ["projects", "recent-updates"] }),
+		queryClient.invalidateQueries({
+			queryKey: [...projectKeys.all, "task-stats"],
+		}),
+		queryClient.invalidateQueries({
+			queryKey: [...projectKeys.all, "workload"],
+		}),
+		queryClient.invalidateQueries({
+			queryKey: [...projectKeys.all, "recent-updates"],
+		}),
 	]);
 
 /**
@@ -115,7 +131,7 @@ export const useTaskMutations = () => {
 				queryClient.invalidateQueries({ queryKey: taskKeys.lists() }),
 				queryClient.invalidateQueries({ queryKey: taskKeys.details() }),
 				queryClient.invalidateQueries({ queryKey: taskKeys.myTasks() }),
-				queryClient.invalidateQueries({ queryKey: ["users", "stats"] }),
+				queryClient.invalidateQueries({ queryKey: userKeys.statsAll() }),
 				invalidateDashboardCharts(queryClient),
 			]);
 		},
@@ -134,7 +150,7 @@ export const useTaskMutations = () => {
 					queryKey: taskKeys.activities(variables.taskId),
 				}),
 				queryClient.invalidateQueries({ queryKey: taskKeys.myTasks() }),
-				queryClient.invalidateQueries({ queryKey: ["users", "stats"] }),
+				queryClient.invalidateQueries({ queryKey: userKeys.statsAll() }),
 				invalidateDashboardCharts(queryClient),
 			]);
 		},
@@ -150,7 +166,7 @@ export const useTaskMutations = () => {
 					queryKey: taskKeys.detail(variables.projectId, variables.taskId),
 				}),
 				queryClient.invalidateQueries({ queryKey: taskKeys.myTasks() }),
-				queryClient.invalidateQueries({ queryKey: ["users", "stats"] }),
+				queryClient.invalidateQueries({ queryKey: userKeys.statsAll() }),
 				invalidateDashboardCharts(queryClient),
 			]);
 		},
@@ -198,7 +214,7 @@ export const useTaskMutations = () => {
 				queryClient.invalidateQueries({
 					queryKey: taskKeys.activities(variables.taskId),
 				}),
-				queryClient.invalidateQueries({ queryKey: ["users", "stats"] }),
+				queryClient.invalidateQueries({ queryKey: userKeys.statsAll() }),
 				invalidateDashboardCharts(queryClient),
 			]);
 		},

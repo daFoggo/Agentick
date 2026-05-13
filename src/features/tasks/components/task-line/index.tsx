@@ -6,8 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { userQueries } from "@/features/users";
-import { taskQueries } from "../../queries";
+import { userMeQueryOptions } from "@/features/users";
+import { myTasksOverviewQueryOptions } from "../../queries";
 import { TaskList } from "./task-list";
 
 export const TaskLineSkeleton = () => {
@@ -40,8 +40,8 @@ export const TaskLine = memo(() => {
 	const { teamId } = useParams({ strict: false });
 	const [userRes, overviewRes] = useSuspenseQueries({
 		queries: [
-			userQueries.me(),
-			taskQueries.myOverview(teamId, format(new Date(), "yyyy-MM-dd")),
+			userMeQueryOptions(),
+			myTasksOverviewQueryOptions(teamId, format(new Date(), "yyyy-MM-dd")),
 		],
 	});
 	const user = userRes.data;

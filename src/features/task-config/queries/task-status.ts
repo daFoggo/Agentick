@@ -13,17 +13,24 @@ import {
 import type { TTaskStatusFindInput } from "../schemas";
 import { taskConfigKeys } from "./keys";
 
+export const taskStatusesQueryOptions = (
+	projectId: string,
+	params?: TTaskStatusFindInput,
+) =>
+	queryOptions({
+		queryKey: taskConfigKeys.statuses(projectId, params),
+		queryFn: () => getTaskStatusesFn({ data: { projectId, params } }),
+	});
+
+export const taskStatusQueryOptions = (projectId: string, statusId: string) =>
+	queryOptions({
+		queryKey: taskConfigKeys.statusDetail(projectId, statusId),
+		queryFn: () => getTaskStatusByIdFn({ data: { projectId, statusId } }),
+	});
+
 export const taskStatusQueries = {
-	statuses: (projectId: string, params?: TTaskStatusFindInput) =>
-		queryOptions({
-			queryKey: taskConfigKeys.statuses(projectId, params),
-			queryFn: () => getTaskStatusesFn({ data: { projectId, params } }),
-		}),
-	statusDetail: (projectId: string, statusId: string) =>
-		queryOptions({
-			queryKey: taskConfigKeys.statusDetail(projectId, statusId),
-			queryFn: () => getTaskStatusByIdFn({ data: { projectId, statusId } }),
-		}),
+	statuses: taskStatusesQueryOptions,
+	statusDetail: taskStatusQueryOptions,
 };
 
 export const useTaskStatusMutations = () => {

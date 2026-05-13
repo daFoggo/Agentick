@@ -1,11 +1,13 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { NestedErrorFallback } from "@/components/common/error-pages";
 import { ViewModeList } from "@/components/layout/app/view-mode-list";
 import { TEAM_VIEW_MODE_CATALOG } from "@/constants/view-mode-list";
-import { TeamDetailsHeader, teamQueries } from "@/features/teams";
+import { TeamDetailsHeader, teamQueryOptions } from "@/features/teams";
 
 export const Route = createFileRoute("/dashboard/$teamId/team")({
+	errorComponent: NestedErrorFallback,
 	loader: ({ context, params }) =>
-		context.queryClient.ensureQueryData(teamQueries.detail(params.teamId)),
+		context.queryClient.ensureQueryData(teamQueryOptions(params.teamId)),
 	component: RouteComponent,
 	staticData: {
 		getTitle: () => "Team Details",

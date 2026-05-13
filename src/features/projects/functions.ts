@@ -1,4 +1,6 @@
+import { notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
+import { isHTTPError } from "ky";
 import { z } from "zod";
 import { requestLoggerMiddleware } from "@/lib/middleware";
 import {
@@ -40,7 +42,14 @@ export const getProjectByIdFn = createServerFn({ method: "GET" })
 	.middleware([requestLoggerMiddleware])
 	.inputValidator(GetProjectSchema)
 	.handler(async ({ data }) => {
-		return await fetchProjectById(data.projectId);
+		try {
+			return await fetchProjectById(data.projectId);
+		} catch (error) {
+			if (isHTTPError(error) && error.response.status === 404) {
+				throw notFound();
+			}
+			throw error;
+		}
 	});
 
 export const createProjectFn = createServerFn({ method: "POST" })

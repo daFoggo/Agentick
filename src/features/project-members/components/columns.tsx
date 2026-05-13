@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import type { CellContext } from "@tanstack/react-table";
 import { ChevronDown, MoreHorizontal, UserMinus } from "lucide-react";
+import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,8 +15,9 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getTeamRoleOption, TEAM_ROLE_CATALOG } from "@/constants/team-roles";
-import { userQueries } from "@/features/users";
+import { userMeQueryOptions } from "@/features/users";
 import { generateColumns } from "@/lib/data-table";
+import { getErrorMessage } from "@/lib/error";
 import { useProjectMemberMutations } from "../queries";
 import type { TProjectMember } from "../schemas";
 
@@ -100,11 +102,20 @@ function RoleCell({ row }: CellContext<TProjectMember, any>) {
 						className="gap-2"
 						disabled={member.role === opt.value}
 						onClick={() =>
-							updateRole.mutate({
-								projectId: member.project_id,
-								user_id: member.user_id,
-								payload: { role: opt.value as any },
-							})
+							updateRole.mutate(
+								{
+									projectId: member.project_id,
+									user_id: member.user_id,
+									payload: { role: opt.value as any },
+								},
+								{
+									onError: (error) => {
+										toast.error(
+											getErrorMessage(error, "Failed to update member role"),
+										);
+									},
+								},
+							)
 						}
 					>
 						<opt.icon className="size-4" />
@@ -119,7 +130,7 @@ function RoleCell({ row }: CellContext<TProjectMember, any>) {
 function ActionCell({ row }: CellContext<TProjectMember, any>) {
 	const member = row.original;
 	const { removeMember } = useProjectMemberMutations();
-	const { data: currentUser } = useQuery(userQueries.me());
+	const { data: currentUser } = useQuery(userMeQueryOptions());
 	const isCurrentUser = currentUser?.id === member.user_id;
 
 	const navigate = useNavigate();
@@ -158,6 +169,11 @@ function ActionCell({ row }: CellContext<TProjectMember, any>) {
 											navigate({ to: "/dashboard" });
 										}
 									}
+								},
+								onError: (error) => {
+									toast.error(
+										getErrorMessage(error, "Failed to remove project member"),
+									);
 								},
 							},
 						)

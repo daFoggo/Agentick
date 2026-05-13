@@ -1,14 +1,39 @@
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQueries } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { projectQueryOptions } from "@/features/projects";
 import { taskConfigQueries } from "@/features/task-config";
-import { mapTaskData, TaskKanban, taskQueries } from "@/features/tasks";
+import { mapTaskData, TaskKanban, tasksQueryOptions } from "@/features/tasks";
 import { useKanbanStore } from "@/stores/use-kanban-store";
 
 export const Route = createFileRoute(
 	"/dashboard/$teamId/projects/$projectId/board",
 )({
+	loader: async ({ context, params }) => {
+		const { projectId } = params;
+		const commonParams = { page: 1, page_size: "all" } as const;
+
+		await Promise.all([
+			context.queryClient.ensureQueryData(projectQueryOptions(projectId)),
+			context.queryClient.ensureQueryData(
+				tasksQueryOptions(projectId, {
+					ordering: "-id",
+					page: 1,
+					page_size: "all",
+					is_deleted__eq: false,
+				}),
+			),
+			context.queryClient.ensureQueryData(
+				taskConfigQueries.statuses(projectId, commonParams),
+			),
+			context.queryClient.ensureQueryData(
+				taskConfigQueries.types(projectId, commonParams),
+			),
+			context.queryClient.ensureQueryData(
+				taskConfigQueries.priorities(projectId, commonParams),
+			),
+		]);
+	},
 	component: ProjectBoardView,
 	staticData: {
 		fixedHeight: true,
@@ -18,49 +43,54 @@ export const Route = createFileRoute(
 function ProjectBoardView() {
 	const { projectId } = Route.useParams();
 
-	// NOTE: All queries below are served from the cache instantly.
-	// Data is prefetched in the parent route loader (route.tsx) via ensureQueryData.
-	// See README §4.2 — Loader Prefetching Pattern.
-	const { data: project } = useQuery(projectQueryOptions(projectId));
-	const { data: tasksResponse } = useQuery(
-		taskQueries.list(projectId, {
-			ordering: "-id",
-			page: 1,
-			page_size: "all",
-			is_deleted__eq: false,
-		}),
-	);
-
 	const commonParams = { page: 1, page_size: "all" } as const;
-	const { data: statusesResponse } = useQuery(
-		taskConfigQueries.statuses(projectId, commonParams),
-	);
-	const { data: typesResponse } = useQuery(
-		taskConfigQueries.types(projectId, commonParams),
-	);
-	const { data: prioritiesResponse } = useQuery(
-		taskConfigQueries.priorities(projectId, commonParams),
-	);
+
+	const [
+		projectRes,
+		tasksResponseRes,
+		statusesResponseRes,
+		typesResponseRes,
+		prioritiesResponseRes,
+	] = useSuspenseQueries({
+		queries: [
+			projectQueryOptions(projectId),
+			tasksQueryOptions(projectId, {
+				ordering: "-id",
+				page: 1,
+				page_size: "all",
+				is_deleted__eq: false,
+			}),
+			taskConfigQueries.statuses(projectId, commonParams),
+			taskConfigQueries.types(projectId, commonParams),
+			taskConfigQueries.priorities(projectId, commonParams),
+		],
+	});
+
+	const project = projectRes.data;
+	const tasksResponse = tasksResponseRes.data;
+	const statusesResponse = statusesResponseRes.data;
+	const typesResponse = typesResponseRes.data;
+	const prioritiesResponse = prioritiesResponseRes.data;
 
 	const sortedStatuses = useMemo(() => {
-		return [...(statusesResponse?.founds ?? [])].sort(
+		return [...statusesResponse.founds].sort(
 			(a, b) => (a.order ?? 0) - (b.order ?? 0),
 		);
 	}, [statusesResponse]);
 
 	const sortedTypes = useMemo(() => {
-		return [...(typesResponse?.founds ?? [])].sort(
+		return [...typesResponse.founds].sort(
 			(a, b) => (a.order ?? 0) - (b.order ?? 0),
 		);
 	}, [typesResponse]);
 
 	const sortedPriorities = useMemo(() => {
-		return [...(prioritiesResponse?.founds ?? [])].sort(
+		return [...prioritiesResponse.founds].sort(
 			(a, b) => (a.order ?? 0) - (b.order ?? 0),
 		);
 	}, [prioritiesResponse]);
 
-	const members = useMemo(() => project?.members ?? [], [project?.members]);
+	const members = useMemo(() => project.members ?? [], [project.members]);
 
 	const [mounted, setMounted] = useState(false);
 	useEffect(() => {
@@ -90,9 +120,7 @@ function ProjectBoardView() {
 	);
 
 	const tasks = useMemo(() => {
-		return (tasksResponse?.founds ?? []).map((task) =>
-			mapTaskData(task, taskOptions),
-		);
+		return tasksResponse.founds.map((task) => mapTaskData(task, taskOptions));
 	}, [tasksResponse, taskOptions]);
 
 	if (!mounted) return null;

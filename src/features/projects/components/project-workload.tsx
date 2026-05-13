@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
-import { Search } from "lucide-react";
+import { Search, TriangleAlertIcon } from "lucide-react";
 import * as React from "react";
 import { memo } from "react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +15,7 @@ import {
 } from "@/components/ui/chart";
 import {
 	Empty,
+	EmptyContent,
 	EmptyDescription,
 	EmptyHeader,
 	EmptyMedia,
@@ -31,6 +33,7 @@ import type {
 	TMemberWorkload,
 	TStatsPeriod,
 } from "@/features/projects/schemas";
+import { getErrorMessage } from "@/lib/error";
 
 /** Parse "YYYY-MM-DD" string mà không bị lệch timezone */
 function parseDateStr(dateStr: string) {
@@ -45,11 +48,14 @@ export const ProjectWorkload = memo(() => {
 
 	const period: TStatsPeriod = mode === "week" ? "weekly" : "monthly";
 
-	const { data: workloadData, isLoading } = useQuery(
-		projectWorkloadQueryOptions(projectId ?? "", period),
-	);
+	const {
+		data: workloadData,
+		isLoading,
+		isError,
+		error,
+	} = useQuery(projectWorkloadQueryOptions(projectId ?? "", period));
 
-	const members: TMemberWorkload[] = workloadData?.members ?? [];
+	const members: Array<TMemberWorkload> = workloadData?.members ?? [];
 
 	const mappedMembers = React.useMemo(
 		() =>
@@ -123,6 +129,17 @@ export const ProjectWorkload = memo(() => {
 							<Skeleton key={i} className="h-28 w-full rounded-lg" />
 						))}
 					</div>
+				) : isError ? (
+					<Alert variant="destructive">
+						<TriangleAlertIcon className="size-4" />
+						<AlertTitle>Error loading workload data</AlertTitle>
+						<AlertDescription>
+							{getErrorMessage(
+								error,
+								"An error occurred while fetching the member workload statistics.",
+							)}
+						</AlertDescription>
+					</Alert>
 				) : (
 					<ScrollArea className="h-96 w-full">
 						<div className="flex flex-col divide-y">
@@ -237,6 +254,11 @@ export const ProjectWorkload = memo(() => {
 												: "Try adjusting your search to find what you're looking for."}
 										</EmptyDescription>
 									</EmptyHeader>
+									<EmptyContent>
+										{members.length === 0
+											? "Assign tasks to members to populate this chart."
+											: "Clear the search term to show all members again."}
+									</EmptyContent>
 								</Empty>
 							)}
 						</div>

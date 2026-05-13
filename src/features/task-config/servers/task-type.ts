@@ -31,16 +31,11 @@ export async function fetchTaskTypes(
 export async function fetchTaskTypeById(
 	projectId: string,
 	typeId: string,
-): Promise<TTaskType | null> {
-	try {
-		const response = await api
-			.get(`${buildSectionPath(projectId, "types")}/${typeId}`)
-			.json<TBaseResponse<TTaskType>>();
-		return response.data;
-	} catch (error) {
-		console.error("error fetch task type detail:", error);
-		return null;
-	}
+): Promise<TTaskType> {
+	const response = await api
+		.get(`${buildSectionPath(projectId, "types")}/${typeId}`)
+		.json<TBaseResponse<TTaskType>>();
+	return response.data;
 }
 
 export async function createTaskType(

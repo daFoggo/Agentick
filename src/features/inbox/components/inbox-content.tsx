@@ -1,4 +1,4 @@
-import type { TInboxItem } from "../schemas";
+import type { TInboxItem } from "@/features/inbox";
 import { InboxInvitationContent } from "./inbox-invitation-content";
 import { InboxSystemContent } from "./inbox-system-content";
 import { InboxTaskAssignedContent } from "./inbox-task-assigned-content";

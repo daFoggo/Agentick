@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
+	AlertCircle,
 	CheckCircle2,
 	ChevronRight,
 	FolderClosed,
@@ -11,7 +12,8 @@ import {
 import { useMemo, useState } from "react";
 import { Area, AreaChart } from "recharts";
 import { Button } from "@/components/ui/button";
-import { type ChartConfig, ChartContainer } from "@/components/ui/chart";
+import type { ChartConfig } from "@/components/ui/chart";
+import { ChartContainer } from "@/components/ui/chart";
 import {
 	Popover,
 	PopoverContent,
@@ -57,9 +59,11 @@ export const SidebarProjectList = () => {
 	const [isCreateProjectDialogOpen, setIsCreateProjectDialogOpen] =
 		useState(false);
 
-	const { data: projectsData, isLoading } = useQuery(
-		projectsQueryOptions({ team_id__eq: teamId }),
-	);
+	const {
+		data: projectsData,
+		isLoading,
+		error,
+	} = useQuery(projectsQueryOptions({ team_id__eq: teamId }));
 
 	const projects = projectsData?.founds ?? [];
 	const visibleProjects = projects.slice(0, VISIBLE_PROJECT_LIMIT);
@@ -86,7 +90,14 @@ export const SidebarProjectList = () => {
 						</SidebarMenuItem>
 					))}
 
-				{!isLoading && projects.length === 0 && (
+				{!isLoading && !!error && (
+					<div className="flex items-center gap-1.5 px-2 py-1 text-xs text-destructive">
+						<AlertCircle className="size-3.5 shrink-0" />
+						<span className="truncate">Failed to load projects</span>
+					</div>
+				)}
+
+				{!isLoading && !error && projects.length === 0 && (
 					<div className="px-2 py-1 text-xs text-muted-foreground">
 						You have no projects yet.
 					</div>
@@ -165,7 +176,7 @@ const MoreProjectsPopover = ({
 	teamId,
 	onCreateProject,
 }: {
-	projects: TProject[];
+	projects: Array<TProject>;
 	teamId: string;
 	onCreateProject: () => void;
 }) => {
@@ -237,7 +248,7 @@ const ProjectListItem = ({
 		>
 			<div className="mb-1 flex items-center justify-between gap-2">
 				<span className="truncate text-xs font-semibold">{project.name}</span>
-				<div className="flex items-center gap-1 text-xs font-medium text-emerald-600">
+				<div className="flex items-center gap-1 text-xs font-medium text-primary">
 					<CheckCircle2 className="size-2.5" />
 					{completionRate}%
 				</div>

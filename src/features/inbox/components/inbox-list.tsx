@@ -2,17 +2,18 @@ import { Inbox } from "lucide-react";
 import { Fragment } from "react";
 import {
 	Empty,
+	EmptyContent,
 	EmptyDescription,
 	EmptyHeader,
 	EmptyMedia,
 	EmptyTitle,
 } from "@/components/ui/empty";
+import type { TInboxItem } from "@/features/inbox";
 import { useInboxStore } from "@/stores/use-inbox-store";
-import type { TInboxItem } from "../schemas";
 import { InboxItem } from "./inbox-item";
 
 interface IInboxListProps {
-	items: TInboxItem[];
+	items: Array<TInboxItem>;
 }
 
 export const InboxList = ({ items }: IInboxListProps) => {
@@ -30,6 +31,10 @@ export const InboxList = ({ items }: IInboxListProps) => {
 						You have no new inbox items at the moment.
 					</EmptyDescription>
 				</EmptyHeader>
+				<EmptyContent>
+					New task assignments, invitations, and system updates will appear
+					here.
+				</EmptyContent>
 			</Empty>
 		);
 	}

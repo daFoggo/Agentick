@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { getErrorMessage } from "@/lib/error";
 import { useProjectMutations } from "../queries";
 import type { TProject } from "../schemas";
 import { CreateProjectSchema, type TCreateProjectInput } from "../schemas";
@@ -65,7 +66,7 @@ export const CreateProjectDialog = ({
 				onOpenChange(false);
 				form.reset();
 			} catch (error) {
-				toast.error("Failed to create project");
+				toast.error(getErrorMessage(error, "Failed to create project"));
 				console.error(error);
 			}
 		},

@@ -51,66 +51,6 @@ Font conventions for UI:
 - Label: Use the default component labels. If custom styling is needed, use font sizes sm, xs and font weights: medium, normal.
 - Always use standard font sizes and weights provided by Tailwind; custom values outside the scale are strictly prohibited.
 
-### Color Tokens (OKLCH — do not hardcode colors)
-- Mapped from the project's latest `styles.css`. OKLCH wrapper `oklch(...)` is omitted below for conciseness.
-
-| Token | Light OKLCH | Dark OKLCH | Used For |
-|---|---|---|---|
-| `--background` | `0.99 0.004 243.72` | `0.18 0.012 243.72` | Page background |
-| `--foreground` | `0.22 0.025 243.72` | `0.98 0.005 243.72` | Main text |
-| `--card` / `--popover` | `1 0 0` | `0.23 0.016 243.72` | Card, dialog, popover bg |
-| `--card-fore` / `--pop-fore` | `0.22 0.025 243.72` | `0.98 0.005 243.72` | Text on card, popover |
-| `--primary` | `0.6984 0.1458 243.72` | `0.6984 0.1458 243.72` | Primary color (vibrant light blue) |
-| `--primary-foreground` | `0.99 0.003 243.72` | `0.99 0.003 243.72` | Text on primary background |
-| `--secondary` | `0.95 0.015 243.72` | `0.30 0.02 243.72` | Secondary background |
-| `--secondary-foreground` | `0.35 0.08 243.72` | `0.98 0.005 243.72` | Secondary text |
-| `--muted` | `0.965 0.01 243.72` | `0.27 0.018 243.72` | Soft muted background |
-| `--muted-foreground` | `0.52 0.025 243.72` | `0.72 0.025 243.72` | Muted/secondary text |
-| `--accent` | `0.94 0.022 243.72` | `0.33 0.025 243.72` | Accent hover background |
-| `--accent-foreground` | `0.25 0.07 243.72` | `0.98 0.005 243.72` | Accent hover text |
-| `--destructive` | `0.6 0.18 25` | `0.72 0.19 22.216` | Error, delete actions (red) |
-| `--border` | `0.91 0.012 243.72` | `1 0 0 / 12%` | Borders |
-| `--input` | `0.91 0.012 243.72` | `1 0 0 / 18%` | Input borders |
-| `--ring` | `0.6984 0.1458 243.72` | `0.6984 0.1458 243.72` | Focus rings |
-
-**Sidebar tokens** (light / dark):
-| Token | Light Value | Dark Value |
-|---|---|---|
-| `--sidebar` | `0.985 0.005 243.72` | `0.23 0.016 243.72` |
-| `--sidebar-foreground` | `0.22 0.025 243.72` | `0.98 0.005 243.72` |
-| `--sidebar-primary` | `0.6984 0.1458 243.72` | `0.6984 0.1458 243.72` |
-| `--sidebar-primary-foreground` | `0.99 0.003 243.72` | `0.99 0.003 243.72` |
-| `--sidebar-accent` | `0.94 0.022 243.72` | `0.33 0.025 243.72` |
-| `--sidebar-accent-foreground` | `0.22 0.025 243.72` | `0.98 0.005 243.72` |
-| `--sidebar-border` | `0.91 0.012 243.72` | `1 0 0 / 12%` |
-| `--sidebar-ring` | `0.6984 0.1458 243.72` | `0.6984 0.1458 243.72` |
-
-**Chart scale**:
-- `--chart-1`: `0.6984 0.1458 243.72`
-- `--chart-2`: `0.8269 0.126 154.5`
-- `--chart-3`: `0.855 0.165 72.8`
-- `--chart-4`: `0.735 0.187 296.3`
-- `--chart-5`: `0.72 0.17 13.4`
-
-### Border Radius
-Base `--radius: 0.625rem`. Scale: `sm(×0.6)` `md(×0.8)` `lg(×1)` `xl(×1.4)` `2xl(×1.8)` `3xl(×2.2)` `4xl(×2.6)`.
-
-Conventions:
-- Button, Input: `rounded-lg`
-- Dialog, Popover, Sheet: `rounded-xl`
-- Avatar: `rounded-full`
-- Badge pill: `rounded-4xl`
-
-### Spacing
-Tailwind 4px grid. No custom tokens. Common patterns: field gap `gap-4`, group gap `gap-5`, card padding `p-4`, icon gap `gap-1.5`.
-
-### Global Utilities (`styles.css`)
-- `no-scrollbar` — hide scrollbar cross-browser
-- `bg-stripes` — diagonal striped background (used for placeholder areas)
-- Default Scrollbar: track transparent, thumb `bg-border rounded-full`, hover `bg-muted-foreground/50`
-
----
-
 ## 2. Component Library
 
 **Import alias:** `@/*` → `src/*` (tsconfig.json). Use `@/components/ui/button`, `@/features/tasks/queries`, etc.
@@ -160,18 +100,26 @@ The submit button uses `form.Subscribe` to read `canSubmit`:
 
 Validators are declared at the form level: `validators: { onSubmit: ZodSchema }`.
 
-### Loading States
+### UI Query States Pattern (Loading / Error / Empty)
 
-| Case | Pattern |
-|---|---|
-| List / card section | `<Skeleton>` — hardcoded count, do not map index |
-| Submitting button | `disabled` + `<Loader2Icon className="animate-spin" />` + "Processing..." text |
-| Sidebar / compact area | `animate-pulse rounded bg-muted` inline (to avoid hydration mismatch) |
-| Route / page transition | `<Suspense fallback={...}>` |
-| Pagination / load more | Spinner at the end of the list, do not replace the entire list |
-| Optimistic UI | `onMutate` + `queryClient.setQueryData` to update the cache early, rollback in `onError` |
+Every component performing asynchronous queries (via `useQuery`, etc.) **MUST** consistently handle three fundamental states using standard UI components. Under no circumstances should errors be swallowed or hidden as fake empty states.
 
-- For empty states: always use `<Empty>` with full composition. Do not customize.
+#### 1. Standard Implementations (Main Content & Lists)
+
+| State | Component & Pattern | Requirement |
+|---|---|---|
+| **Loading** | `<Skeleton>` (from `ui/skeleton`) | Hardcoded count/layout matching the expected content structure. Avoid hydration mismatch. |
+| **Error** | `<Alert variant="destructive">` | Pass error to `getErrorMessage(error, "fallback")` to display standardized error alerts. |
+| **Empty** | `<Empty>` (full composition) | Use `<EmptyHeader>`, `<EmptyMedia>`, `<EmptyTitle>`, and actionable `<EmptyContent>`. |
+
+#### 2. Exception Cases (Special Spaces & Compact UI)
+In confined layout spaces like Sidebars, inline status rows, small widgets, or badges, rendering full-scale `Alert` or `Empty` components will break visual flow.
+
+* **Compact Error:** Render a small inline error text using a tiny icon (e.g. `AlertCircle` 3.5/4) and `text-destructive text-xs` instead of the full `<Alert>` component.
+* **Compact Empty:** Render a simple, minimal helper text (e.g. `text-xs text-muted-foreground`) instead of the full `<Empty>` layout.
+* **Skeleton Obligation:** Even in compact environments, the loading state **MUST at least have an inline `<Skeleton>`** to prevent layout shifting and flash-of-unstyled-content (FOUC).
+
+---
 
 ### Toast (Sonner)
 - Use toast to notify users of high-priority mutations or actions. Avoid displaying toasts for minor or brief interactions.

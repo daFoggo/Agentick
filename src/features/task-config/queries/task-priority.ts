@@ -13,17 +13,27 @@ import {
 import type { TTaskPriorityFindInput } from "../schemas";
 import { taskConfigKeys } from "./keys";
 
+export const taskPrioritiesQueryOptions = (
+	projectId: string,
+	params?: TTaskPriorityFindInput,
+) =>
+	queryOptions({
+		queryKey: taskConfigKeys.priorities(projectId, params),
+		queryFn: () => getTaskPrioritiesFn({ data: { projectId, params } }),
+	});
+
+export const taskPriorityQueryOptions = (
+	projectId: string,
+	priorityId: string,
+) =>
+	queryOptions({
+		queryKey: taskConfigKeys.priorityDetail(projectId, priorityId),
+		queryFn: () => getTaskPriorityByIdFn({ data: { projectId, priorityId } }),
+	});
+
 export const taskPriorityQueries = {
-	priorities: (projectId: string, params?: TTaskPriorityFindInput) =>
-		queryOptions({
-			queryKey: taskConfigKeys.priorities(projectId, params),
-			queryFn: () => getTaskPrioritiesFn({ data: { projectId, params } }),
-		}),
-	priorityDetail: (projectId: string, priorityId: string) =>
-		queryOptions({
-			queryKey: taskConfigKeys.priorityDetail(projectId, priorityId),
-			queryFn: () => getTaskPriorityByIdFn({ data: { projectId, priorityId } }),
-		}),
+	priorities: taskPrioritiesQueryOptions,
+	priorityDetail: taskPriorityQueryOptions,
 };
 
 export const useTaskPriorityMutations = () => {

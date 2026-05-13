@@ -13,17 +13,24 @@ import {
 import type { TTaskTagFindInput } from "../schemas";
 import { taskConfigKeys } from "./keys";
 
+export const taskTagsQueryOptions = (
+	projectId: string,
+	params?: TTaskTagFindInput,
+) =>
+	queryOptions({
+		queryKey: taskConfigKeys.tags(projectId, params),
+		queryFn: () => getTaskTagsFn({ data: { projectId, params } }),
+	});
+
+export const taskTagQueryOptions = (projectId: string, tagId: string) =>
+	queryOptions({
+		queryKey: taskConfigKeys.tagDetail(projectId, tagId),
+		queryFn: () => getTaskTagByIdFn({ data: { projectId, tagId } }),
+	});
+
 export const taskTagQueries = {
-	tags: (projectId: string, params?: TTaskTagFindInput) =>
-		queryOptions({
-			queryKey: taskConfigKeys.tags(projectId, params),
-			queryFn: () => getTaskTagsFn({ data: { projectId, params } }),
-		}),
-	tagDetail: (projectId: string, tagId: string) =>
-		queryOptions({
-			queryKey: taskConfigKeys.tagDetail(projectId, tagId),
-			queryFn: () => getTaskTagByIdFn({ data: { projectId, tagId } }),
-		}),
+	tags: taskTagsQueryOptions,
+	tagDetail: taskTagQueryOptions,
 };
 
 export const useTaskTagMutations = () => {

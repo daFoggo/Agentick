@@ -1,4 +1,3 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import {
 	Bookmark,
@@ -21,16 +20,10 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import type { TInboxItem, TInboxType } from "@/features/inbox";
+import { useInboxMutations } from "@/features/inbox";
 import { cn } from "@/lib/utils";
 import { useInboxStore } from "@/stores/use-inbox-store";
-import {
-	deleteInboxFn,
-	markInboxAsReadFn,
-	toggleInboxBookmarkFn,
-	unarchiveInboxFn,
-} from "../functions";
-import { inboxKeys } from "../queries";
-import type { TInboxItem, TInboxType } from "../schemas";
 import { InboxActionButton } from "./inbox-action-button";
 
 const TYPE_CONFIG: Record<TInboxType, { label: string; className: string }> = {
@@ -59,62 +52,25 @@ interface IInboxItemProps {
 
 export const InboxItem = ({ item, isSelected }: IInboxItemProps) => {
 	const { setSelectedItemId } = useInboxStore();
-	const queryClient = useQueryClient();
-
-	const refreshInbox = () => {
-		queryClient.invalidateQueries({ queryKey: inboxKeys.all });
-	};
-
-	// ACTIVE -> ARCHIVED
-	const markAsReadMutation = useMutation({
-		mutationFn: (id: string) =>
-			markInboxAsReadFn({ data: { inboxItemId: id } }),
-		onSuccess: () => {
-			refreshInbox();
-		},
-	});
-
-	// ARCHIVED -> ACTIVE (Mark as Unread)
-	const markAsUnreadMutation = useMutation({
-		mutationFn: (id: string) => unarchiveInboxFn({ data: { inboxItemId: id } }),
-		onSuccess: () => {
-			refreshInbox();
-		},
-	});
-
-	// ARCHIVED/ACTIVE <-> BOOKMARKED
-	const toggleBookmarkMutation = useMutation({
-		mutationFn: (id: string) =>
-			toggleInboxBookmarkFn({ data: { inboxItemId: id } }),
-		onSuccess: () => {
-			refreshInbox();
-		},
-	});
-
-	const deleteMutation = useMutation({
-		mutationFn: (id: string) => deleteInboxFn({ data: { inboxItemId: id } }),
-		onSuccess: () => {
-			refreshInbox();
-		},
-	});
+	const { markAsRead, unarchive, toggleBookmark, remove } = useInboxMutations();
 
 	const handleToggleRead = (e: React.MouseEvent) => {
 		e.stopPropagation();
 		if (item.status === "ACTIVE") {
-			markAsReadMutation.mutate(item.id);
+			markAsRead.mutate(item.id);
 		} else {
-			markAsUnreadMutation.mutate(item.id);
+			unarchive.mutate(item.id);
 		}
 	};
 
 	const handleToggleBookmark = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		toggleBookmarkMutation.mutate(item.id);
+		toggleBookmark.mutate(item.id);
 	};
 
 	const handleDelete = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		deleteMutation.mutate(item.id);
+		remove.mutate(item.id);
 	};
 
 	return (
@@ -124,7 +80,7 @@ export const InboxItem = ({ item, isSelected }: IInboxItemProps) => {
 				className={cn(
 					"group relative cursor-pointer transition-all hover:bg-accent/50",
 					item.status === "ACTIVE" && "bg-muted/40",
-					isSelected && " ring-primary ring-offset-0",
+					isSelected && "ring-primary ring-offset-0",
 				)}
 				size="sm"
 			>
@@ -152,7 +108,7 @@ export const InboxItem = ({ item, isSelected }: IInboxItemProps) => {
 								onClick={handleToggleBookmark}
 								className={cn(
 									item.status === "BOOKMARKED" &&
-										"text-yellow-500 hover:text-yellow-600",
+										"text-primary hover:text-primary",
 								)}
 							/>
 							<InboxActionButton
@@ -163,7 +119,7 @@ export const InboxItem = ({ item, isSelected }: IInboxItemProps) => {
 								onClick={handleToggleRead}
 								className={cn(
 									item.status === "ARCHIVED" &&
-										"text-orange-500 hover:text-orange-600",
+										"text-primary hover:text-primary",
 								)}
 							/>
 							<InboxActionButton
@@ -174,7 +130,7 @@ export const InboxItem = ({ item, isSelected }: IInboxItemProps) => {
 							/>
 						</div>
 					</CardAction>
-					<CardDescription className="col-span-full line-clamp-2 text-xs leading-relaxed w-full">
+					<CardDescription className="col-span-full line-clamp-2 w-full text-xs leading-relaxed">
 						{item.content?.substring(0, 300)}
 					</CardDescription>
 				</CardHeader>
@@ -218,7 +174,7 @@ export const InboxItem = ({ item, isSelected }: IInboxItemProps) => {
 								)}
 							</div>
 						)}
-						<span className="text-xs font-medium text-muted-foreground/60 shrink-0">
+						<span className="shrink-0 text-xs font-medium text-muted-foreground/60">
 							{formatDistanceToNow(new Date(item.created_at), {
 								addSuffix: true,
 							})}

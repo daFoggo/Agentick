@@ -2,7 +2,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
 import type { ReactNode } from "react";
-import { queryClient } from "@/lib/query-client";
+import { createQueryClient } from "@/lib/query-client";
 import type { IViewModeDefinition } from "@/types/view-mode-list";
 import { routeTree } from "./routeTree.gen";
 
@@ -11,6 +11,8 @@ export interface IRouterContext {
 }
 
 export function getRouter() {
+	const queryClient = createQueryClient();
+
 	const router = createTanStackRouter({
 		routeTree,
 		context: {

@@ -34,16 +34,11 @@ export async function fetchMyTeams(): Promise<TTeam[]> {
 /**
  * Lấy thông tin chi tiết của một Team theo ID.
  */
-export async function fetchTeamById(teamId: string): Promise<TTeam | null> {
-	try {
-		const response = await api
-			.get(`teams/${teamId}`)
-			.json<TBaseResponse<TTeam>>();
-		return response.data;
-	} catch (error) {
-		console.error("error fetch team detail: ", error);
-		return null;
-	}
+export async function fetchTeamById(teamId: string): Promise<TTeam> {
+	const response = await api
+		.get(`teams/${teamId}`)
+		.json<TBaseResponse<TTeam>>();
+	return response.data;
 }
 
 /**

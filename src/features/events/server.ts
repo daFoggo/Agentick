@@ -32,38 +32,20 @@ export async function fetchEventById(eventId: string): Promise<TEvent> {
 }
 
 export async function createEvent(payload: TCreateEventInput): Promise<TEvent> {
-	try {
-		const response = await api
-			.post("events", { json: payload })
-			.json<TBaseResponse<TEvent>>();
-		return response.data;
-	} catch (error: any) {
-		if (error.response) {
-			const errorText = await error.response.clone().text();
-			console.error("Backend Error Response:", errorText);
-			throw new Error(`Backend Error: ${errorText}`);
-		}
-		throw error;
-	}
+	const response = await api
+		.post("events", { json: payload })
+		.json<TBaseResponse<TEvent>>();
+	return response.data;
 }
 
 export async function updateEvent({
 	eventId,
 	payload,
 }: TUpdateEventInput): Promise<TEvent> {
-	try {
-		const response = await api
-			.patch(`events/${eventId}`, { json: payload })
-			.json<TBaseResponse<TEvent>>();
-		return response.data;
-	} catch (error: any) {
-		if (error.response) {
-			const errorText = await error.response.clone().text();
-			console.error("Backend Update Error Response:", errorText);
-			throw new Error(`Backend Error: ${errorText}`);
-		}
-		throw error;
-	}
+	const response = await api
+		.patch(`events/${eventId}`, { json: payload })
+		.json<TBaseResponse<TEvent>>();
+	return response.data;
 }
 
 export async function deleteEvent(eventId: string): Promise<void> {

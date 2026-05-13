@@ -20,18 +20,20 @@ export const phaseKeys = {
 		[...phaseKeys.all(projectId), "detail", phaseId] as const,
 };
 
-export const phaseQueries = {
-	list: (projectId: string, params?: TPhaseFindInput) =>
-		queryOptions({
-			queryKey: phaseKeys.list(projectId, params),
-			queryFn: () => getPhasesFn({ data: { projectId, params } }),
-		}),
-	detail: (projectId: string, phaseId: string) =>
-		queryOptions({
-			queryKey: phaseKeys.detail(projectId, phaseId),
-			queryFn: () => getPhaseByIdFn({ data: { projectId, phaseId } }),
-		}),
-};
+export const phasesQueryOptions = (
+	projectId: string,
+	params?: TPhaseFindInput,
+) =>
+	queryOptions({
+		queryKey: phaseKeys.list(projectId, params),
+		queryFn: () => getPhasesFn({ data: { projectId, params } }),
+	});
+
+export const phaseQueryOptions = (projectId: string, phaseId: string) =>
+	queryOptions({
+		queryKey: phaseKeys.detail(projectId, phaseId),
+		queryFn: () => getPhaseByIdFn({ data: { projectId, phaseId } }),
+	});
 
 export const usePhaseMutations = () => {
 	const queryClient = useQueryClient();

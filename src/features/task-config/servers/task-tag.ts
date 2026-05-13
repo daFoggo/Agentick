@@ -31,16 +31,11 @@ export async function fetchTaskTags(
 export async function fetchTaskTagById(
 	projectId: string,
 	tagId: string,
-): Promise<TTaskTag | null> {
-	try {
-		const response = await api
-			.get(`${buildSectionPath(projectId, "tags")}/${tagId}`)
-			.json<TBaseResponse<TTaskTag>>();
-		return response.data;
-	} catch (error) {
-		console.error("error fetch task tag detail:", error);
-		return null;
-	}
+): Promise<TTaskTag> {
+	const response = await api
+		.get(`${buildSectionPath(projectId, "tags")}/${tagId}`)
+		.json<TBaseResponse<TTaskTag>>();
+	return response.data;
 }
 
 export async function createTaskTag(

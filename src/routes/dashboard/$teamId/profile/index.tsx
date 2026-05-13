@@ -1,16 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { MyProjectsList, myProjectsQueryOptions } from "@/features/projects";
-import { MyTeamsList, teamQueries } from "@/features/teams";
-import { ProfileCard, userQueries } from "@/features/users";
+import { MyTeamsList, myTeamsQueryOptions } from "@/features/teams";
+import { ProfileCard, userMeQueryOptions } from "@/features/users";
 
 export const Route = createFileRoute("/dashboard/$teamId/profile/")({
 	loader: async ({ context, params }) => {
 		void context.queryClient.prefetchQuery(
 			myProjectsQueryOptions(params.teamId),
 		);
-		void context.queryClient.prefetchQuery(teamQueries.myTeams());
+		void context.queryClient.prefetchQuery(myTeamsQueryOptions());
 
-		await context.queryClient.ensureQueryData(userQueries.me());
+		await context.queryClient.ensureQueryData(userMeQueryOptions());
 	},
 	component: ProfileDashboardComponent,
 	staticData: {

@@ -5,7 +5,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import type { TInboxItem } from "../schemas";
+import type { TInboxItem } from "@/features/inbox";
 
 interface IInboxSystemContentProps {
 	item: TInboxItem;

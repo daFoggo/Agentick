@@ -2,23 +2,36 @@ import { createFileRoute } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { Suspense } from "react";
 import { MyProjectsGrid, myProjectsQueryOptions } from "@/features/projects";
-import { TaskLine, TaskLineSkeleton, taskQueries } from "@/features/tasks";
-import { UserGreeting, userQueries } from "@/features/users";
+import {
+	myTasksOverviewQueryOptions,
+	TaskLine,
+	TaskLineSkeleton,
+} from "@/features/tasks";
+import {
+	UserGreeting,
+	userGreetingQueryOptions,
+	userMeQueryOptions,
+	userStatsQueryOptions,
+} from "@/features/users";
 
 export const Route = createFileRoute("/dashboard/$teamId/overview/")({
 	loader: async ({ context, params }) => {
 		const today = format(new Date(), "yyyy-MM-dd");
 
-		void context.queryClient.prefetchQuery(userQueries.me());
-		void context.queryClient.prefetchQuery(userQueries.stats("weekly"));
-		void context.queryClient.prefetchQuery(
-			taskQueries.myOverview(params.teamId, today),
-		);
-		void context.queryClient.prefetchQuery(
-			myProjectsQueryOptions(params.teamId),
-		);
+		// Tải trước các thông tin không bắt buộc
+		void context.queryClient.prefetchQuery(userStatsQueryOptions("weekly"));
 
-		await context.queryClient.ensureQueryData(userQueries.greeting());
+		// Đảm bảo các thông tin bắt buộc cho component dùng Suspense được tải xong
+		await Promise.all([
+			context.queryClient.ensureQueryData(userMeQueryOptions()),
+			context.queryClient.ensureQueryData(userGreetingQueryOptions()),
+			context.queryClient.ensureQueryData(
+				myTasksOverviewQueryOptions(params.teamId, today),
+			),
+			context.queryClient.ensureQueryData(
+				myProjectsQueryOptions(params.teamId),
+			),
+		]);
 	},
 	component: RouteComponent,
 	staticData: {

@@ -1,4 +1,6 @@
+import { notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
+import { isHTTPError } from "ky";
 import { z } from "zod";
 import { requestLoggerMiddleware } from "@/lib/middleware";
 import {
@@ -18,7 +20,14 @@ export const getInvitationByIdFn = createServerFn({ method: "GET" })
 	.middleware([requestLoggerMiddleware])
 	.inputValidator(z.object({ invitationId: z.string() }))
 	.handler(async ({ data }) => {
-		return await fetchInvitationById(data.invitationId);
+		try {
+			return await fetchInvitationById(data.invitationId);
+		} catch (error) {
+			if (isHTTPError(error) && error.response.status === 404) {
+				throw notFound();
+			}
+			throw error;
+		}
 	});
 
 export const acceptInvitationFn = createServerFn({ method: "POST" })

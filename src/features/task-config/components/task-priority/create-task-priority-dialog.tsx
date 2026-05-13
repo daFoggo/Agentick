@@ -30,6 +30,7 @@ import {
 	TAILWIND_500_COLORS,
 	TAILWIND_COLOR_OPTIONS,
 } from "@/constants/color-options";
+import { getErrorMessage } from "@/lib/error";
 import { taskConfigQueries, useTaskConfigMutations } from "../../queries";
 import {
 	TaskPriorityCreateSchema,
@@ -73,7 +74,7 @@ export const CreateTaskPriorityDialog = ({
 				onOpenChange(false);
 				form.reset();
 			} catch (error) {
-				toast.error("Failed to create task priority");
+				toast.error(getErrorMessage(error, "Failed to create task priority"));
 				console.error(error);
 			}
 		},

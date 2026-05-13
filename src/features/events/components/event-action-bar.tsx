@@ -10,17 +10,18 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { teamMembersQueryOptions } from "@/features/team-members";
-import { userQueries } from "@/features/users";
-import { cn } from "@/lib/utils";
-import type { IBigCalendarEvent } from "@/types/big-calendar";
-import { EVENT_TYPE_OPTIONS } from "../constants";
-import { useEventMutations } from "../queries";
 import {
 	CreateEventBaseSchema,
+	EVENT_TYPE_OPTIONS,
 	type TEventType,
 	UpdateEventSchema,
-} from "../schemas";
+	useEventMutations,
+} from "@/features/events";
+import { teamMembersQueryOptions } from "@/features/team-members";
+import { userMeQueryOptions } from "@/features/users";
+import { getErrorMessage } from "@/lib/error";
+import { cn } from "@/lib/utils";
+import type { IBigCalendarEvent } from "@/types/big-calendar";
 
 type TMode = "create" | "edit";
 
@@ -41,7 +42,7 @@ export const EventActionBar = ({
 	const { create, update } = useEventMutations();
 	const params = useParams({ strict: false }) as { teamId?: string };
 	const teamId = params.teamId || "";
-	const { data: me } = useQuery(userQueries.me());
+	const { data: me } = useQuery(userMeQueryOptions());
 	const titleRef = useRef<HTMLInputElement>(null);
 
 	const { data: teamMembersData } = useQuery(teamMembersQueryOptions(teamId));
@@ -98,8 +99,8 @@ export const EventActionBar = ({
 
 				onOpenChange(false);
 				onSuccess?.();
-			} catch (err: any) {
-				toast.error(err.message || "Something went wrong");
+			} catch (error) {
+				toast.error(getErrorMessage(error));
 			}
 		},
 	});

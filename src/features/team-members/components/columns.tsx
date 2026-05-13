@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "@tanstack/react-router";
 import type { CellContext } from "@tanstack/react-table";
 import { ChevronDown, Loader2, MoreHorizontal, UserMinus } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,8 +16,9 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getTeamRoleOption, TEAM_ROLE_CATALOG } from "@/constants/team-roles";
-import { userQueries } from "@/features/users";
+import { userMeQueryOptions } from "@/features/users";
 import { generateColumns } from "@/lib/data-table";
+import { getErrorMessage } from "@/lib/error";
 import { useDashboardStore } from "@/stores/use-dashboard-store";
 import {
 	memberProjectCountQueryOptions,
@@ -29,12 +31,9 @@ import { RemoveTeamMemberDialog } from "./remove-team-member-dialog";
 const RoleCell = ({ row }: CellContext<TTeamMember, any>) => {
 	const member = row.original;
 	const { updateRole } = useTeamMemberMutations();
-	const { data: currentUser } = useQuery(userQueries.me());
+	const { data: currentUser } = useQuery(userMeQueryOptions());
 	const { teamId } = useParams({ strict: false }) as { teamId?: string };
-	const { data: members } = useQuery({
-		...teamMembersQueryOptions(teamId ?? ""),
-		enabled: !!teamId,
-	});
+	const { data: members } = useQuery(teamMembersQueryOptions(teamId ?? ""));
 
 	const roleOption = getTeamRoleOption(member.role);
 
@@ -74,11 +73,20 @@ const RoleCell = ({ row }: CellContext<TTeamMember, any>) => {
 						className="gap-2"
 						disabled={member.role === opt.value}
 						onClick={() =>
-							updateRole.mutate({
-								teamId: member.team_id,
-								user_id: member.user_id,
-								payload: { role: opt.value },
-							})
+							updateRole.mutate(
+								{
+									teamId: member.team_id,
+									user_id: member.user_id,
+									payload: { role: opt.value },
+								},
+								{
+									onError: (error) => {
+										toast.error(
+											getErrorMessage(error, "Failed to update member role"),
+										);
+									},
+								},
+							)
 						}
 					>
 						<opt.icon className="size-4" />
@@ -99,15 +107,12 @@ const ActionCell = ({ row }: CellContext<TTeamMember, any>) => {
 	const [projectCount, setProjectCount] = useState<number>(0);
 	const [isChecking, setIsChecking] = useState(false);
 
-	const { data: currentUser } = useQuery(userQueries.me());
+	const { data: currentUser } = useQuery(userMeQueryOptions());
 	const isCurrentUser = currentUser?.id === member.user_id;
 
 	const navigate = useNavigate();
 	const { teamId } = useParams({ strict: false }) as { teamId?: string };
-	const { data: members } = useQuery({
-		...teamMembersQueryOptions(teamId ?? ""),
-		enabled: !!teamId,
-	});
+	const { data: members } = useQuery(teamMembersQueryOptions(teamId ?? ""));
 
 	const currentUserRole = members?.founds?.find(
 		(m) => m.user_id === currentUser?.id,
@@ -151,6 +156,9 @@ const ActionCell = ({ row }: CellContext<TTeamMember, any>) => {
 						}
 						navigate({ to: "/dashboard" });
 					}
+				},
+				onError: (error) => {
+					toast.error(getErrorMessage(error, "Failed to remove team member"));
 				},
 			},
 		);

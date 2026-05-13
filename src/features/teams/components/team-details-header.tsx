@@ -14,10 +14,9 @@ export interface ITeamDetailsHeaderProps {
 
 export function TeamDetailsHeader({ team }: ITeamDetailsHeaderProps) {
 	const [inviteOpen, setInviteOpen] = useState(false);
-	const { data: membersData } = useQuery({
-		...teamMembersQueryOptions(team?.id ?? ""),
-		enabled: !!team?.id,
-	});
+	const { data: membersData } = useQuery(
+		teamMembersQueryOptions(team?.id ?? ""),
+	);
 
 	if (!team) {
 		return (

@@ -3,6 +3,8 @@ import {
 	useMutation,
 	useQueryClient,
 } from "@tanstack/react-query";
+import { projectKeys } from "@/features/projects/queries";
+import { teamKeys } from "@/features/teams/queries";
 import {
 	acceptTeamInviteFn,
 	addTeamMemberFn,
@@ -23,6 +25,10 @@ export const teamMemberKeys = {
 	all: ["teamMembers"] as const,
 	lists: () => [...teamMemberKeys.all, "list"] as const,
 	list: (teamId: string) => [...teamMemberKeys.lists(), teamId] as const,
+	projectCounts: (teamId: string) =>
+		[...teamMemberKeys.list(teamId), "projectCount"] as const,
+	projectCount: (teamId: string, userId: string) =>
+		[...teamMemberKeys.projectCounts(teamId), userId] as const,
 };
 
 export const teamMembersQueryOptions = (teamId: string) =>
@@ -36,7 +42,7 @@ export const memberProjectCountQueryOptions = (
 	userId: string,
 ) =>
 	queryOptions({
-		queryKey: [...teamMemberKeys.list(teamId), userId, "projectCount"],
+		queryKey: teamMemberKeys.projectCount(teamId, userId),
 		queryFn: () =>
 			getMemberProjectCountFn({ data: { teamId, user_id: userId } }),
 	});
@@ -73,10 +79,10 @@ export const useTeamMemberMutations = () => {
 					queryKey: teamMemberKeys.list(variables.teamId),
 				}),
 				queryClient.invalidateQueries({
-					queryKey: ["teams"],
+					queryKey: teamKeys.all,
 				}),
 				queryClient.invalidateQueries({
-					queryKey: ["projects"],
+					queryKey: projectKeys.all,
 				}),
 			]);
 		},

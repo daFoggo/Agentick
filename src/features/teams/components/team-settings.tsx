@@ -18,7 +18,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { TeamDeleteDialog } from "@/features/teams/components/team-delete-dialog";
-import { teamQueries, useTeamMutations } from "../queries";
+import { getErrorMessage } from "@/lib/error";
+import {
+	myTeamsQueryOptions,
+	teamQueryOptions,
+	useTeamMutations,
+} from "../queries";
 import {
 	CreateTeamSchema,
 	type TCreateTeamInput,
@@ -37,8 +42,8 @@ interface ITeamSettingsProps {
 export const TeamSettings = ({ teamId }: ITeamSettingsProps) => {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
-	const { data: team } = useSuspenseQuery(teamQueries.detail(teamId));
-	const { data: myTeams } = useQuery(teamQueries.myTeams());
+	const { data: team } = useSuspenseQuery(teamQueryOptions(teamId));
+	const { data: myTeams } = useQuery(myTeamsQueryOptions());
 	const { update, remove } = useTeamMutations();
 	const [updatingField, setUpdatingField] = useState<
 		keyof TCreateTeamInput | null
@@ -99,8 +104,13 @@ export const TeamSettings = ({ teamId }: ITeamSettingsProps) => {
 			}, 800);
 
 			toast.success(`Updated ${fieldName.replace("_", " ")}`);
-		} catch (_error) {
-			toast.error(`Failed to update ${fieldName.replace("_", " ")}`);
+		} catch (error) {
+			toast.error(
+				getErrorMessage(
+					error,
+					`Failed to update ${fieldName.replace("_", " ")}`,
+				),
+			);
 		} finally {
 			setUpdatingField((current) => (current === fieldName ? null : current));
 		}
@@ -119,7 +129,7 @@ export const TeamSettings = ({ teamId }: ITeamSettingsProps) => {
 			toast.success("Team deleted successfully");
 
 			const teamsAfterDelete = await queryClient.fetchQuery(
-				teamQueries.myTeams(),
+				myTeamsQueryOptions(),
 			);
 			const nextTeam = teamsAfterDelete.find((item) => item.id !== teamId);
 
@@ -137,8 +147,8 @@ export const TeamSettings = ({ teamId }: ITeamSettingsProps) => {
 				}, 250);
 			}
 			return true;
-		} catch (_error) {
-			toast.error("Failed to delete team");
+		} catch (error) {
+			toast.error(getErrorMessage(error, "Failed to delete team"));
 			return false;
 		}
 	};
@@ -148,8 +158,13 @@ export const TeamSettings = ({ teamId }: ITeamSettingsProps) => {
 			try {
 				await remove.mutateAsync(teamId);
 				toast.success("Team deleted successfully");
-			} catch (_error) {
-				toast.error("New team created, but failed to delete old team");
+			} catch (error) {
+				toast.error(
+					getErrorMessage(
+						error,
+						"New team created, but failed to delete old team",
+					),
+				);
 			}
 		}
 

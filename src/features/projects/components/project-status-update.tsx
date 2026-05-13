@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, TriangleAlertIcon } from "lucide-react";
 import { memo } from "react";
 import { TaskStatusBadge } from "@/components/common/task-status-badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	Empty,
+	EmptyContent,
 	EmptyDescription,
 	EmptyHeader,
 	EmptyMedia,
@@ -12,6 +14,7 @@ import {
 } from "@/components/ui/empty";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getErrorMessage } from "@/lib/error";
 import { projectRecentStatusUpdatesQueryOptions } from "../queries";
 import type { TTaskActivity } from "../schemas";
 
@@ -37,9 +40,12 @@ function getLatestStatusColor(task: TTaskActivity) {
 
 export const ProjectStatusUpdate = memo(
 	({ projectId }: { projectId: string }) => {
-		const { data: items = [], isLoading } = useQuery(
-			projectRecentStatusUpdatesQueryOptions(projectId, 15),
-		);
+		const {
+			data: items = [],
+			isLoading,
+			isError,
+			error,
+		} = useQuery(projectRecentStatusUpdatesQueryOptions(projectId, 15));
 
 		return (
 			<Card>
@@ -51,17 +57,28 @@ export const ProjectStatusUpdate = memo(
 						<div className="flex flex-col gap-4">
 							{[1, 2, 3, 4].map((i) => (
 								<div key={i} className="flex items-center justify-between py-2">
-									<div className="space-y-2 flex-1">
+									<div className="flex-1 space-y-2">
 										<Skeleton className="h-4 w-48" />
 										<Skeleton className="h-5 w-24" />
 									</div>
-									<div className="space-y-2 shrink-0 text-right">
-										<Skeleton className="h-3 w-28 ml-auto" />
-										<Skeleton className="h-3 w-16 ml-auto" />
+									<div className="shrink-0 space-y-2 text-right">
+										<Skeleton className="ml-auto h-3 w-28" />
+										<Skeleton className="ml-auto h-3 w-16" />
 									</div>
 								</div>
 							))}
 						</div>
+					) : isError ? (
+						<Alert variant="destructive">
+							<TriangleAlertIcon className="size-4" />
+							<AlertTitle>Error loading updates</AlertTitle>
+							<AlertDescription>
+								{getErrorMessage(
+									error,
+									"An error occurred while fetching the recent project status updates.",
+								)}
+							</AlertDescription>
+						</Alert>
 					) : (
 						<ScrollArea className="h-96 w-full">
 							<div className="flex flex-col divide-y">
@@ -77,6 +94,9 @@ export const ProjectStatusUpdate = memo(
 												later for status changes.
 											</EmptyDescription>
 										</EmptyHeader>
+										<EmptyContent>
+											Update task statuses to see recent changes here.
+										</EmptyContent>
 									</Empty>
 								) : (
 									items.map((it) => (

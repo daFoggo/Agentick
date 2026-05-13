@@ -1,4 +1,6 @@
+import { notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
+import { isHTTPError } from "ky";
 import { requestLoggerMiddleware } from "@/lib/middleware";
 import {
 	CreateTeamSchema,
@@ -27,7 +29,16 @@ export const fetchMyTeamsFn = createServerFn({ method: "GET" })
 export const fetchTeamByIdFn = createServerFn({ method: "GET" })
 	.middleware([requestLoggerMiddleware])
 	.inputValidator(FetchTeamByIdSchema)
-	.handler(({ data: teamId }) => fetchTeamById(teamId));
+	.handler(async ({ data: teamId }) => {
+		try {
+			return await fetchTeamById(teamId);
+		} catch (error) {
+			if (isHTTPError(error) && error.response.status === 404) {
+				throw notFound();
+			}
+			throw error;
+		}
+	});
 
 export const createTeamFn = createServerFn({ method: "POST" })
 	.middleware([requestLoggerMiddleware])

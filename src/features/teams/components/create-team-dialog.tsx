@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { getErrorMessage } from "@/lib/error";
 import { useTeamMutations } from "../queries";
 import type { TTeam } from "../schemas";
 import { CreateTeamSchema, type TCreateTeamInput } from "../schemas";
@@ -56,7 +57,7 @@ export const CreateTeamDialog = ({
 				onOpenChange(false);
 				form.reset();
 			} catch (error) {
-				toast.error("Failed to create team");
+				toast.error(getErrorMessage(error, "Failed to create team"));
 				console.error(error);
 			}
 		},

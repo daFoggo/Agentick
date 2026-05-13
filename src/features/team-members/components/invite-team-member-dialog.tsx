@@ -22,7 +22,11 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { ASSIGNABLE_ROLES } from "@/constants/team-roles";
-import { type TUserSearchResult, userQueries } from "@/features/users";
+import {
+	searchUsersQueryOptions,
+	type TUserSearchResult,
+} from "@/features/users";
+import { getErrorMessage } from "@/lib/error";
 import { useTeamMemberMutations } from "../queries";
 import type { TTeamRole } from "../schemas";
 
@@ -43,7 +47,7 @@ export const InviteTeamMemberDialog = ({
 	const deferredQuery = useDeferredValue(searchQuery);
 
 	const { data: fetchedUsers = [], isLoading } = useQuery(
-		userQueries.search(deferredQuery, { excludeTeamId: teamId }),
+		searchUsersQueryOptions(deferredQuery, { excludeTeamId: teamId }),
 	);
 
 	const users = useMemo(() => {
@@ -82,8 +86,8 @@ export const InviteTeamMemberDialog = ({
 			toast.success(`${selectedUsers.length} invitations have been sent`);
 			handleReset();
 			onOpenChange(false);
-		} catch (_error) {
-			toast.error("Failed to send some invitations");
+		} catch (error) {
+			toast.error(getErrorMessage(error, "Failed to send some invitations"));
 		}
 	};
 

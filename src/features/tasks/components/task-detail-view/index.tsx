@@ -7,19 +7,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
 	buildTaskDetailPayload,
+	CreateTaskSchema,
 	cloneTaskDetailFormValues,
 	getTaskDetailDefaultValues,
 	type ITaskListDialogOptions,
 	serializeTaskDetailFormValues,
-} from "@/features/tasks/helpers";
-import { useTaskMutations } from "@/features/tasks/queries";
-import {
-	CreateTaskSchema,
 	type TTask,
 	type TTaskAIEstimationExplanation,
 	type TTaskDetailFormValues,
 	UpdateTaskSchema,
-} from "@/features/tasks/schemas";
+	useTaskMutations,
+} from "@/features/tasks";
+import { getErrorMessage } from "@/lib/error";
 import { DeleteTaskListDialog } from "../task-table/delete-task-list-dialog";
 import { TaskDetailHeader } from "./task-detail-header";
 import { TaskDetailMainSection } from "./task-detail-main-section";
@@ -147,8 +146,8 @@ export const TaskDetailView = ({
 					formApi.reset(cloneTaskDetailFormValues(nextValue));
 				}
 			}
-		} catch (_error) {
-			toast.error("Failed to update task");
+		} catch (error) {
+			toast.error(getErrorMessage(error, "Failed to update task"));
 		} finally {
 			autosaveRunningRef.current = false;
 		}
@@ -228,8 +227,13 @@ export const TaskDetailView = ({
 				if (!task?.id) {
 					navigateBack(targetProjectId);
 				}
-			} catch (_error) {
-				toast.error(task ? "Failed to update task" : "Failed to create task");
+			} catch (error) {
+				toast.error(
+					getErrorMessage(
+						error,
+						task ? "Failed to update task" : "Failed to create task",
+					),
+				);
 			}
 		},
 	});
@@ -258,8 +262,8 @@ export const TaskDetailView = ({
 				form.setFieldValue("estimated_hours", result.suggested_hours);
 				setAiExplanation(result);
 			}
-		} catch (_err) {
-			toast.error("Failed to generate AI estimation");
+		} catch (error) {
+			toast.error(getErrorMessage(error, "Failed to generate AI estimation"));
 		}
 	};
 
@@ -273,8 +277,8 @@ export const TaskDetailView = ({
 			toast.success("Task deleted successfully");
 			navigateBack(projectId || task.project_id);
 			return true;
-		} catch {
-			toast.error("Failed to delete task");
+		} catch (error) {
+			toast.error(getErrorMessage(error, "Failed to delete task"));
 			return false;
 		}
 	};

@@ -11,6 +11,7 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
 	SIDEBAR_PERSONAL,
 	SIDEBAR_PROJECT_SETTINGS,
@@ -113,10 +114,10 @@ export const AppSidebar = () => {
 							<SidebarMenuItem>
 								<SidebarMenuButton disabled>
 									<div className="flex items-center gap-2">
-										<div className="size-8 animate-pulse rounded-full bg-muted" />
+										<Skeleton className="size-8 rounded-full" />
 										<div className="flex flex-col gap-1">
-											<div className="h-3 w-20 animate-pulse rounded bg-muted" />
-											<div className="h-2 w-24 animate-pulse rounded bg-muted" />
+											<Skeleton className="h-3 w-20" />
+											<Skeleton className="h-2 w-24" />
 										</div>
 									</div>
 								</SidebarMenuButton>

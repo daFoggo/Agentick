@@ -1,8 +1,14 @@
+import { useNavigate } from "@tanstack/react-router";
 import { formatDistanceToNow } from "date-fns";
 import { Check, Loader2, X } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { useInvitationMutations } from "../queries";
-import type { TInvitation } from "../schemas";
+import {
+	navigateAfterInvitationAccept,
+	type TInvitation,
+	useInvitationMutations,
+} from "@/features/invitations";
+import { getErrorMessage } from "@/lib/error";
 
 interface IInvitationItemProps {
 	invitation: TInvitation;
@@ -13,6 +19,7 @@ export function InvitationItem({
 	invitation,
 	onActionComplete,
 }: IInvitationItemProps) {
+	const navigate = useNavigate();
 	const { accept, decline } = useInvitationMutations();
 	const targetName =
 		invitation.project?.name || invitation.team?.name || "an organization";
@@ -44,7 +51,16 @@ export function InvitationItem({
 					disabled={accept.isPending || decline.isPending}
 					onClick={() => {
 						accept.mutate(invitation.id, {
-							onSuccess: onActionComplete,
+							onSuccess: (result) => {
+								toast.success("Invitation accepted successfully");
+								navigateAfterInvitationAccept(result, navigate);
+								onActionComplete();
+							},
+							onError: (error) => {
+								toast.error(
+									getErrorMessage(error, "Failed to accept invitation"),
+								);
+							},
 						});
 					}}
 				>
@@ -62,7 +78,15 @@ export function InvitationItem({
 					disabled={accept.isPending || decline.isPending}
 					onClick={() => {
 						decline.mutate(invitation.id, {
-							onSuccess: onActionComplete,
+							onSuccess: () => {
+								toast.success("Invitation declined");
+								onActionComplete();
+							},
+							onError: (error) => {
+								toast.error(
+									getErrorMessage(error, "Failed to decline invitation"),
+								);
+							},
 						});
 					}}
 				>

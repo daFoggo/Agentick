@@ -13,15 +13,16 @@ import {
 	ComboboxValue,
 	useComboboxAnchor,
 } from "@/components/ui/combobox";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 interface MultiSelectComboboxProps<T> {
 	/** Danh sách tất cả các mục có thể chọn */
-	items: T[];
+	items: Array<T>;
 	/** Danh sách các mục đang được chọn (Dạng object hoàn chỉnh) */
-	value: T[];
+	value: Array<T>;
 	/** Callback khi thay đổi lựa chọn */
-	onValueChange: (value: T[]) => void;
+	onValueChange: (value: Array<T>) => void;
 	/** Chuyển đổi một mục thành chuỗi để tìm kiếm */
 	itemToString: (item: T) => string;
 	/** Chuyển đổi một mục thành giá trị duy nhất (ID) */
@@ -89,7 +90,7 @@ export function MultiSelectCombobox<T>({
 					)}
 				>
 					<ComboboxValue>
-						{(selectedItems: T[]) => (
+						{(selectedItems: Array<T>) => (
 							<>
 								{selectedItems.map((item) => (
 									<ComboboxChip key={itemToValue(item)}>
@@ -103,7 +104,14 @@ export function MultiSelectCombobox<T>({
 				</ComboboxChips>
 				<ComboboxContent anchor={anchor} className="min-w-64">
 					<ComboboxEmpty className="py-4 text-center text-sm text-muted-foreground">
-						{isLoading ? "Searching..." : emptyText}
+						{isLoading ? (
+							<div className="flex flex-col gap-2 px-2">
+								<Skeleton className="h-4 w-full" />
+								<Skeleton className="h-4 w-3/4" />
+							</div>
+						) : (
+							emptyText
+						)}
 					</ComboboxEmpty>
 					<ComboboxList>
 						{(item: T) => (

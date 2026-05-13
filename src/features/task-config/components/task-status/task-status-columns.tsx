@@ -1,6 +1,7 @@
 import type { CellContext } from "@tanstack/react-table";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -11,6 +12,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { generateColumns } from "@/lib/data-table";
+import { getErrorMessage } from "@/lib/error";
 import { useTaskConfigMutations } from "../../queries";
 import type { TTaskStatus } from "../../schemas";
 import { DeleteTaskStatusDialog } from "./delete-task-status-dialog";
@@ -55,6 +57,7 @@ const ActionCell = ({ row }: CellContext<TTaskStatus, any>) => {
 			});
 			return true;
 		} catch (error) {
+			toast.error(getErrorMessage(error, "Failed to delete status"));
 			console.error("Failed to delete status:", error);
 			return false;
 		}

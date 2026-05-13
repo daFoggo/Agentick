@@ -3,6 +3,8 @@ import {
 	useMutation,
 	useQueryClient,
 } from "@tanstack/react-query";
+import { projectKeys } from "@/features/projects/queries";
+import { teamMemberKeys } from "@/features/team-members/queries";
 import {
 	acceptProjectInviteFn,
 	addProjectMemberFn,
@@ -43,7 +45,7 @@ export const useProjectMemberMutations = () => {
 					queryKey: projectMemberKeys.list(variables.projectId),
 				}),
 				queryClient.invalidateQueries({
-					queryKey: ["teamMembers"],
+					queryKey: teamMemberKeys.all,
 				}),
 			]);
 		},
@@ -58,7 +60,7 @@ export const useProjectMemberMutations = () => {
 					queryKey: projectMemberKeys.list(variables.projectId),
 				}),
 				queryClient.invalidateQueries({
-					queryKey: ["teamMembers"],
+					queryKey: teamMemberKeys.all,
 				}),
 			]);
 		},
@@ -73,10 +75,10 @@ export const useProjectMemberMutations = () => {
 					queryKey: projectMemberKeys.list(variables.projectId),
 				}),
 				queryClient.invalidateQueries({
-					queryKey: ["teamMembers"],
+					queryKey: teamMemberKeys.all,
 				}),
 				queryClient.invalidateQueries({
-					queryKey: ["projects"],
+					queryKey: projectKeys.all,
 				}),
 			]);
 		},
@@ -98,7 +100,7 @@ export const useProjectMemberMutations = () => {
 					queryKey: projectMemberKeys.all,
 				}),
 				queryClient.invalidateQueries({
-					queryKey: ["teamMembers"],
+					queryKey: teamMemberKeys.all,
 				}),
 			]);
 		},

@@ -27,10 +27,9 @@ export function ProjectDetailsHeader({
 }: IProjectDetailsHeaderProps) {
 	const [isInviteOpen, setIsInviteOpen] = useState(false);
 	const navigate = useNavigate();
-	const { data: membersData } = useQuery({
-		...projectMembersQueryOptions(project?.id ?? ""),
-		enabled: !!project?.id,
-	});
+	const { data: membersData } = useQuery(
+		projectMembersQueryOptions(project?.id ?? ""),
+	);
 
 	if (!project) {
 		return (

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
+import { BarChart3, TriangleAlertIcon } from "lucide-react";
 import * as React from "react";
 import {
 	Bar,
@@ -9,6 +10,7 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,9 +19,18 @@ import {
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
+import {
+	Empty,
+	EmptyContent,
+	EmptyDescription,
+	EmptyHeader,
+	EmptyMedia,
+	EmptyTitle,
+} from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
 import { projectTaskStatsQueryOptions } from "@/features/projects/queries";
 import type { TStatsPeriod } from "@/features/projects/schemas";
+import { getErrorMessage } from "@/lib/error";
 
 type ViewMode = "priority" | "status" | "type";
 
@@ -28,9 +39,12 @@ export const ProjectTaskStatsCard = React.memo(() => {
 	const [period, setPeriod] = React.useState<TStatsPeriod>("weekly");
 	const { projectId } = useParams({ strict: false });
 
-	const { data: stats, isLoading } = useQuery(
-		projectTaskStatsQueryOptions(projectId ?? "", period),
-	);
+	const {
+		data: stats,
+		isLoading,
+		isError,
+		error,
+	} = useQuery(projectTaskStatsQueryOptions(projectId ?? "", period));
 
 	// Map API response sang format cho BarChart
 	const data = React.useMemo(() => {
@@ -103,9 +117,35 @@ export const ProjectTaskStatsCard = React.memo(() => {
 			<CardContent>
 				{isLoading ? (
 					<Skeleton className="h-60 w-full rounded-lg" />
+				) : isError ? (
+					<Alert variant="destructive">
+						<TriangleAlertIcon className="size-4" />
+						<AlertTitle>Error loading stats</AlertTitle>
+						<AlertDescription>
+							{getErrorMessage(
+								error,
+								"An error occurred while fetching the project task statistics.",
+							)}
+						</AlertDescription>
+					</Alert>
 				) : data.length === 0 ? (
-					<div className="flex h-60 items-center justify-center text-sm text-muted-foreground">
-						No tasks found for this period.
+					<div className="flex h-60 items-center justify-center">
+						<Empty className="h-auto flex-none border-0 p-0">
+							<EmptyHeader>
+								<EmptyMedia variant="icon">
+									<BarChart3 />
+								</EmptyMedia>
+								<EmptyTitle>No tasks found</EmptyTitle>
+								<EmptyDescription>
+									No tasks found for this period.
+								</EmptyDescription>
+							</EmptyHeader>
+							<EmptyContent>
+								<p className="text-xs text-muted-foreground">
+									Start adding tasks to see stats!
+								</p>
+							</EmptyContent>
+						</Empty>
 					</div>
 				) : (
 					<ChartContainer

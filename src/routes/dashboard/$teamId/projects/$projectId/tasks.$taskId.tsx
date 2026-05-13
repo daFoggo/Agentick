@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import { projectMembersQueryOptions } from "@/features/project-members";
 import { taskConfigQueries } from "@/features/task-config";
-import { TaskDetailView, taskQueries } from "@/features/tasks";
+import { TaskDetailView, taskQueryOptions } from "@/features/tasks";
 
 export const Route = createFileRoute(
 	"/dashboard/$teamId/projects/$projectId/tasks/$taskId",
@@ -19,9 +19,7 @@ export const Route = createFileRoute(
 
 		// Standard Loader Prefetching Pattern from Rule 1
 		await Promise.all([
-			context.queryClient.ensureQueryData(
-				taskQueries.detail(projectId, taskId),
-			),
+			context.queryClient.ensureQueryData(taskQueryOptions(projectId, taskId)),
 			context.queryClient.ensureQueryData(
 				taskConfigQueries.statuses(projectId, commonParams),
 			),
@@ -51,7 +49,7 @@ function TaskDetailPageOrchestrator() {
 	const [taskRes, statusesRes, typesRes, prioritiesRes, membersRes] =
 		useSuspenseQueries({
 			queries: [
-				taskQueries.detail(projectId, taskId),
+				taskQueryOptions(projectId, taskId),
 				taskConfigQueries.statuses(projectId, commonParams),
 				taskConfigQueries.types(projectId, commonParams),
 				taskConfigQueries.priorities(projectId, commonParams),

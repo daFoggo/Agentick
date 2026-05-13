@@ -1,39 +1,31 @@
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { Briefcase, FolderGit2 } from "lucide-react";
-
+import { Briefcase, FolderGit2, Plus } from "lucide-react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	Empty,
+	EmptyContent,
 	EmptyDescription,
 	EmptyHeader,
 	EmptyMedia,
 	EmptyTitle,
 } from "@/components/ui/empty";
-import { Skeleton } from "@/components/ui/skeleton";
-
 import { myProjectsQueryOptions } from "@/features/projects/queries";
+import { CreateProjectDialog } from "./create-project-dialog";
 
 export function MyProjectsList() {
 	const navigate = useNavigate();
 	const { teamId } = useParams({ strict: false });
+	const [isCreateOpen, setIsCreateOpen] = useState(false);
 
-	const { data: projects = [], isLoading } = useQuery(
+	const { data: projects = [] } = useSuspenseQuery(
 		myProjectsQueryOptions(teamId),
 	);
 
 	const content = (() => {
-		if (isLoading) {
-			return (
-				<div className="space-y-4">
-					{[1, 2, 3].map((i) => (
-						<Skeleton key={i} className="h-20 w-full rounded-xl" />
-					))}
-				</div>
-			);
-		}
-
 		if (projects.length === 0) {
 			return (
 				<Empty>
@@ -46,6 +38,16 @@ export function MyProjectsList() {
 							You haven't joined any projects yet.
 						</EmptyDescription>
 					</EmptyHeader>
+					<EmptyContent>
+						<Button
+							type="button"
+							variant="outline"
+							onClick={() => setIsCreateOpen(true)}
+						>
+							<Plus className="size-4" />
+							New Project
+						</Button>
+					</EmptyContent>
 				</Empty>
 			);
 		}
@@ -83,18 +85,25 @@ export function MyProjectsList() {
 	})();
 
 	return (
-		<Card>
-			<CardHeader className="flex flex-row items-center justify-between">
-				<CardTitle className="flex items-center gap-2">
-					<FolderGit2 className="size-4 text-muted-foreground" />
-					<span>My Projects</span>
-				</CardTitle>
-				<Badge variant="secondary" className="font-mono">
-					{projects.length}
-				</Badge>
-			</CardHeader>
+		<>
+			<Card>
+				<CardHeader className="flex flex-row items-center justify-between">
+					<CardTitle className="flex items-center gap-2">
+						<FolderGit2 className="size-4 text-muted-foreground" />
+						<span>My Projects</span>
+					</CardTitle>
+					<Badge variant="secondary" className="font-mono">
+						{projects.length}
+					</Badge>
+				</CardHeader>
 
-			<CardContent>{content}</CardContent>
-		</Card>
+				<CardContent>{content}</CardContent>
+			</Card>
+			<CreateProjectDialog
+				open={isCreateOpen}
+				onOpenChange={setIsCreateOpen}
+				teamId={teamId || "personal"}
+			/>
+		</>
 	);
 }

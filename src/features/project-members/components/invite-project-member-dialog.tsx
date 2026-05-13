@@ -22,7 +22,11 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { ASSIGNABLE_ROLES } from "@/constants/team-roles";
-import { type TUserSearchResult, userQueries } from "@/features/users";
+import {
+	searchUsersQueryOptions,
+	type TUserSearchResult,
+} from "@/features/users";
+import { getErrorMessage } from "@/lib/error";
 import { useProjectMemberMutations } from "../queries";
 import type { TProjectRole } from "../schemas";
 
@@ -48,7 +52,7 @@ export const InviteProjectMemberDialog = ({
 
 	// Use global user search with smart exclusion
 	const { data: fetchedUsers = [], isLoading } = useQuery(
-		userQueries.search(deferredQuery, { excludeProjectId: projectId }),
+		searchUsersQueryOptions(deferredQuery, { excludeProjectId: projectId }),
 	);
 
 	const users = useMemo(() => {
@@ -87,8 +91,8 @@ export const InviteProjectMemberDialog = ({
 			toast.success(`${selectedUsers.length} invitations have been sent`);
 			handleReset();
 			onOpenChange(false);
-		} catch (_error) {
-			toast.error("Failed to send some invitations");
+		} catch (error) {
+			toast.error(getErrorMessage(error, "Failed to send some invitations"));
 		}
 	};
 

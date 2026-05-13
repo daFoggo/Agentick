@@ -1,9 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw, TriangleAlertIcon } from "lucide-react";
 import { memo } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { agentQueries, useAgentMutations } from "../queries";
+import {
+	projectRiskStatsQueryOptions,
+	useAgentMutations,
+} from "@/features/agent";
+import { getErrorMessage } from "@/lib/error";
 import { ProjectRiskGauge } from "./project-risk-gauge";
 import { RiskDriversChart } from "./risk-drivers-chart";
 import { RiskMatrixChart } from "./risk-matrix-chart";
@@ -14,9 +19,12 @@ interface IProjectRiskDashboardProps {
 
 export const ProjectRiskDashboard = memo(
 	({ projectId }: IProjectRiskDashboardProps) => {
-		const { data: riskStats, isLoading } = useQuery(
-			agentQueries.projectRiskStats(projectId),
-		);
+		const {
+			data: riskStats,
+			isLoading,
+			isError,
+			error,
+		} = useQuery(projectRiskStatsQueryOptions(projectId));
 
 		const { analyzeProjectRisk } = useAgentMutations();
 
@@ -26,15 +34,32 @@ export const ProjectRiskDashboard = memo(
 
 		if (isLoading) {
 			return (
-				<div className="space-y-4 col-span-full">
+				<div className="col-span-full space-y-4">
 					<div className="flex items-center justify-between">
 						<Skeleton className="h-8 w-36 rounded" />
 					</div>
-					<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-4">
 						<Skeleton className="col-span-1 h-62.5 rounded-xl" />
-						<Skeleton className="col-span-1 md:col-span-2 h-62.5 rounded-xl" />
+						<Skeleton className="col-span-1 h-62.5 rounded-xl md:col-span-2" />
 						<Skeleton className="col-span-1 h-62.5 rounded-xl" />
 					</div>
+				</div>
+			);
+		}
+
+		if (isError) {
+			return (
+				<div className="col-span-full p-4">
+					<Alert variant="destructive">
+						<TriangleAlertIcon className="size-4" />
+						<AlertTitle>Error loading risk data</AlertTitle>
+						<AlertDescription>
+							{getErrorMessage(
+								error,
+								"An error occurred while retrieving project risk assessments.",
+							)}
+						</AlertDescription>
+					</Alert>
 				</div>
 			);
 		}
@@ -42,7 +67,7 @@ export const ProjectRiskDashboard = memo(
 		if (!riskStats) return null;
 
 		return (
-			<div className="space-y-4 col-span-full">
+			<div className="col-span-full space-y-4">
 				<div className="flex items-center justify-between">
 					<Button
 						onClick={handleAnalyzeAll}
@@ -61,7 +86,7 @@ export const ProjectRiskDashboard = memo(
 					</Button>
 				</div>
 
-				<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+				<div className="grid grid-cols-1 gap-4 md:grid-cols-4">
 					<ProjectRiskGauge overallRiskIndex={riskStats.overall_risk_index} />
 					<RiskMatrixChart tasks={riskStats.tasks} />
 					<RiskDriversChart tasks={riskStats.tasks} />

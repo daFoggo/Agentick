@@ -31,16 +31,11 @@ export async function fetchPhases(
 export async function fetchPhaseById(
 	projectId: string,
 	phaseId: string,
-): Promise<TPhase | null> {
-	try {
-		const response = await api
-			.get(`${buildPhasePath(projectId)}/${phaseId}`)
-			.json<TBaseResponse<TPhase>>();
-		return response.data;
-	} catch (error) {
-		console.error("error fetch phase detail:", error);
-		return null;
-	}
+): Promise<TPhase> {
+	const response = await api
+		.get(`${buildPhasePath(projectId)}/${phaseId}`)
+		.json<TBaseResponse<TPhase>>();
+	return response.data;
 }
 
 export async function createPhase(

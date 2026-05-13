@@ -1,5 +1,6 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { UserPlus } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -8,10 +9,12 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { useInvitationMutations } from "@/features/invitations/queries";
-import { markInboxAsReadFn } from "../functions";
-import { inboxKeys } from "../queries";
-import type { TInboxItem } from "../schemas";
+import { type TInboxItem, useInboxMutations } from "@/features/inbox";
+import {
+	navigateAfterInvitationAccept,
+	useInvitationMutations,
+} from "@/features/invitations";
+import { getErrorMessage } from "@/lib/error";
 
 interface IInboxInvitationContentProps {
 	item: TInboxItem;
@@ -20,20 +23,23 @@ interface IInboxInvitationContentProps {
 export const InboxInvitationContent = ({
 	item,
 }: IInboxInvitationContentProps) => {
+	const navigate = useNavigate();
 	const { accept: acceptInvitation } = useInvitationMutations();
-	const queryClient = useQueryClient();
-
-	const archiveMutation = useMutation({
-		mutationFn: (id: string) =>
-			markInboxAsReadFn({ data: { inboxItemId: id } }),
-		onSuccess: () => queryClient.invalidateQueries({ queryKey: inboxKeys.all }),
-	});
+	const { markAsRead } = useInboxMutations();
 
 	const handleAccept = (e: React.MouseEvent) => {
 		e.stopPropagation();
 		if (item.resource_id) {
-			acceptInvitation.mutate(item.resource_id);
-			archiveMutation.mutate(item.id);
+			acceptInvitation.mutate(item.resource_id, {
+				onSuccess: (result) => {
+					toast.success("Invitation accepted successfully");
+					navigateAfterInvitationAccept(result, navigate);
+					markAsRead.mutate(item.id);
+				},
+				onError: (error) => {
+					toast.error(getErrorMessage(error, "Failed to accept invitation"));
+				},
+			});
 		}
 	};
 
