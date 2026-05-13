@@ -1,5 +1,5 @@
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
-import { PackageCheck, SlidersHorizontal, Users } from "lucide-react";
+import { AlertCircle, PackageCheck, SlidersHorizontal, Users } from "lucide-react";
 import { memo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +15,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getErrorMessage } from "@/lib/error";
 import { userGreetingQueryOptions, userStatsQueryOptions } from "../queries";
 import type { TStatsPeriod } from "../schemas";
 
@@ -26,7 +27,11 @@ export const UserGreeting = memo(() => {
 		data: stats,
 		isLoading,
 		isError,
+		error,
 	} = useQuery(userStatsQueryOptions(period));
+	const statsErrorMessage = isError
+		? getErrorMessage(error, "Could not load stats.")
+		: undefined;
 
 	return (
 		<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -55,7 +60,13 @@ export const UserGreeting = memo(() => {
 							{isLoading ? (
 								<Skeleton className="h-4 w-6" />
 							) : isError || !stats ? (
-								<span className="font-semibold text-destructive">N/A</span>
+								<span
+									className="flex items-center gap-1 font-medium text-destructive"
+									title={statsErrorMessage}
+								>
+									<AlertCircle className="size-3.5 shrink-0" />
+									Error
+								</span>
 							) : (
 								<span className="font-semibold text-foreground">
 									{stats.tasks_completed}
@@ -73,7 +84,13 @@ export const UserGreeting = memo(() => {
 							{isLoading ? (
 								<Skeleton className="h-4 w-6" />
 							) : isError || !stats ? (
-								<span className="font-semibold text-destructive">N/A</span>
+								<span
+									className="flex items-center gap-1 font-medium text-destructive"
+									title={statsErrorMessage}
+								>
+									<AlertCircle className="size-3.5 shrink-0" />
+									Error
+								</span>
 							) : (
 								<span className="font-semibold text-foreground">
 									{stats.collaborated_with}

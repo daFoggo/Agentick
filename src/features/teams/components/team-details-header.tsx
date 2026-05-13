@@ -1,12 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import { UserPlus, Users } from "lucide-react";
+import { AlertCircle, UserPlus, Users } from "lucide-react";
 import { useState } from "react";
 import { MemberAvatarGroup } from "@/components/common/member-avatar-group";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { TTeamMember } from "@/features/team-members";
 import { InviteTeamMemberDialog } from "@/features/team-members";
 import { teamMembersQueryOptions } from "@/features/team-members/queries";
 import type { TTeam } from "@/features/teams";
+import { getErrorMessage } from "@/lib/error";
 
 export interface ITeamDetailsHeaderProps {
 	team: TTeam | null;
@@ -14,9 +16,15 @@ export interface ITeamDetailsHeaderProps {
 
 export function TeamDetailsHeader({ team }: ITeamDetailsHeaderProps) {
 	const [inviteOpen, setInviteOpen] = useState(false);
-	const { data: membersData } = useQuery(
-		teamMembersQueryOptions(team?.id ?? ""),
-	);
+	const {
+		data: membersData,
+		isLoading: isMembersLoading,
+		isError: isMembersError,
+		error: membersError,
+	} = useQuery({
+		...teamMembersQueryOptions(team?.id ?? ""),
+		enabled: !!team?.id,
+	});
 
 	if (!team) {
 		return (
@@ -41,16 +49,29 @@ export function TeamDetailsHeader({ team }: ITeamDetailsHeaderProps) {
 			</div>
 
 			<div className="flex items-center gap-2">
-				<MemberAvatarGroup
-					items={members}
-					max={4}
-					size="default"
-					getAvatarInfo={(m: TTeamMember) => ({
-						id: m.id,
-						name: m.user?.name,
-						avatar_url: m.user?.avatar_url,
-					})}
-				/>
+				{isMembersLoading && <Skeleton className="h-8 w-24 rounded-full" />}
+
+				{isMembersError && (
+					<div className="flex items-center gap-1.5 text-xs text-destructive">
+						<AlertCircle className="size-3.5 shrink-0" />
+						<span className="truncate">
+							{getErrorMessage(membersError, "Could not load members.")}
+						</span>
+					</div>
+				)}
+
+				{!isMembersLoading && !isMembersError && (
+					<MemberAvatarGroup
+						items={members}
+						max={4}
+						size="default"
+						getAvatarInfo={(m: TTeamMember) => ({
+							id: m.id,
+							name: m.user?.name,
+							avatar_url: m.user?.avatar_url,
+						})}
+					/>
+				)}
 
 				<Button onClick={() => setInviteOpen(true)}>
 					Invite
