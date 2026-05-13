@@ -1,13 +1,21 @@
 import { useForm } from "@tanstack/react-form";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
-import { CalendarPlus, FileText, Loader2, Users, X } from "lucide-react";
+import {
+	AlertCircle,
+	CalendarPlus,
+	FileText,
+	Loader2,
+	Users,
+	X,
+} from "lucide-react";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { DateTimePicker } from "@/components/common/date-picker";
 import { MultiSelectCombobox } from "@/components/common/multi-select-combobox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -42,11 +50,27 @@ export const EventActionBar = ({
 	const { create, update } = useEventMutations();
 	const params = useParams({ strict: false }) as { teamId?: string };
 	const teamId = params.teamId || "";
-	const { data: me } = useQuery(userMeQueryOptions());
+	const {
+		data: me,
+		isLoading: isMeLoading,
+		isError: isMeError,
+		error: meError,
+	} = useQuery(userMeQueryOptions());
 	const titleRef = useRef<HTMLInputElement>(null);
 
-	const { data: teamMembersData } = useQuery(teamMembersQueryOptions(teamId));
+	const {
+		data: teamMembersData,
+		isLoading: isTeamMembersLoading,
+		isError: isTeamMembersError,
+		error: teamMembersError,
+	} = useQuery({
+		...teamMembersQueryOptions(teamId),
+		enabled: !!teamId,
+	});
 	const teamMembers = teamMembersData?.founds || [];
+	const isDependencyLoading = isMeLoading || isTeamMembersLoading;
+	const dependencyError = meError ?? teamMembersError;
+	const hasDependencyError = isMeError || isTeamMembersError;
 
 	const form = useForm({
 		defaultValues: {
@@ -148,6 +172,8 @@ export const EventActionBar = ({
 	]);
 
 	const isPending = create.isPending || update.isPending;
+	const isSubmitDisabled =
+		isPending || isDependencyLoading || hasDependencyError || !teamId || !me?.id;
 
 	useEffect(() => {
 		if (!open) return;
@@ -230,6 +256,18 @@ export const EventActionBar = ({
 								/>
 
 								<div className="flex flex-col gap-2 pt-4">
+									{isDependencyLoading && <Skeleton className="h-4 w-48" />}
+									{hasDependencyError && (
+										<div className="flex items-center gap-1.5 text-xs text-destructive">
+											<AlertCircle className="size-3.5 shrink-0" />
+											<span>
+												{getErrorMessage(
+													dependencyError,
+													"Could not load event dependencies.",
+												)}
+											</span>
+										</div>
+									)}
 									{/* ── Title Input ────────────────────────────────────────── */}
 									<form.Field
 										name="title"
@@ -325,6 +363,7 @@ export const EventActionBar = ({
 																onValueChange={(vals) =>
 																	pField.handleChange(vals.map((m) => m.id))
 																}
+																isLoading={isTeamMembersLoading}
 																itemToString={(m) => m.user?.name || ""}
 																itemToValue={(m) => m.id}
 																placeholder="Add participants"
@@ -386,7 +425,9 @@ export const EventActionBar = ({
 											children={([canSubmit, isSubmitting]) => (
 												<Button
 													type="submit"
-													disabled={!canSubmit || isPending || isSubmitting}
+													disabled={
+														!canSubmit || isSubmitDisabled || isSubmitting
+													}
 												>
 													{isPending || isSubmitting ? (
 														<>

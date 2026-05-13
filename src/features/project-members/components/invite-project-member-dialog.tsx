@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, Plus } from "lucide-react";
+import { AlertCircle, Loader2, Plus } from "lucide-react";
 import { useDeferredValue, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { MultiSelectCombobox } from "@/components/common/multi-select-combobox";
@@ -51,12 +51,19 @@ export const InviteProjectMemberDialog = ({
 	const deferredQuery = useDeferredValue(searchQuery);
 
 	// Use global user search with smart exclusion
-	const { data: fetchedUsers = [], isLoading } = useQuery(
+	const {
+		data: fetchedUsers,
+		isLoading,
+		isError,
+		error,
+	} = useQuery(
 		searchUsersQueryOptions(deferredQuery, { excludeProjectId: projectId }),
 	);
 
 	const users = useMemo(() => {
-		const list = [...fetchedUsers];
+		if (isError) return [];
+
+		const list = [...(fetchedUsers ?? [])];
 		const trimmedQuery = deferredQuery.trim();
 		const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedQuery);
 
@@ -72,7 +79,7 @@ export const InviteProjectMemberDialog = ({
 			});
 		}
 		return list;
-	}, [fetchedUsers, deferredQuery]);
+	}, [fetchedUsers, deferredQuery, isError]);
 
 	const { generateInvite } = useProjectMemberMutations();
 
@@ -155,6 +162,14 @@ export const InviteProjectMemberDialog = ({
 								</div>
 							)}
 						/>
+						{isError && (
+							<div className="flex items-center gap-1.5 text-xs text-destructive">
+								<AlertCircle className="size-3.5 shrink-0" />
+								<span>
+									{getErrorMessage(error, "Could not search users.")}
+								</span>
+							</div>
+						)}
 					</Field>
 
 					<Field>
@@ -192,7 +207,9 @@ export const InviteProjectMemberDialog = ({
 					<Button
 						type="button"
 						onClick={handleAdd}
-						disabled={selectedUsers.length === 0 || generateInvite.isPending}
+						disabled={
+							selectedUsers.length === 0 || generateInvite.isPending || isError
+						}
 					>
 						{generateInvite.isPending ? (
 							<>

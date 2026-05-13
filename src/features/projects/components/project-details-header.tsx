@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { FolderOpen, Settings, Share2 } from "lucide-react";
+import { AlertCircle, FolderOpen, Settings, Share2 } from "lucide-react";
 import { useState } from "react";
 import { MemberAvatarGroup } from "@/components/common/member-avatar-group";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Tooltip,
 	TooltipContent,
@@ -15,6 +16,7 @@ import {
 	type TProjectMember,
 } from "@/features/project-members";
 import type { TProject } from "@/features/projects";
+import { getErrorMessage } from "@/lib/error";
 
 export interface IProjectDetailsHeaderProps {
 	teamId: string;
@@ -27,9 +29,15 @@ export function ProjectDetailsHeader({
 }: IProjectDetailsHeaderProps) {
 	const [isInviteOpen, setIsInviteOpen] = useState(false);
 	const navigate = useNavigate();
-	const { data: membersData } = useQuery(
-		projectMembersQueryOptions(project?.id ?? ""),
-	);
+	const {
+		data: membersData,
+		isLoading: isMembersLoading,
+		isError: isMembersError,
+		error: membersError,
+	} = useQuery({
+		...projectMembersQueryOptions(project?.id ?? ""),
+		enabled: !!project?.id,
+	});
 
 	if (!project) {
 		return (
@@ -75,7 +83,18 @@ export function ProjectDetailsHeader({
 			</div>
 
 			<div className="flex items-center gap-4">
-				{members.length > 0 && (
+				{isMembersLoading && <Skeleton className="h-8 w-24 rounded-full" />}
+
+				{isMembersError && (
+					<div className="flex items-center gap-1.5 text-xs text-destructive">
+						<AlertCircle className="size-3.5 shrink-0" />
+						<span className="truncate">
+							{getErrorMessage(membersError, "Could not load members.")}
+						</span>
+					</div>
+				)}
+
+				{!isMembersLoading && !isMembersError && members.length > 0 && (
 					<Tooltip>
 						<TooltipTrigger asChild>
 							<div
