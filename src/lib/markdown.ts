@@ -1,3 +1,4 @@
+import { toString as hastToString } from "hast-util-to-string";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeRaw from "rehype-raw";
 import rehypeSlug from "rehype-slug";
@@ -6,6 +7,7 @@ import remarkGfm from "remark-gfm";
 import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import { unified } from "unified";
+import { visit } from "unist-util-visit";
 
 export type MarkdownHeading = {
 	id: string;
@@ -18,41 +20,42 @@ export type MarkdownResult = {
 	headings: Array<MarkdownHeading>;
 };
 
-/**
- * Chuyển đổi nội dung Markdown thành mã HTML an toàn.
- * Hàm này sử dụng hệ sinh thái Unified/Remark/Rehype để hỗ trợ đầy đủ GFM,
- * tự động gán ID cho tiêu đề và trích xuất danh sách tiêu đề (headings)
- * để sử dụng cho các thành phần như Mục lục (Table of Contents).
- */
-export async function renderMarkdown(content: string): Promise<MarkdownResult> {
-	const headings: Array<MarkdownHeading> = [];
+export type RenderMarkdownOptions = {
+	allowHtml?: boolean;
+};
 
-	const result = await unified()
-		.use(remarkParse) // Parse markdown
-		.use(remarkGfm) // Support GitHub Flavored Markdown
-		.use(remarkRehype, { allowDangerousHtml: true }) // Convert to HTML AST
-		.use(rehypeRaw) // Process raw HTML in markdown
-		.use(rehypeSlug) // Add IDs to headings
+export async function renderMarkdown(
+	content: string,
+	options: RenderMarkdownOptions = {},
+): Promise<MarkdownResult> {
+	const headings: Array<MarkdownHeading> = [];
+	const processor = unified()
+		.use(remarkParse)
+		.use(remarkGfm)
+		.use(remarkRehype, { allowDangerousHtml: options.allowHtml ?? false });
+
+	if (options.allowHtml) {
+		processor.use(rehypeRaw);
+	}
+
+	const result = await processor
+		.use(rehypeSlug)
 		.use(rehypeAutolinkHeadings, {
 			behavior: "wrap",
 			properties: { className: ["anchor"] },
 		})
 		.use(() => (tree) => {
-			// Extract headings for table of contents
-			const { visit } = require("unist-util-visit");
-			const { toString: hastToString } = require("hast-util-to-string");
-
 			visit(tree, "element", (node: any) => {
 				if (["h1", "h2", "h3", "h4", "h5", "h6"].includes(node.tagName)) {
 					headings.push({
 						id: node.properties?.id || "",
 						text: hastToString(node),
-						level: parseInt(node.tagName.charAt(1), 10),
+						level: Number.parseInt(node.tagName.charAt(1), 10),
 					});
 				}
 			});
 		})
-		.use(rehypeStringify) // Serialize to HTML string
+		.use(rehypeStringify)
 		.process(content);
 
 	return {

@@ -1,13 +1,12 @@
 import type { AnyFieldApi } from "@tanstack/react-form";
 import { TextAlignStart } from "lucide-react";
-
+import { MarkdownEditor } from "@/components/common/markdown-editor";
 import {
 	Field,
 	FieldError,
 	FieldGroup,
 	FieldLabel,
 } from "@/components/ui/field";
-import { Textarea } from "@/components/ui/textarea";
 import type { ITaskListDialogOptions, TTask } from "@/features/tasks";
 import type { TTaskDetailFormApi } from "@/features/tasks/schemas";
 import { TaskActivity } from "./task-activity";
@@ -42,13 +41,13 @@ export const TaskDetailMainSection = ({
 										Description
 									</div>
 								</FieldLabel>
-								<Textarea
+								<MarkdownEditor
 									id={field.name}
 									value={field.state.value || ""}
 									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
+									onChange={(value) => field.handleChange(value)}
 									placeholder="Add a detailed description..."
-									className="min-h-40 resize-none"
+									className="min-h-40"
 									aria-invalid={isInvalid}
 								/>
 								<FieldError errors={field.state.meta.errors} />

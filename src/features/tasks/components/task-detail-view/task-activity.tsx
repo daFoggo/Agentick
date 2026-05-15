@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { MarkdownEditor } from "@/components/common/markdown-editor";
+import { MarkdownRenderer } from "@/components/common/markdown-renderer";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -25,7 +27,6 @@ import {
 	InputGroup,
 	InputGroupAddon,
 	InputGroupButton,
-	InputGroupTextarea,
 } from "@/components/ui/input-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -184,10 +185,14 @@ export const TaskActivity = ({ taskId }: ITaskActivityProps) => {
 												</Button>
 											</InputGroupAddon>
 
-											<InputGroupTextarea
-												readOnly
-												value={activity.content}
-												className="min-h-[unset]"
+											<MarkdownRenderer
+												content={activity.content || ""}
+												className="px-2.5 pb-2"
+												emptyContent={
+													<span className="text-sm text-muted-foreground">
+														No comment content.
+													</span>
+												}
 											/>
 										</InputGroup>
 									);
@@ -303,37 +308,32 @@ export const TaskActivity = ({ taskId }: ITaskActivityProps) => {
 				</div>
 			</ScrollArea>
 
-			{/* 2. The Add Comment input sits entirely OUTSIDE the timeline scope. No hacks or forced backgrounds needed anymore! */}
-			<InputGroup className="overflow-hidden">
-				<InputGroupTextarea
-					placeholder="Add comment... (Press Ctrl + Enter to send)"
-					className="min-h-20"
-					value={commentText}
-					onChange={(e) => setCommentText(e.target.value)}
-					onKeyDown={(e) => {
-						if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-							e.preventDefault();
-							e.stopPropagation();
-							handleSendComment(e.currentTarget.value);
-						}
-					}}
-				/>
-				<InputGroupAddon align="block-end" className="flex justify-end">
-					<InputGroupButton
-						type="button"
-						variant="default"
-						size="icon-sm"
-						disabled={!commentText.trim() || addComment.isPending}
-						onClick={() => handleSendComment()}
-					>
-						{addComment.isPending ? (
-							<Loader2 className="size-4 animate-spin" />
-						) : (
-							<ArrowUp className="size-4" />
-						)}
-					</InputGroupButton>
-				</InputGroupAddon>
-			</InputGroup>
+			<MarkdownEditor
+				value={commentText}
+				onChange={setCommentText}
+				containerClassName="bg-card dark:bg-card"
+				className="min-h-20"
+				footer={
+					<div className="flex justify-end">
+						<InputGroupButton
+							type="button"
+							variant="default"
+							size="icon-sm"
+							disabled={!commentText.trim() || addComment.isPending}
+							onClick={() => handleSendComment()}
+							aria-label="Send comment"
+						>
+							{addComment.isPending ? (
+								<Loader2 className="size-4 animate-spin" />
+							) : (
+								<ArrowUp className="size-4" />
+							)}
+						</InputGroupButton>
+					</div>
+				}
+				placeholder="Add comment... (Press Ctrl + Enter to send)"
+				onModEnter={handleSendComment}
+			/>
 		</div>
 	);
 };
