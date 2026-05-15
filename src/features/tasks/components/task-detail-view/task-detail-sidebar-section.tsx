@@ -166,11 +166,7 @@ export const TaskDetailSidebarSection = ({
 											))}
 										</SelectContent>
 									</Select>
-									{availableParentTasks.length === 0 ? (
-										<p className="text-xs text-muted-foreground">
-											No other tasks available.
-										</p>
-									) : null}
+
 								</div>
 								<FieldError errors={field.state.meta.errors} />
 							</Field>

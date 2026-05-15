@@ -24,7 +24,7 @@ import { Separator } from "@/components/ui/separator";
 import { TIMEZONES } from "@/constants/timezone";
 import { getErrorMessage } from "@/lib/error";
 import {
-	projectKeys,
+	myProjectsQueryOptions,
 	projectQueryOptions,
 	useProjectMutations,
 } from "../queries";
@@ -122,9 +122,8 @@ export const ProjectSettings = ({
 			await remove.mutateAsync(projectId);
 			toast.success("Project deleted successfully");
 
-			// Đọc cache myProjects đã được invalidate bởi mutation onSuccess
-			const remaining = queryClient.getQueryData<any[]>(
-				projectKeys.myProjects(teamId),
+			const remaining = await queryClient.fetchQuery(
+				myProjectsQueryOptions(teamId),
 			);
 
 			if (!remaining || remaining.length === 0) {

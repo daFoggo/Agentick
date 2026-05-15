@@ -14,7 +14,13 @@ Do not introduce another server-state cache layer.
 
 ## Query Function Contract
 
-A query function must resolve valid data or throw.
+A query function must either return real data or throw an error.
+
+In practice, this means:
+
+- If the request succeeds, return the payload the UI should actually use.
+- If the request fails for a real transport/server/auth problem, let the error bubble up.
+- Only catch errors when you are intentionally translating a known domain case, such as `404 -> notFound()`.
 
 Wrong:
 
@@ -35,6 +41,8 @@ const response = await api.get("projects").json<TBaseResponse<TProject[]>>()
 return response.data
 ```
 
+This repo also has one related pattern for list endpoints: the server function may normalize a missing backend payload to an empty list, for example `return res ?? []`. That is not the same as swallowing an error in a `catch` block.
+
 Only catch known domain cases:
 
 ```ts
@@ -48,6 +56,8 @@ try {
   throw error
 }
 ```
+
+That pattern is used for detail resources in this repo: a missing project, task, team, or invitation becomes `notFound()`, while everything else still fails normally so the route or UI can show the real error state.
 
 ## Query Keys
 
@@ -162,7 +172,7 @@ Rules:
 - Create QueryClient through `createQueryClient()`.
 - Create it in the router/request lifecycle.
 - Pass the same instance to router context and `QueryProvider`.
-- Clear the active `useQueryClient()` instance on auth changes.
+- Clear query caches from auth mutation and account-switch flows when the signed-in identity changes.
 
 ## Ky v2 Rules
 
