@@ -173,7 +173,11 @@ export const EventActionBar = ({
 
 	const isPending = create.isPending || update.isPending;
 	const isSubmitDisabled =
-		isPending || isDependencyLoading || hasDependencyError || !teamId || !me?.id;
+		isPending ||
+		isDependencyLoading ||
+		hasDependencyError ||
+		!teamId ||
+		!me?.id;
 
 	useEffect(() => {
 		if (!open) return;

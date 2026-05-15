@@ -165,9 +165,7 @@ export const InviteProjectMemberDialog = ({
 						{isError && (
 							<div className="flex items-center gap-1.5 text-xs text-destructive">
 								<AlertCircle className="size-3.5 shrink-0" />
-								<span>
-									{getErrorMessage(error, "Could not search users.")}
-								</span>
+								<span>{getErrorMessage(error, "Could not search users.")}</span>
 							</div>
 						)}
 					</Field>

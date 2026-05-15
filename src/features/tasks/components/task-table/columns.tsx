@@ -1,5 +1,11 @@
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import {
+	ChevronDown,
+	ChevronRight,
+	MoreHorizontal,
+	Pencil,
+	Trash2,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { MemberAvatarGroup } from "@/components/common/member-avatar-group";
@@ -26,6 +32,8 @@ import {
 import { generateColumns } from "@/lib/data-table";
 import { getErrorMessage } from "@/lib/error";
 import { DeleteTaskListDialog } from "./delete-task-list-dialog";
+
+const taskDepthClasses = ["", "ml-4", "ml-8", "ml-12", "ml-16"];
 
 const TaskListActionCell = ({ task }: { task: TTask }) => {
 	const { remove } = useTaskMutations();
@@ -106,14 +114,45 @@ export const getTaskColumns = (options: ITaskListDialogOptions) =>
 			label: "Title",
 			size: 250,
 			enablePinning: true,
-			cell: ({ getValue }) => {
+			cell: ({ getValue, row }) => {
+				const canExpand = row.getCanExpand();
+				const isExpanded = row.getIsExpanded();
+				const depthClass =
+					taskDepthClasses[Math.min(row.depth, taskDepthClasses.length - 1)] ??
+					"";
+
 				return (
-					<span
-						className="block max-w-full truncate text-sm font-medium text-foreground"
-						title={getValue() as string}
-					>
-						{getValue() as string}
-					</span>
+					<div className={`flex min-w-0 items-center gap-1.5 ${depthClass}`}>
+						{canExpand ? (
+							<Button
+								type="button"
+								variant="ghost"
+								size="icon-xs"
+								className="shrink-0"
+								aria-label={
+									isExpanded ? "Collapse sub-tasks" : "Expand sub-tasks"
+								}
+								onClick={(event) => {
+									event.stopPropagation();
+									row.getToggleExpandedHandler()();
+								}}
+							>
+								{isExpanded ? (
+									<ChevronDown className="size-3.5" />
+								) : (
+									<ChevronRight className="size-3.5" />
+								)}
+							</Button>
+						) : (
+							<span className="size-6 shrink-0" />
+						)}
+						<span
+							className="block max-w-full truncate text-sm font-medium text-foreground"
+							title={getValue() as string}
+						>
+							{getValue() as string}
+						</span>
+					</div>
 				);
 			},
 		},

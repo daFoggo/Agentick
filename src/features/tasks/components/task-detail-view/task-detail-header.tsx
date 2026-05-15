@@ -32,6 +32,7 @@ export const TaskDetailHeader = ({
 					size="icon"
 					onClick={onBack}
 					className="shrink-0"
+					aria-label="Back to tasks"
 				>
 					<ArrowLeft className="size-4" />
 				</Button>
@@ -77,6 +78,7 @@ export const TaskDetailHeader = ({
 							<div className="flex items-center gap-2">
 								{isPending ? (
 									<Button
+										type="button"
 										variant="ghost"
 										className="flex animate-in items-center gap-2 text-xs font-medium text-muted-foreground duration-500 select-none fade-in"
 									>

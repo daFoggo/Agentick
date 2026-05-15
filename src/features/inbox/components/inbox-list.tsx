@@ -2,7 +2,6 @@ import { Inbox } from "lucide-react";
 import { Fragment } from "react";
 import {
 	Empty,
-	EmptyContent,
 	EmptyDescription,
 	EmptyHeader,
 	EmptyMedia,
@@ -31,10 +30,6 @@ export const InboxList = ({ items }: IInboxListProps) => {
 						You have no new inbox items at the moment.
 					</EmptyDescription>
 				</EmptyHeader>
-				<EmptyContent>
-					New task assignments, invitations, and system updates will appear
-					here.
-				</EmptyContent>
 			</Empty>
 		);
 	}

@@ -4,7 +4,6 @@ import {
 	projectRiskStatsQueryOptions,
 } from "@/features/agent";
 import {
-	ProjectAISummary,
 	ProjectStatusUpdate,
 	ProjectTaskStatsCard,
 	ProjectWorkload,
@@ -48,7 +47,6 @@ function ProjectDashboardView() {
 					<ProjectWorkload />
 				</div>
 				<div className="flex flex-col gap-4 lg:col-span-2">
-					<ProjectAISummary projectId={projectId} />
 					<ProjectStatusUpdate projectId={projectId} />
 				</div>
 			</div>

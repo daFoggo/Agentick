@@ -150,7 +150,6 @@ export type TTaskPriority = TTaskPriorityOption["value"];
  */
 export const PROJECT_TASKS_ROUTE = "projects/{project_id}/tasks";
 export const PROJECT_TASK_CONFIG_ROUTE = "projects/{project_id}/task-config";
-export const PROJECT_PHASES_ROUTE = "projects/{project_id}/phases";
 
 /**
  * Các giá trị mặc định cho phân trang và sắp xếp

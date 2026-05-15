@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/chart";
 import {
 	Empty,
-	EmptyContent,
 	EmptyDescription,
 	EmptyHeader,
 	EmptyMedia,
@@ -140,11 +139,6 @@ export const ProjectTaskStatsCard = React.memo(() => {
 									No tasks found for this period.
 								</EmptyDescription>
 							</EmptyHeader>
-							<EmptyContent>
-								<p className="text-xs text-muted-foreground">
-									Start adding tasks to see stats!
-								</p>
-							</EmptyContent>
 						</Empty>
 					</div>
 				) : (

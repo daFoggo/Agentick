@@ -138,12 +138,14 @@ export const getTaskDetailDefaultValues = (
 	task: TTask | undefined,
 	options: ITaskListDialogOptions,
 	defaultStatusId?: string,
+	defaultParentId?: string | null,
 ): TTaskDetailFormValues => {
 	const defaults = resolveDefaultTaskOptionIds(options);
 
 	return {
 		title: task?.title || "",
 		description: task?.description ?? "",
+		parent_id: task?.parent_id ?? defaultParentId ?? null,
 		status_id: task?.status_id ?? defaultStatusId ?? defaults.statusId,
 		type_id: task?.type_id ?? defaults.typeId,
 		priority_id: task?.priority_id ?? defaults.priorityId,
@@ -151,6 +153,7 @@ export const getTaskDetailDefaultValues = (
 		due_date: toCalendarDateValue(task?.due_date) ?? new Date(),
 		order: task?.order ?? 0,
 		estimated_hours: task?.estimated_hours ?? undefined,
+		actual_hours: task?.actual_hours ?? undefined,
 	};
 };
 
@@ -166,6 +169,11 @@ export const buildTaskDetailPayload = (value: TTaskDetailFormValues) => {
 			? Number(value.estimated_hours)
 			: null;
 
+	const actualHours =
+		value.actual_hours !== undefined && value.actual_hours !== null
+			? Number(value.actual_hours)
+			: null;
+
 	return {
 		dueDateIso,
 		payload: {
@@ -173,10 +181,12 @@ export const buildTaskDetailPayload = (value: TTaskDetailFormValues) => {
 			status_id: value.status_id,
 			type_id: value.type_id,
 			priority_id: value.priority_id,
+			parent_id: value.parent_id || null,
 			member_ids: value.member_ids,
 			description: value.description || null,
 			due_date: dueDateIso,
 			estimated_hours: estimatedHours,
+			actual_hours: actualHours,
 		},
 	};
 };
@@ -188,6 +198,7 @@ export const serializeTaskDetailFormValues = (value: TTaskDetailFormValues) =>
 		status_id: value.status_id,
 		type_id: value.type_id,
 		priority_id: value.priority_id,
+		parent_id: value.parent_id ?? null,
 		member_ids: value.member_ids,
 		due_date:
 			value.due_date instanceof Date ? value.due_date.toISOString() : null,
@@ -195,12 +206,17 @@ export const serializeTaskDetailFormValues = (value: TTaskDetailFormValues) =>
 			value.estimated_hours !== undefined && value.estimated_hours !== null
 				? Number(value.estimated_hours)
 				: null,
+		actual_hours:
+			value.actual_hours !== undefined && value.actual_hours !== null
+				? Number(value.actual_hours)
+				: null,
 	});
 
 export const cloneTaskDetailFormValues = (
 	value: TTaskDetailFormValues,
 ): TTaskDetailFormValues => ({
 	...value,
+	parent_id: value.parent_id ?? null,
 	member_ids: [...value.member_ids],
 	due_date:
 		value.due_date instanceof Date ? new Date(value.due_date) : new Date(),
@@ -226,7 +242,7 @@ export function mapTaskData(
 	return {
 		id: task.id,
 		project_id: task.project_id,
-		parent_id: null,
+		parent_id: task.parent_id ?? null,
 		title: task.title,
 		description: task.description ?? null,
 		status_id: task.status_id,
@@ -238,7 +254,6 @@ export function mapTaskData(
 		type_color: typeOpt?.color,
 		status_color: statusOpt?.color,
 		priority_color: priorityOpt?.color,
-		phase_id: task.phase_id ?? null,
 		task_members: task.task_members || [],
 		started_at: task.started_at
 			? new Date(task.started_at).toISOString()
@@ -262,5 +277,6 @@ export function mapTaskData(
 			task.estimated_hours != null ? Number(task.estimated_hours) : undefined,
 		actual_hours:
 			task.actual_hours != null ? Number(task.actual_hours) : undefined,
+		sub_tasks: task.sub_tasks?.map((subTask) => mapTaskData(subTask, options)),
 	};
 }

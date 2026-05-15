@@ -51,7 +51,7 @@ if (projects.length === 0) {
         <EmptyTitle>No projects yet</EmptyTitle>
         <EmptyDescription>Create a project to start planning work.</EmptyDescription>
       </EmptyHeader>
-      <EmptyContent>
+      <EmptyContent> // only display when you have action button, dont display if only has description
         <Button>Create project</Button>
       </EmptyContent>
     </Empty>

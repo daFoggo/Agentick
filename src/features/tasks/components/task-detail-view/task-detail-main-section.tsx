@@ -8,17 +8,23 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
+import type { ITaskListDialogOptions, TTask } from "@/features/tasks";
 import type { TTaskDetailFormApi } from "@/features/tasks/schemas";
 import { TaskActivity } from "./task-activity";
+import { TaskSubTasksSection } from "./task-sub-tasks-section";
 
 interface ITaskDetailMainSectionProps {
 	form: TTaskDetailFormApi;
+	task?: TTask;
 	taskId?: string;
+	options: ITaskListDialogOptions;
 }
 
 export const TaskDetailMainSection = ({
 	form,
+	task,
 	taskId,
+	options,
 }: ITaskDetailMainSectionProps) => {
 	return (
 		<div className="space-y-6 lg:col-span-3">
@@ -51,6 +57,8 @@ export const TaskDetailMainSection = ({
 					}}
 				</form.Field>
 			</FieldGroup>
+
+			<TaskSubTasksSection task={task} options={options} />
 
 			<TaskActivity taskId={taskId} />
 		</div>

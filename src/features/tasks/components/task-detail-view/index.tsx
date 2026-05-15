@@ -27,20 +27,25 @@ import { TaskDetailSidebarSection } from "./task-detail-sidebar-section";
 interface ITaskDetailViewProps {
 	task?: TTask;
 	options: ITaskListDialogOptions;
+	parentTaskOptions?: TTask[];
 	isLoading?: boolean;
 	defaultStatusId?: string;
+	defaultParentId?: string | null;
 }
 
 export const TaskDetailView = ({
 	task,
 	options,
+	parentTaskOptions = [],
 	isLoading,
 	defaultStatusId,
+	defaultParentId,
 }: ITaskDetailViewProps) => {
 	const navigate = useNavigate();
 	const { teamId, projectId } = useParams({ strict: false });
 	const search = useSearch({ strict: false });
 	const redirectTo = (search as any).redirect_to;
+	const parentTaskId = (search as any).parent_task_id;
 	const { update, remove, estimate, create } = useTaskMutations();
 
 	const navigateBack = (overrideProjectId?: string) => {
@@ -78,6 +83,23 @@ export const TaskDetailView = ({
 					...common,
 				});
 				break;
+			case "task":
+				if (parentTaskId) {
+					navigate({
+						to: "/dashboard/$teamId/projects/$projectId/tasks/$taskId",
+						params: {
+							...common.params,
+							taskId: parentTaskId,
+						},
+						search: { redirect_to: "list" } as any,
+					});
+					break;
+				}
+				navigate({
+					to: "/dashboard/$teamId/projects/$projectId/list",
+					...common,
+				});
+				break;
 			default:
 				navigate({
 					to: "/dashboard/$teamId/projects/$projectId/list",
@@ -93,6 +115,7 @@ export const TaskDetailView = ({
 		task,
 		options,
 		defaultStatusId,
+		defaultParentId,
 	);
 	const lastSavedSignatureRef = useRef(
 		serializeTaskDetailFormValues(defaultValues),
@@ -321,10 +344,17 @@ export const TaskDetailView = ({
 					/>
 					<CardContent>
 						<div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
-							<TaskDetailMainSection form={form} taskId={task?.id} />
+							<TaskDetailMainSection
+								form={form}
+								task={task}
+								taskId={task?.id}
+								options={options}
+							/>
 							<TaskDetailSidebarSection
 								form={form}
+								task={task}
 								options={options}
+								parentTaskOptions={parentTaskOptions}
 								aiExplanation={aiExplanation}
 								isEstimating={estimate.isPending}
 								onAIEstimate={handleAIEstimate}

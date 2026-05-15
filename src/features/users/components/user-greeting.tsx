@@ -1,5 +1,10 @@
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
-import { AlertCircle, PackageCheck, SlidersHorizontal, Users } from "lucide-react";
+import {
+	AlertCircle,
+	PackageCheck,
+	SlidersHorizontal,
+	Users,
+} from "lucide-react";
 import { memo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {

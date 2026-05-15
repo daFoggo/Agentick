@@ -7,7 +7,6 @@ import {
 	FindPageSizeWithAllSchema,
 } from "@/lib/zod-common";
 import type { TBaseFindResponse, TBaseSearchOptions } from "@/types/api";
-import type { TPhase } from "../phases";
 import type { TProjectMember } from "../project-members";
 import type {
 	TTaskPriority as TTaskPriorityOption,
@@ -54,7 +53,6 @@ export const TaskSchema = z.object({
 	type_id: z.string(),
 	priority_id: z.string(),
 	// Removed assigner_id and assignee_ids
-	phase_id: z.string().nullable(),
 	started_at: ApiDateSchema.nullable().optional(),
 	completed_at: ApiDateSchema.nullable().optional(),
 	due_date: ApiDateSchema.nullable().optional(),
@@ -94,8 +92,8 @@ export const TaskSchema = z.object({
  */
 export type TTask = z.infer<typeof TaskSchema> & {
 	tags?: TTaskTag[];
-	phase?: TPhase;
 	task_members?: TTaskMember[];
+	sub_tasks?: TTask[];
 	type_color?: string;
 	status_color?: string;
 	priority_color?: string;
@@ -113,7 +111,6 @@ export const CreateTaskSchema = z.object({
 	type_id: z.string(),
 	priority_id: z.string(),
 	member_ids: z.array(z.string()).optional(), // Dùng thay cho assignee_ids
-	phase_id: z.string().nullable().optional(),
 	started_at: ApiDateSchema.optional().nullable(), // Nay có thể optional lúc tạo
 	due_date: ApiDateSchema,
 	order: z.number().int(),
@@ -132,6 +129,7 @@ export type TTaskDetailFormValues = Omit<
 	due_date: Date;
 	member_ids: string[];
 	estimated_hours?: number;
+	actual_hours?: number;
 };
 
 export type TTaskDetailFormApi = ReactFormApi<

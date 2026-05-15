@@ -1,6 +1,5 @@
 export * from "./components/my-projects-grid";
 export * from "./components/my-projects-list";
-export * from "./components/project-ai-summary";
 export * from "./components/project-settings";
 export * from "./components/project-status-update";
 export * from "./components/project-task-stats-card";

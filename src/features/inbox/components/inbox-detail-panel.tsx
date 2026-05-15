@@ -10,7 +10,6 @@ import {
 import { CardDescription } from "@/components/ui/card";
 import {
 	Empty,
-	EmptyContent,
 	EmptyDescription,
 	EmptyHeader,
 	EmptyMedia,
@@ -68,9 +67,6 @@ export const InboxDetailPanel = ({ item }: IInboxDetailPanelProps) => {
 							Select an inbox item to view details
 						</EmptyDescription>
 					</EmptyHeader>
-					<EmptyContent>
-						Choose a message from the inbox list to inspect its context.
-					</EmptyContent>
 				</Empty>
 			</div>
 		);

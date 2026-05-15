@@ -5,21 +5,35 @@ import { z } from "zod";
 
 import { projectMembersQueryOptions } from "@/features/project-members";
 import { taskConfigQueries } from "@/features/task-config";
-import { TaskDetailView, taskQueryOptions } from "@/features/tasks";
+import {
+	TaskDetailView,
+	taskQueryOptions,
+	tasksQueryOptions,
+} from "@/features/tasks";
 
 export const Route = createFileRoute(
 	"/dashboard/$teamId/projects/$projectId/tasks/$taskId",
 )({
 	validateSearch: z.object({
 		redirect_to: z.string().optional(),
+		parent_task_id: z.string().optional(),
 	}),
 	loader: async ({ context, params }) => {
 		const { projectId, taskId } = params;
 		const commonParams = { page: 1, page_size: "all" } as const;
+		const taskListParams = {
+			ordering: "-id",
+			page: 1,
+			page_size: "all",
+			is_deleted__eq: false,
+		} as const;
 
 		// Standard Loader Prefetching Pattern from Rule 1
 		await Promise.all([
 			context.queryClient.ensureQueryData(taskQueryOptions(projectId, taskId)),
+			context.queryClient.ensureQueryData(
+				tasksQueryOptions(projectId, taskListParams),
+			),
 			context.queryClient.ensureQueryData(
 				taskConfigQueries.statuses(projectId, commonParams),
 			),
@@ -44,12 +58,19 @@ export const Route = createFileRoute(
 function TaskDetailPageOrchestrator() {
 	const { projectId, taskId } = Route.useParams();
 	const commonParams = { page: 1, page_size: "all" } as const;
+	const taskListParams = {
+		ordering: "-id",
+		page: 1,
+		page_size: "all",
+		is_deleted__eq: false,
+	} as const;
 
 	// Using React Suspense Queries ensures safe immediate state access since data preloaded above
-	const [taskRes, statusesRes, typesRes, prioritiesRes, membersRes] =
+	const [taskRes, tasksRes, statusesRes, typesRes, prioritiesRes, membersRes] =
 		useSuspenseQueries({
 			queries: [
 				taskQueryOptions(projectId, taskId),
+				tasksQueryOptions(projectId, taskListParams),
 				taskConfigQueries.statuses(projectId, commonParams),
 				taskConfigQueries.types(projectId, commonParams),
 				taskConfigQueries.priorities(projectId, commonParams),
@@ -62,6 +83,7 @@ function TaskDetailPageOrchestrator() {
 	const types = typesRes.data?.founds ?? [];
 	const priorities = prioritiesRes.data?.founds ?? [];
 	const members = membersRes.data?.founds ?? [];
+	const parentTaskOptions = tasksRes.data?.founds ?? [];
 
 	const taskOptions = useMemo(
 		() => ({
@@ -75,5 +97,11 @@ function TaskDetailPageOrchestrator() {
 
 	if (!task) return <div>Task not found</div>;
 
-	return <TaskDetailView task={task} options={taskOptions} />;
+	return (
+		<TaskDetailView
+			task={task}
+			options={taskOptions}
+			parentTaskOptions={parentTaskOptions}
+		/>
+	);
 }

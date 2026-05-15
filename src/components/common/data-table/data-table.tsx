@@ -11,10 +11,22 @@ import {
 	getGroupedRowModel,
 	getPaginationRowModel,
 	type PaginationState,
+	type Row,
 	type RowSelectionState,
+	type Table as TanStackTable,
 	useReactTable,
 } from "@tanstack/react-table";
+import { X } from "lucide-react";
 import { memo, useEffect, useMemo, useState } from "react";
+import {
+	ActionBar,
+	ActionBarClose,
+	ActionBarGroup,
+	ActionBarItem,
+	type ActionBarProps,
+	ActionBarSelection,
+	ActionBarSeparator,
+} from "@/components/ui/action-bar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
@@ -23,6 +35,13 @@ import { DataTableGroupRow } from "./data-table-group-row";
 import { DataTableHeaderCell } from "./data-table-header-cell";
 import { DataTablePagination } from "./data-table-pagination";
 import { DataTableRow } from "./data-table-row";
+
+export interface IDataTableSelectionActionBarRenderProps<TData> {
+	table: TanStackTable<TData>;
+	selectedRows: Row<TData>[];
+	selectedCount: number;
+	clearSelection: () => void;
+}
 
 export interface IDataTableProps<TData> {
 	data: TData[];
@@ -46,6 +65,11 @@ export interface IDataTableProps<TData> {
 	enableRowSelection?: boolean;
 	enableColumnReorder?: boolean;
 	enableColumnPinning?: boolean;
+	showSelectionActionBar?: boolean;
+	selectionActionBarProps?: Omit<ActionBarProps, "open" | "onOpenChange">;
+	renderSelectionActionBar?: (
+		props: IDataTableSelectionActionBarRenderProps<TData>,
+	) => React.ReactNode;
 	className?: string;
 	wrapperClassName?: string;
 	getRowId?: (row: TData) => string;
@@ -74,6 +98,9 @@ const DataTableInner = <TData,>({
 	showRowsPerPage = true,
 	showSelectedCount = true,
 	enableRowSelection = false,
+	showSelectionActionBar = enableRowSelection,
+	selectionActionBarProps,
+	renderSelectionActionBar,
 	className,
 	wrapperClassName,
 	getRowId,
@@ -238,6 +265,15 @@ const DataTableInner = <TData,>({
 	const allHeaderGroups = table.getHeaderGroups();
 	const rows = table.getRowModel().rows;
 	const totalCols = table.getAllLeafColumns().length;
+	const selectedRows = table.getFilteredSelectedRowModel().rows;
+	const selectedCount = selectedRows.length;
+	const clearSelection = () => table.resetRowSelection();
+	const selectionActionBarContext = {
+		table,
+		selectedRows,
+		selectedCount,
+		clearSelection,
+	} satisfies IDataTableSelectionActionBarRenderProps<TData>;
 
 	return (
 		<div
@@ -317,6 +353,41 @@ const DataTableInner = <TData,>({
 						enablePagination={enablePagination}
 					/>
 				</div>
+			)}
+
+			{showSelectionActionBar && (
+				<ActionBar
+					open={selectedCount > 0}
+					onOpenChange={(open) => {
+						if (!open) clearSelection();
+					}}
+					{...selectionActionBarProps}
+				>
+					{renderSelectionActionBar ? (
+						renderSelectionActionBar(selectionActionBarContext)
+					) : (
+						<>
+							<ActionBarSelection>
+								{selectedCount.toLocaleString()} selected
+							</ActionBarSelection>
+							<ActionBarSeparator />
+							<ActionBarGroup>
+								<ActionBarItem
+									variant="ghost"
+									onSelect={(event) => {
+										event.preventDefault();
+										clearSelection();
+									}}
+								>
+									Clear selection
+								</ActionBarItem>
+							</ActionBarGroup>
+							<ActionBarClose aria-label="Clear selection">
+								<X className="size-3.5" />
+							</ActionBarClose>
+						</>
+					)}
+				</ActionBar>
 			)}
 		</div>
 	);

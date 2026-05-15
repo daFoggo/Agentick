@@ -1,4 +1,5 @@
 /** biome-ignore-all lint/correctness/useExhaustiveDependencies: <idjk> */
+
 import { useQuery } from "@tanstack/react-query";
 import { format, formatDistanceToNow, isValid } from "date-fns";
 import {
@@ -15,7 +16,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
 	Empty,
-	EmptyContent,
 	EmptyDescription,
 	EmptyHeader,
 	EmptyMedia,
@@ -139,9 +139,6 @@ export const TaskActivity = ({ taskId }: ITaskActivityProps) => {
 											Modify your task or add comments to track updates.
 										</EmptyDescription>
 									</EmptyHeader>
-									<EmptyContent>
-										Add a comment or update the task to start the activity log.
-									</EmptyContent>
 								</Empty>
 							</div>
 						) : (
