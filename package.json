@@ -34,6 +34,7 @@
 		"@tanstack/react-table": "^8.21.3",
 		"@tanstack/router-plugin": "^1.166.13",
 		"@tiptap/extension-link": "^3.23.4",
+		"@tiptap/extension-list": "^3.23.4",
 		"@tiptap/extension-placeholder": "^3.23.4",
 		"@tiptap/extension-typography": "^3.23.4",
 		"@tiptap/markdown": "^3.23.4",

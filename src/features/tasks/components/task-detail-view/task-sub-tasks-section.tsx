@@ -3,6 +3,7 @@ import { CalendarDays, GitBranch, ListTree, Plus } from "lucide-react";
 import { TaskPriorityBadge } from "@/components/common/task-priority-badge";
 import { TaskStatusBadge } from "@/components/common/task-status-badge";
 import { TaskTypeBadge } from "@/components/common/task-type-badge";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
 	Empty,
@@ -13,14 +14,26 @@ import {
 	EmptyTitle,
 } from "@/components/ui/empty";
 import {
+	Item,
+	ItemActions,
+	ItemContent,
+	ItemDescription,
+	ItemGroup,
+	ItemMedia,
+	ItemTitle,
+} from "@/components/ui/item";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
 	formatCalendarDate,
 	type ITaskListDialogOptions,
 	type TTask,
 } from "@/features/tasks";
 
-interface TaskSubTasksSectionProps {
+interface ITaskSubTasksSectionProps {
 	task?: TTask;
-	options: ITaskListDialogOptions;
+	options?: ITaskListDialogOptions;
+	parentTaskOptions?: TTask[];
+	isLoading?: boolean;
 }
 
 const getOptionById = <T extends { id: string; name: string; color?: string }>(
@@ -31,13 +44,19 @@ const getOptionById = <T extends { id: string; name: string; color?: string }>(
 export function TaskSubTasksSection({
 	task,
 	options,
-}: TaskSubTasksSectionProps) {
+	parentTaskOptions = [],
+	isLoading,
+}: ITaskSubTasksSectionProps) {
 	const navigate = useNavigate();
 	const { teamId, projectId } = useParams({ strict: false });
 
-	if (!task) return null;
+	if (isLoading) return <TaskSubTasksSectionSkeleton />;
+	if (!task || !options) return null;
 
-	const subTasks = task.sub_tasks ?? [];
+	const subTasks =
+		task.sub_tasks && task.sub_tasks.length > 0
+			? task.sub_tasks
+			: parentTaskOptions.filter((t) => t.parent_id === task.id);
 	const targetTeamId = teamId || "personal";
 	const targetProjectId = projectId || task.project_id;
 
@@ -52,7 +71,7 @@ export function TaskSubTasksSection({
 				parent_id: task.id,
 				parent_task_id: task.id,
 				redirect_to: "task",
-			} as any,
+			} as Record<string, string>,
 		});
 	};
 
@@ -67,19 +86,17 @@ export function TaskSubTasksSection({
 			search: {
 				parent_task_id: task.id,
 				redirect_to: "task",
-			} as any,
+			} as Record<string, string>,
 		});
 	};
 
 	return (
-		<section data-slot="task-sub-tasks-section" className="space-y-3">
-			<div className="flex items-center justify-between gap-3">
+		<section data-slot="task-sub-tasks-section" className="space-y-2">
+			<div className="flex items-center justify-between gap-2">
 				<div className="flex items-center gap-2">
 					<ListTree className="size-4 text-muted-foreground" />
 					<h2 className="text-sm font-medium">Sub-tasks</h2>
-					<span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-						{subTasks.length}
-					</span>
+					<Badge variant="secondary">{subTasks.length}</Badge>
 				</div>
 				<Button
 					type="button"
@@ -93,7 +110,7 @@ export function TaskSubTasksSection({
 			</div>
 
 			{subTasks.length === 0 ? (
-				<Empty className="min-h-44 border border-dashed shadow-none">
+				<Empty className="min-h-40 border border-dashed shadow-none">
 					<EmptyHeader>
 						<EmptyMedia variant="icon">
 							<GitBranch />
@@ -111,7 +128,7 @@ export function TaskSubTasksSection({
 					</EmptyContent>
 				</Empty>
 			) : (
-				<div className="divide-y rounded-lg border">
+				<ItemGroup>
 					{subTasks.map((subTask) => {
 						const status = getOptionById(options.statuses, subTask.status_id);
 						const type = getOptionById(options.types, subTask.type_id);
@@ -121,51 +138,75 @@ export function TaskSubTasksSection({
 						);
 
 						return (
-							<button
+							<Item
+								asChild
 								key={subTask.id}
-								type="button"
-								className="flex w-full items-center gap-3 px-3 py-3 text-left transition-colors hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
-								onClick={() => navigateToSubTask(subTask)}
+								className="cursor-pointer hover:bg-muted/60"
+								size="xs"
 							>
-								<GitBranch className="size-4 shrink-0 text-muted-foreground" />
-								<div className="min-w-0 flex-1 space-y-2">
-									<div className="truncate text-sm font-medium">
-										{subTask.title}
-									</div>
-									<div className="flex flex-wrap items-center gap-2">
-										<TaskStatusBadge
-											name={status?.name || "Unknown"}
-											color={status?.color}
-											className="max-w-32"
-										/>
-										{type ? (
-											<TaskTypeBadge
-												name={type.name}
-												color={type.color}
-												typeVariant="subtle"
+								<button
+									type="button"
+									onClick={() => navigateToSubTask(subTask)}
+									className="text-left"
+								>
+									<ItemMedia variant="icon">
+										<GitBranch className="text-muted-foreground" />
+									</ItemMedia>
+									<ItemContent>
+										<ItemTitle>{subTask.title}</ItemTitle>
+										<ItemDescription className="flex flex-wrap items-center gap-2 mt-1">
+											<TaskStatusBadge
+												name={status?.name || "Unknown"}
+												color={status?.color}
 												className="max-w-32"
 											/>
-										) : null}
-										{priority ? (
-											<TaskPriorityBadge
-												name={priority.name}
-												color={priority.color}
-												className="max-w-32"
-											/>
-										) : null}
-									</div>
-								</div>
-								<div className="hidden shrink-0 items-center gap-1.5 text-xs text-muted-foreground sm:flex">
-									<CalendarDays className="size-3.5" />
-									{subTask.due_date
-										? formatCalendarDate(new Date(subTask.due_date))
-										: "No due date"}
-								</div>
-							</button>
+											{type ? (
+												<TaskTypeBadge
+													name={type.name}
+													color={type.color}
+													className="max-w-32"
+												/>
+											) : null}
+											{priority ? (
+												<TaskPriorityBadge
+													name={priority.name}
+													color={priority.color}
+													className="max-w-32"
+												/>
+											) : null}
+										</ItemDescription>
+									</ItemContent>
+									<ItemActions className="hidden text-muted-foreground sm:flex">
+										<CalendarDays className="size-3.5" />
+										{subTask.due_date
+											? formatCalendarDate(new Date(subTask.due_date))
+											: "No due date"}
+									</ItemActions>
+								</button>
+							</Item>
 						);
 					})}
-				</div>
+				</ItemGroup>
 			)}
+		</section>
+	);
+}
+
+export function TaskSubTasksSectionSkeleton() {
+	return (
+		<section data-slot="task-sub-tasks-section-skeleton" className="space-y-2">
+			<div className="flex items-center justify-between gap-2">
+				<div className="flex items-center gap-2">
+					<Skeleton className="size-4" />
+					<Skeleton className="h-5 w-24" />
+				</div>
+				<Skeleton className="h-8 w-28" />
+			</div>
+			<ItemGroup>
+				<Skeleton className="h-14 w-full rounded-lg" />
+				<Skeleton className="h-14 w-full rounded-lg" />
+				<Skeleton className="h-14 w-full rounded-lg" />
+			</ItemGroup>
 		</section>
 	);
 }

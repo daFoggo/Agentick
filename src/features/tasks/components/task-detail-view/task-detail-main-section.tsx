@@ -17,6 +17,8 @@ interface ITaskDetailMainSectionProps {
 	task?: TTask;
 	taskId?: string;
 	options: ITaskListDialogOptions;
+	parentTaskOptions?: TTask[];
+	isLoading?: boolean;
 }
 
 export const TaskDetailMainSection = ({
@@ -24,6 +26,8 @@ export const TaskDetailMainSection = ({
 	task,
 	taskId,
 	options,
+	parentTaskOptions = [],
+	isLoading,
 }: ITaskDetailMainSectionProps) => {
 	return (
 		<div className="space-y-6 lg:col-span-3">
@@ -47,7 +51,8 @@ export const TaskDetailMainSection = ({
 									onBlur={field.handleBlur}
 									onChange={(value) => field.handleChange(value)}
 									placeholder="Add a detailed description..."
-									className="min-h-40"
+									contentClassName="max-h-60 overflow-y-auto"
+									editorClassName="min-h-40"
 									aria-invalid={isInvalid}
 								/>
 								<FieldError errors={field.state.meta.errors} />
@@ -57,9 +62,14 @@ export const TaskDetailMainSection = ({
 				</form.Field>
 			</FieldGroup>
 
-			<TaskSubTasksSection task={task} options={options} />
+			<TaskSubTasksSection
+				task={task}
+				options={options}
+				parentTaskOptions={parentTaskOptions}
+				isLoading={isLoading}
+			/>
 
-			<TaskActivity taskId={taskId} />
+			{taskId && <TaskActivity taskId={taskId} />}
 		</div>
 	);
 };

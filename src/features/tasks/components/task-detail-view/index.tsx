@@ -349,6 +349,8 @@ export const TaskDetailView = ({
 								task={task}
 								taskId={task?.id}
 								options={options}
+								parentTaskOptions={parentTaskOptions}
+								isLoading={isLoading}
 							/>
 							<TaskDetailSidebarSection
 								form={form}

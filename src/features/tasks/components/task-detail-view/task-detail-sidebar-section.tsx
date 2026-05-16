@@ -166,7 +166,6 @@ export const TaskDetailSidebarSection = ({
 											))}
 										</SelectContent>
 									</Select>
-
 								</div>
 								<FieldError errors={field.state.meta.errors} />
 							</Field>
@@ -396,42 +395,44 @@ export const TaskDetailSidebarSection = ({
 					}}
 				</form.Field>
 
-				<form.Field name="actual_hours">
-					{(field: AnyFieldApi) => {
-						const isInvalid =
-							field.state.meta.isTouched && !!field.state.meta.errors.length;
+				{task && (
+					<form.Field name="actual_hours">
+						{(field: AnyFieldApi) => {
+							const isInvalid =
+								field.state.meta.isTouched && !!field.state.meta.errors.length;
 
-						return (
-							<Field
-								data-invalid={isInvalid}
-								orientation="horizontal"
-								className="gap-4"
-							>
-								<FieldLabel htmlFor={field.name} className="w-32 flex-none!">
-									<div className="flex items-center gap-2">
-										<Timer className="size-3.5 text-muted-foreground" />
-										Act. Hours
-									</div>
-								</FieldLabel>
-								<Input
-									id={field.name}
-									type="number"
-									step="0.1"
-									min="0"
-									className="w-24"
-									value={field.state.value ?? ""}
-									onChange={(e) => {
-										const val = e.target.value;
-										field.handleChange(val === "" ? undefined : Number(val));
-									}}
-									aria-invalid={isInvalid}
-									placeholder="Hours"
-								/>
-								<FieldError errors={field.state.meta.errors} />
-							</Field>
-						);
-					}}
-				</form.Field>
+							return (
+								<Field
+									data-invalid={isInvalid}
+									orientation="horizontal"
+									className="gap-4"
+								>
+									<FieldLabel htmlFor={field.name} className="w-32 flex-none!">
+										<div className="flex items-center gap-2">
+											<Timer className="size-3.5 text-muted-foreground" />
+											Act. Hours
+										</div>
+									</FieldLabel>
+									<Input
+										id={field.name}
+										type="number"
+										step="0.1"
+										min="0"
+										className="w-24"
+										value={field.state.value ?? ""}
+										onChange={(e) => {
+											const val = e.target.value;
+											field.handleChange(val === "" ? undefined : Number(val));
+										}}
+										aria-invalid={isInvalid}
+										placeholder="Hours"
+									/>
+									<FieldError errors={field.state.meta.errors} />
+								</Field>
+							);
+						}}
+					</form.Field>
+				)}
 
 				{task?.started_at && (
 					<Field orientation="horizontal" className="gap-4">

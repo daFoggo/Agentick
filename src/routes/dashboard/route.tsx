@@ -43,7 +43,7 @@ function DashboardLayout() {
 	const isFixedHeight = matches.some((m) => m.staticData.fixedHeight);
 
 	return (
-		<SidebarProvider className="h-svh overflow-hidden">
+		<SidebarProvider className="h-svh overflow-hidden" disableKeyboardShortcut>
 			<AppSidebar />
 			<SidebarInset
 				className={cn("h-full min-w-0", !isFixedHeight && "overflow-y-auto")}

@@ -2,13 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { format, formatDistanceToNow, isValid } from "date-fns";
-import {
-	ArrowUp,
-	Loader2,
-	Logs,
-	MoreHorizontal,
-	TriangleAlert,
-} from "lucide-react";
+import { Logs, MoreHorizontal, TriangleAlert } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { MarkdownEditor } from "@/components/common/markdown-editor";
@@ -23,11 +17,7 @@ import {
 	EmptyMedia,
 	EmptyTitle,
 } from "@/components/ui/empty";
-import {
-	InputGroup,
-	InputGroupAddon,
-	InputGroupButton,
-} from "@/components/ui/input-group";
+import { InputGroup, InputGroupAddon } from "@/components/ui/input-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { taskActivitiesQueryOptions, useTaskMutations } from "@/features/tasks";
@@ -37,14 +27,28 @@ interface ITaskActivityProps {
 	taskId?: string;
 }
 
+export interface ITaskActivityLog {
+	id: string;
+	activity_type: string;
+	user?: {
+		name?: string;
+		avatar_url?: string;
+	};
+	created_at: string;
+	content?: string;
+	new_value?: unknown;
+	old_value?: unknown;
+	field_name?: string;
+}
+
 const formatActivityDate = (dateStr: string) => {
 	const d = new Date(dateStr);
 	if (!isValid(d)) return "some time ago";
 	return formatDistanceToNow(d, { addSuffix: true });
 };
 
-const formatValue = (val: any) => {
-	if (!val) return "None";
+const formatValue = (val: unknown) => {
+	if (val === null || val === undefined || val === "") return "None";
 	return String(val);
 };
 
@@ -119,7 +123,7 @@ export const TaskActivity = ({ taskId }: ITaskActivityProps) => {
 		<div className="flex flex-col gap-2">
 			<p className="text-lg font-semibold tracking-tight">Activity</p>
 
-			<ScrollArea className={hasActivities ? "h-90 pr-4" : "pr-4"}>
+			<ScrollArea className={hasActivities ? "h-40 pr-4" : "pr-4"}>
 				{/* Main unified coordinate space spans entire height, full width */}
 				<div className="flex flex-col gap-4">
 					{/* 1. Relative block ONLY for historical entries + vertical timeline line */}
@@ -143,7 +147,7 @@ export const TaskActivity = ({ taskId }: ITaskActivityProps) => {
 								</Empty>
 							</div>
 						) : (
-							timelineItems.map((activity: any) => {
+							timelineItems.map((activity: ITaskActivityLog) => {
 								const isComment = activity.activity_type === "comment";
 								const userName = activity.user?.name || "Someone";
 
@@ -232,7 +236,8 @@ export const TaskActivity = ({ taskId }: ITaskActivityProps) => {
 									let formattedValue = formatValue(activity.new_value);
 									if (
 										activity.field_name === "due_date" &&
-										activity.new_value
+										activity.new_value &&
+										typeof activity.new_value === "string"
 									) {
 										try {
 											const d = new Date(activity.new_value);
@@ -263,7 +268,7 @@ export const TaskActivity = ({ taskId }: ITaskActivityProps) => {
 										<span className="text-muted-foreground">
 											added{" "}
 											<span className="font-semibold text-foreground">
-												{activity.new_value}
+												{formatValue(activity.new_value)}
 											</span>{" "}
 											to this task
 										</span>
@@ -273,7 +278,7 @@ export const TaskActivity = ({ taskId }: ITaskActivityProps) => {
 										<span className="text-muted-foreground">
 											removed{" "}
 											<span className="font-semibold text-foreground">
-												{activity.old_value}
+												{formatValue(activity.old_value)}
 											</span>{" "}
 											from this task
 										</span>
@@ -312,25 +317,10 @@ export const TaskActivity = ({ taskId }: ITaskActivityProps) => {
 				value={commentText}
 				onChange={setCommentText}
 				containerClassName="bg-card dark:bg-card"
-				className="min-h-20"
-				footer={
-					<div className="flex justify-end">
-						<InputGroupButton
-							type="button"
-							variant="default"
-							size="icon-sm"
-							disabled={!commentText.trim() || addComment.isPending}
-							onClick={() => handleSendComment()}
-							aria-label="Send comment"
-						>
-							{addComment.isPending ? (
-								<Loader2 className="size-4 animate-spin" />
-							) : (
-								<ArrowUp className="size-4" />
-							)}
-						</InputGroupButton>
-					</div>
-				}
+				contentClassName="max-h-40 overflow-y-auto"
+				editorClassName="min-h-20"
+				onSubmit={handleSendComment}
+				isSubmitPending={addComment.isPending}
 				placeholder="Add comment... (Press Ctrl + Enter to send)"
 				onModEnter={handleSendComment}
 			/>

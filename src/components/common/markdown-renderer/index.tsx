@@ -22,7 +22,7 @@ interface IMarkdownRendererProps extends RenderMarkdownOptions {
 }
 
 export const markdownContentClassName = cn(
-	"max-w-none break-words text-sm leading-6 text-foreground",
+	"markdown-content max-w-none break-words text-sm leading-6 text-foreground",
 	"[&_a]:font-medium [&_a]:text-primary [&_a]:underline-offset-4 hover:[&_a]:underline",
 	"[&_blockquote]:border-l-2 [&_blockquote]:border-border [&_blockquote]:pl-3 [&_blockquote]:text-muted-foreground",
 	"[&_code]:rounded [&_code]:bg-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.85em]",

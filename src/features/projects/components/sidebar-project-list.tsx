@@ -9,7 +9,7 @@ import {
 	Plus,
 	TextAlignStart,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Area, AreaChart } from "recharts";
 import { Button } from "@/components/ui/button";
 import type { ChartConfig } from "@/components/ui/chart";
@@ -59,11 +59,18 @@ export const SidebarProjectList = () => {
 	const [isCreateProjectDialogOpen, setIsCreateProjectDialogOpen] =
 		useState(false);
 
+	const [isMounted, setIsMounted] = useState(false);
+	useEffect(() => {
+		setIsMounted(true);
+	}, []);
+
 	const {
 		data: projectsData,
 		isLoading,
 		error,
 	} = useQuery(projectsQueryOptions({ team_id__eq: teamId }));
+
+	const isInitialLoading = isLoading || !isMounted;
 
 	const projects = projectsData?.founds ?? [];
 	const visibleProjects = projects.slice(0, VISIBLE_PROJECT_LIMIT);
@@ -79,8 +86,8 @@ export const SidebarProjectList = () => {
 	return (
 		<SidebarGroup>
 			<SidebarGroupLabel>Projects</SidebarGroupLabel>
-			<SidebarMenu className="gap-0.5">
-				{isLoading &&
+			<SidebarMenu className="gap-0.5" suppressHydrationWarning>
+				{isInitialLoading &&
 					["project-skeleton-1", "project-skeleton-2"].map((key) => (
 						<SidebarMenuItem key={key}>
 							<SidebarMenuButton disabled>
@@ -90,20 +97,20 @@ export const SidebarProjectList = () => {
 						</SidebarMenuItem>
 					))}
 
-				{!isLoading && !!error && (
+				{!isInitialLoading && !!error && (
 					<div className="flex items-center gap-1.5 px-2 py-1 text-xs text-destructive">
 						<AlertCircle className="size-3.5 shrink-0" />
 						<span className="truncate">Failed to load projects</span>
 					</div>
 				)}
 
-				{!isLoading && !error && projects.length === 0 && (
+				{!isInitialLoading && !error && projects.length === 0 && (
 					<div className="px-2 py-1 text-xs text-muted-foreground">
 						You have no projects yet.
 					</div>
 				)}
 
-				{!isLoading &&
+				{!isInitialLoading &&
 					visibleProjects.map((project) => (
 						<SidebarMenuItem key={project.id}>
 							<Link
@@ -140,7 +147,7 @@ export const SidebarProjectList = () => {
 						</SidebarMenuItem>
 					))}
 
-				{!isLoading && (
+				{!isInitialLoading && (
 					<SidebarMenuItem>
 						{hasMoreProjects ? (
 							<MoreProjectsPopover
