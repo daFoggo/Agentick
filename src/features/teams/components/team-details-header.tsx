@@ -8,6 +8,8 @@ import type { TTeamMember } from "@/features/team-members";
 import { InviteTeamMemberDialog } from "@/features/team-members";
 import { teamMembersQueryOptions } from "@/features/team-members/queries";
 import type { TTeam } from "@/features/teams";
+import { getTeamPermissions } from "@/features/teams/permissions";
+import { userMeQueryOptions } from "@/features/users";
 import { getErrorMessage } from "@/lib/error";
 
 export interface ITeamDetailsHeaderProps {
@@ -16,6 +18,12 @@ export interface ITeamDetailsHeaderProps {
 
 export function TeamDetailsHeader({ team }: ITeamDetailsHeaderProps) {
 	const [inviteOpen, setInviteOpen] = useState(false);
+	const {
+		data: currentUser,
+		isLoading: isCurrentUserLoading,
+		isError: isCurrentUserError,
+		error: currentUserError,
+	} = useQuery(userMeQueryOptions());
 	const {
 		data: membersData,
 		isLoading: isMembersLoading,
@@ -35,6 +43,9 @@ export function TeamDetailsHeader({ team }: ITeamDetailsHeaderProps) {
 	}
 
 	const members = membersData?.founds ?? [];
+	const permissions = getTeamPermissions(members, currentUser?.id);
+	const isPermissionLoading = isMembersLoading || isCurrentUserLoading;
+	const isPermissionError = isMembersError || isCurrentUserError;
 
 	return (
 		<div className="flex w-full items-center justify-between gap-4">
@@ -73,16 +84,37 @@ export function TeamDetailsHeader({ team }: ITeamDetailsHeaderProps) {
 					/>
 				)}
 
-				<Button onClick={() => setInviteOpen(true)}>
-					Invite
-					<UserPlus />
-				</Button>
+				{isCurrentUserError && !isMembersError && (
+					<div className="flex items-center gap-1.5 text-xs text-destructive">
+						<AlertCircle className="size-3.5 shrink-0" />
+						<span className="truncate">
+							{getErrorMessage(currentUserError, "Could not load permissions.")}
+						</span>
+					</div>
+				)}
 
-				<InviteTeamMemberDialog
-					teamId={team.id}
-					open={inviteOpen}
-					onOpenChange={setInviteOpen}
-				/>
+				{isPermissionLoading && !isPermissionError && (
+					<Skeleton className="h-9 w-20 rounded-md" />
+				)}
+
+				{permissions.canManageMembers &&
+					!isPermissionLoading &&
+					!isPermissionError && (
+						<Button onClick={() => setInviteOpen(true)}>
+							Invite
+							<UserPlus />
+						</Button>
+					)}
+
+				{permissions.canManageMembers &&
+					!isPermissionLoading &&
+					!isPermissionError && (
+						<InviteTeamMemberDialog
+							teamId={team.id}
+							open={inviteOpen}
+							onOpenChange={setInviteOpen}
+						/>
+					)}
 			</div>
 		</div>
 	);

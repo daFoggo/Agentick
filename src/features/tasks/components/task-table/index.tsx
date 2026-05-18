@@ -40,6 +40,7 @@ interface ITaskTableProps {
 	priorities: TTaskPriorityOption[];
 	groupBy?: string;
 	defaultPageSize?: number;
+	canManageTasks?: boolean;
 }
 
 const buildTaskTree = (tasks: TTask[]) => {
@@ -150,6 +151,7 @@ export const TaskTable = ({
 	priorities,
 	groupBy,
 	defaultPageSize = 20,
+	canManageTasks = true,
 }: ITaskTableProps) => {
 	const navigate = useNavigate();
 	const { teamId } = useParams({ strict: false });
@@ -167,7 +169,10 @@ export const TaskTable = ({
 		[members, statuses, types, priorities],
 	);
 
-	const columns = useMemo(() => getTaskColumns(tableOptions), [tableOptions]);
+	const columns = useMemo(
+		() => getTaskColumns(tableOptions, canManageTasks),
+		[tableOptions, canManageTasks],
+	);
 	const taskTree = useMemo(() => buildTaskTree(data), [data]);
 	const bulkDeleteCount = tasksToBulkDelete.length;
 
@@ -198,18 +203,20 @@ export const TaskTable = ({
 
 	return (
 		<div className="space-y-4">
-			<Button
-				onClick={() =>
-					navigate({
-						to: "/dashboard/$teamId/projects/$projectId/tasks/create",
-						params: { teamId: teamId || "personal", projectId },
-						search: { redirect_to: "list" } as any,
-					})
-				}
-			>
-				<Plus className="size-4" />
-				New Task
-			</Button>
+			{canManageTasks && (
+				<Button
+					onClick={() =>
+						navigate({
+							to: "/dashboard/$teamId/projects/$projectId/tasks/create",
+							params: { teamId: teamId || "personal", projectId },
+							search: { redirect_to: "list" } as any,
+						})
+					}
+				>
+					<Plus className="size-4" />
+					New Task
+				</Button>
+			)}
 
 			<DataTable<TTask>
 				data={taskTree}
@@ -227,10 +234,10 @@ export const TaskTable = ({
 				}
 				defaultGrouping={groupBy ? [groupBy] : []}
 				defaultColumnPinning={{
-					left: ["select", "title"],
-					right: ["actions"],
+					left: [canManageTasks ? "select" : "", "title"].filter(Boolean),
+					right: canManageTasks ? ["actions"] : [],
 				}}
-				enableRowSelection={true}
+				enableRowSelection={canManageTasks}
 				defaultPageSize={defaultPageSize}
 				enablePagination={false}
 				renderSelectionActionBar={({

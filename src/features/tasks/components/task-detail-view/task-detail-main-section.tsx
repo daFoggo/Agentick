@@ -19,6 +19,7 @@ interface ITaskDetailMainSectionProps {
 	options: ITaskListDialogOptions;
 	parentTaskOptions?: TTask[];
 	isLoading?: boolean;
+	canManageTasks?: boolean;
 }
 
 export const TaskDetailMainSection = ({
@@ -28,6 +29,7 @@ export const TaskDetailMainSection = ({
 	options,
 	parentTaskOptions = [],
 	isLoading,
+	canManageTasks = true,
 }: ITaskDetailMainSectionProps) => {
 	return (
 		<div className="space-y-6 lg:col-span-3">
@@ -54,6 +56,7 @@ export const TaskDetailMainSection = ({
 									contentClassName="max-h-60 overflow-y-auto"
 									editorClassName="min-h-40"
 									aria-invalid={isInvalid}
+									readOnly={!canManageTasks}
 								/>
 								<FieldError errors={field.state.meta.errors} />
 							</Field>
@@ -67,9 +70,10 @@ export const TaskDetailMainSection = ({
 				options={options}
 				parentTaskOptions={parentTaskOptions}
 				isLoading={isLoading}
+				canManageTasks={canManageTasks}
 			/>
 
-			{taskId && <TaskActivity taskId={taskId} />}
+			{taskId && <TaskActivity taskId={taskId} canComment={canManageTasks} />}
 		</div>
 	);
 };

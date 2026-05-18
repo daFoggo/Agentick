@@ -25,6 +25,7 @@ import { getErrorMessage } from "@/lib/error";
 
 interface ITaskActivityProps {
 	taskId?: string;
+	canComment?: boolean;
 }
 
 export interface ITaskActivityLog {
@@ -52,7 +53,10 @@ const formatValue = (val: unknown) => {
 	return String(val);
 };
 
-export const TaskActivity = ({ taskId }: ITaskActivityProps) => {
+export const TaskActivity = ({
+	taskId,
+	canComment = true,
+}: ITaskActivityProps) => {
 	const [commentText, setCommentText] = useState("");
 	const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -313,17 +317,19 @@ export const TaskActivity = ({ taskId }: ITaskActivityProps) => {
 				</div>
 			</ScrollArea>
 
-			<MarkdownEditor
-				value={commentText}
-				onChange={setCommentText}
-				containerClassName="bg-card dark:bg-card"
-				contentClassName="max-h-40 overflow-y-auto"
-				editorClassName="min-h-20"
-				onSubmit={handleSendComment}
-				isSubmitPending={addComment.isPending}
-				placeholder="Add comment... (Press Ctrl + Enter to send)"
-				onModEnter={handleSendComment}
-			/>
+			{canComment && (
+				<MarkdownEditor
+					value={commentText}
+					onChange={setCommentText}
+					containerClassName="bg-card dark:bg-card"
+					contentClassName="max-h-40 overflow-y-auto"
+					editorClassName="min-h-20"
+					onSubmit={handleSendComment}
+					isSubmitPending={addComment.isPending}
+					placeholder="Add comment... (Press Ctrl + Enter to send)"
+					onModEnter={handleSendComment}
+				/>
+			)}
 		</div>
 	);
 };

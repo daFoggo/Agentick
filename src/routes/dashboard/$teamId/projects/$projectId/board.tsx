@@ -1,9 +1,13 @@
 import { useSuspenseQueries } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { projectQueryOptions } from "@/features/projects";
+import {
+	getProjectPermissions,
+	projectQueryOptions,
+} from "@/features/projects";
 import { taskConfigQueries } from "@/features/task-config";
 import { mapTaskData, TaskKanban, tasksQueryOptions } from "@/features/tasks";
+import { userMeQueryOptions } from "@/features/users";
 import { useKanbanStore } from "@/stores/use-kanban-store";
 
 export const Route = createFileRoute(
@@ -15,6 +19,7 @@ export const Route = createFileRoute(
 
 		await Promise.all([
 			context.queryClient.ensureQueryData(projectQueryOptions(projectId)),
+			context.queryClient.ensureQueryData(userMeQueryOptions()),
 			context.queryClient.ensureQueryData(
 				tasksQueryOptions(projectId, {
 					ordering: "-id",
@@ -47,6 +52,7 @@ function ProjectBoardView() {
 
 	const [
 		projectRes,
+		currentUserRes,
 		tasksResponseRes,
 		statusesResponseRes,
 		typesResponseRes,
@@ -54,6 +60,7 @@ function ProjectBoardView() {
 	] = useSuspenseQueries({
 		queries: [
 			projectQueryOptions(projectId),
+			userMeQueryOptions(),
 			tasksQueryOptions(projectId, {
 				ordering: "-id",
 				page: 1,
@@ -67,6 +74,7 @@ function ProjectBoardView() {
 	});
 
 	const project = projectRes.data;
+	const currentUser = currentUserRes.data;
 	const tasksResponse = tasksResponseRes.data;
 	const statusesResponse = statusesResponseRes.data;
 	const typesResponse = typesResponseRes.data;
@@ -91,6 +99,7 @@ function ProjectBoardView() {
 	}, [prioritiesResponse]);
 
 	const members = useMemo(() => project.members ?? [], [project.members]);
+	const permissions = getProjectPermissions(project, currentUser?.id);
 
 	const [mounted, setMounted] = useState(false);
 	useEffect(() => {
@@ -133,6 +142,7 @@ function ProjectBoardView() {
 			statuses={taskOptions.statuses}
 			types={taskOptions.types}
 			priorities={taskOptions.priorities}
+			canManageTasks={permissions.canManageTasks}
 		/>
 	);
 }

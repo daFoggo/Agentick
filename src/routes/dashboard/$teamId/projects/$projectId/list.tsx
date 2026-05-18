@@ -1,10 +1,14 @@
 import { useSuspenseQueries } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { projectQueryOptions } from "@/features/projects/queries";
+import {
+	getProjectPermissions,
+	projectQueryOptions,
+} from "@/features/projects";
 import { taskConfigQueries } from "@/features/task-config";
 import { TaskTable, tasksQueryOptions } from "@/features/tasks";
 import { mapTaskData } from "@/features/tasks/helpers";
+import { userMeQueryOptions } from "@/features/users";
 
 export const Route = createFileRoute(
 	"/dashboard/$teamId/projects/$projectId/list",
@@ -15,6 +19,7 @@ export const Route = createFileRoute(
 
 		await Promise.all([
 			context.queryClient.ensureQueryData(projectQueryOptions(projectId)),
+			context.queryClient.ensureQueryData(userMeQueryOptions()),
 			context.queryClient.ensureQueryData(
 				tasksQueryOptions(projectId, {
 					ordering: "-id",
@@ -43,6 +48,7 @@ function ProjectListView() {
 
 	const [
 		projectRes,
+		currentUserRes,
 		tasksResponseRes,
 		statusesResponseRes,
 		typesResponseRes,
@@ -50,6 +56,7 @@ function ProjectListView() {
 	] = useSuspenseQueries({
 		queries: [
 			projectQueryOptions(projectId),
+			userMeQueryOptions(),
 			tasksQueryOptions(projectId, {
 				ordering: "-id",
 				page: 1,
@@ -63,6 +70,7 @@ function ProjectListView() {
 	});
 
 	const project = projectRes.data;
+	const currentUser = currentUserRes.data;
 	const tasksResponse = tasksResponseRes.data;
 	const statusesResponse = statusesResponseRes.data;
 	const typesResponse = typesResponseRes.data;
@@ -86,6 +94,7 @@ function ProjectListView() {
 		priorities: sortedPriorities,
 	};
 	const projectMembers = project?.members ?? [];
+	const permissions = getProjectPermissions(project, currentUser?.id);
 
 	const tasks = tasksResponse.founds.map((task) =>
 		mapTaskData(task, taskOptions),
@@ -100,6 +109,7 @@ function ProjectListView() {
 			types={taskOptions.types}
 			priorities={taskOptions.priorities}
 			groupBy="status"
+			canManageTasks={permissions.canManageTasks}
 		/>
 	);
 }

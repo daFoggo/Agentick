@@ -8,6 +8,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
 	Field,
@@ -17,8 +18,11 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { teamMembersQueryOptions } from "@/features/team-members";
 import { TeamDeleteDialog } from "@/features/teams/components/team-delete-dialog";
+import { userMeQueryOptions } from "@/features/users";
 import { getErrorMessage } from "@/lib/error";
+import { getTeamPermissions } from "../permissions";
 import {
 	myTeamsQueryOptions,
 	teamQueryOptions,
@@ -43,6 +47,10 @@ export const TeamSettings = ({ teamId }: ITeamSettingsProps) => {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const { data: team } = useSuspenseQuery(teamQueryOptions(teamId));
+	const { data: currentUser } = useSuspenseQuery(userMeQueryOptions());
+	const { data: membersData } = useSuspenseQuery(
+		teamMembersQueryOptions(teamId),
+	);
 	const { data: myTeams } = useQuery(myTeamsQueryOptions());
 	const { update, remove } = useTeamMutations();
 	const [updatingField, setUpdatingField] = useState<
@@ -58,6 +66,10 @@ export const TeamSettings = ({ teamId }: ITeamSettingsProps) => {
 	const [requiresTeamCreation, setRequiresTeamCreation] = useState(false);
 
 	const isLastTeam = myTeams?.length === 1 && myTeams?.[0]?.id === teamId;
+	const permissions = getTeamPermissions(
+		membersData?.founds ?? [],
+		currentUser?.id,
+	);
 
 	useEffect(() => {
 		return () => {
@@ -79,7 +91,7 @@ export const TeamSettings = ({ teamId }: ITeamSettingsProps) => {
 	});
 
 	const handleFieldUpdate = async (fieldName: keyof TCreateTeamInput) => {
-		if (update.isPending) {
+		if (update.isPending || !permissions.canManageTeam) {
 			return;
 		}
 
@@ -117,6 +129,10 @@ export const TeamSettings = ({ teamId }: ITeamSettingsProps) => {
 	};
 
 	const handleDeleteTeam = async () => {
+		if (!permissions.canManageTeam) {
+			return false;
+		}
+
 		if (isLastTeam) {
 			setRequiresTeamCreation(true);
 			setIsCreateTeamDialogOpen(true);
@@ -184,6 +200,17 @@ export const TeamSettings = ({ teamId }: ITeamSettingsProps) => {
 
 		setIsCreateTeamDialogOpen(open);
 	};
+
+	if (!permissions.canManageTeam) {
+		return (
+			<Alert variant="destructive">
+				<AlertTitle>Access denied</AlertTitle>
+				<AlertDescription>
+					Only team owners can manage team settings.
+				</AlertDescription>
+			</Alert>
+		);
+	}
 
 	return (
 		<div className="w-full space-y-8">

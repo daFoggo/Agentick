@@ -30,6 +30,10 @@ import {
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { teamMembersQueryOptions } from "@/features/team-members";
+import { getTeamPermissions } from "@/features/teams";
+import { userMeQueryOptions } from "@/features/users";
+import { getErrorMessage } from "@/lib/error";
 import { cn } from "@/lib/utils";
 import { projectsQueryOptions } from "../queries";
 import type { TProject } from "../schemas";
@@ -55,6 +59,7 @@ export const SidebarProjectList = () => {
 	// Extract teamId reliably via regex directly from pathname to prevent hydration timing delay
 	const match = pathname.match(/^\/dashboard\/([^/]+)/);
 	const teamId = match ? match[1] : "";
+	const isTeamContext = Boolean(teamId && teamId !== "personal");
 
 	const [isCreateProjectDialogOpen, setIsCreateProjectDialogOpen] =
 		useState(false);
@@ -69,12 +74,40 @@ export const SidebarProjectList = () => {
 		isLoading,
 		error,
 	} = useQuery(projectsQueryOptions({ team_id__eq: teamId }));
+	const {
+		data: currentUser,
+		isLoading: isCurrentUserLoading,
+		isError: isCurrentUserError,
+		error: currentUserError,
+	} = useQuery(userMeQueryOptions());
+	const {
+		data: membersData,
+		isLoading: isMembersLoading,
+		isError: isMembersError,
+		error: membersError,
+	} = useQuery({
+		...teamMembersQueryOptions(teamId),
+		enabled: isTeamContext,
+	});
 
 	const isInitialLoading = isLoading || !isMounted;
 
 	const projects = projectsData?.founds ?? [];
 	const visibleProjects = projects.slice(0, VISIBLE_PROJECT_LIMIT);
 	const hasMoreProjects = projects.length > VISIBLE_PROJECT_LIMIT;
+	const permissions = getTeamPermissions(
+		membersData?.founds ?? [],
+		currentUser?.id,
+	);
+	const isPermissionLoading =
+		isTeamContext && (isCurrentUserLoading || isMembersLoading);
+	const isPermissionError =
+		isTeamContext && (isCurrentUserError || isMembersError);
+	const permissionError = isPermissionError
+		? (currentUserError ?? membersError)
+		: undefined;
+	const canCreateProject =
+		permissions.canCreateProjects && !isPermissionLoading && !isPermissionError;
 
 	const handleProjectCreated = (project: TProject) => {
 		navigate({
@@ -147,25 +180,47 @@ export const SidebarProjectList = () => {
 						</SidebarMenuItem>
 					))}
 
-				{!isInitialLoading && (
-					<SidebarMenuItem>
-						{hasMoreProjects ? (
-							<MoreProjectsPopover
-								projects={projects}
-								teamId={teamId}
-								onCreateProject={() => setIsCreateProjectDialogOpen(true)}
-							/>
-						) : (
-							<SidebarMenuButton
-								onClick={() => setIsCreateProjectDialogOpen(true)}
-								tooltip="Create new project"
-							>
-								<Plus className="size-4" />
-								<span>Create new project</span>
-							</SidebarMenuButton>
-						)}
-					</SidebarMenuItem>
-				)}
+				{!isInitialLoading &&
+					(hasMoreProjects ||
+						isPermissionLoading ||
+						isPermissionError ||
+						canCreateProject) && (
+						<SidebarMenuItem>
+							{hasMoreProjects ? (
+								<MoreProjectsPopover
+									projects={projects}
+									teamId={teamId}
+									canCreateProject={canCreateProject}
+									isPermissionLoading={isPermissionLoading}
+									permissionError={permissionError}
+									onCreateProject={() => setIsCreateProjectDialogOpen(true)}
+								/>
+							) : isPermissionLoading ? (
+								<SidebarMenuButton disabled>
+									<Skeleton className="size-4 shrink-0" />
+									<Skeleton className="h-3.5 flex-1" />
+								</SidebarMenuButton>
+							) : isPermissionError ? (
+								<div className="flex items-center gap-1.5 px-2 py-1 text-xs text-destructive">
+									<AlertCircle className="size-3.5 shrink-0" />
+									<span className="truncate">
+										{getErrorMessage(
+											permissionError,
+											"Could not load project permissions.",
+										)}
+									</span>
+								</div>
+							) : canCreateProject ? (
+								<SidebarMenuButton
+									onClick={() => setIsCreateProjectDialogOpen(true)}
+									tooltip="Create new project"
+								>
+									<Plus className="size-4" />
+									<span>Create new project</span>
+								</SidebarMenuButton>
+							) : null}
+						</SidebarMenuItem>
+					)}
 			</SidebarMenu>
 
 			<CreateProjectDialog
@@ -181,10 +236,16 @@ export const SidebarProjectList = () => {
 const MoreProjectsPopover = ({
 	projects,
 	teamId,
+	canCreateProject,
+	isPermissionLoading,
+	permissionError,
 	onCreateProject,
 }: {
 	projects: Array<TProject>;
 	teamId: string;
+	canCreateProject: boolean;
+	isPermissionLoading: boolean;
+	permissionError: unknown;
 	onCreateProject: () => void;
 }) => {
 	return (
@@ -219,10 +280,27 @@ const MoreProjectsPopover = ({
 					))}
 				</div>
 
-				<Button onClick={onCreateProject} className="mt-1 w-full" size="sm">
-					<Plus className="size-4" />
-					<span>Create new project</span>
-				</Button>
+				{isPermissionLoading ? (
+					<div className="mt-1 flex items-center gap-2 px-2 py-1.5">
+						<Skeleton className="size-4 shrink-0" />
+						<Skeleton className="h-3.5 flex-1" />
+					</div>
+				) : permissionError ? (
+					<div className="mt-1 flex items-center gap-1.5 px-2 py-1 text-xs text-destructive">
+						<AlertCircle className="size-3.5 shrink-0" />
+						<span className="truncate">
+							{getErrorMessage(
+								permissionError,
+								"Could not load project permissions.",
+							)}
+						</span>
+					</div>
+				) : canCreateProject ? (
+					<Button onClick={onCreateProject} className="mt-1 w-full" size="sm">
+						<Plus className="size-4" />
+						<span>Create new project</span>
+					</Button>
+				) : null}
 			</PopoverContent>
 		</Popover>
 	);

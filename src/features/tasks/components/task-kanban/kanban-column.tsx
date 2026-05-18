@@ -21,6 +21,7 @@ interface KanbanColumnProps {
 	onDeleteTask?: (task: TTask) => void;
 	onAddTask: (statusId: string) => void;
 	isOverlay?: boolean;
+	canManageTasks?: boolean;
 }
 
 export const KanbanColumn = ({
@@ -31,6 +32,7 @@ export const KanbanColumn = ({
 	onDeleteTask,
 	onAddTask,
 	isOverlay,
+	canManageTasks = true,
 }: KanbanColumnProps) => {
 	const {
 		setNodeRef: setSortableRef,
@@ -41,7 +43,7 @@ export const KanbanColumn = ({
 		isDragging,
 	} = useSortable({
 		id,
-		disabled: isOverlay,
+		disabled: isOverlay || !canManageTasks,
 		data: {
 			type: "column",
 			title,
@@ -50,7 +52,7 @@ export const KanbanColumn = ({
 
 	const { setNodeRef: setDroppableRef, isOver } = useDroppable({
 		id,
-		disabled: isOverlay,
+		disabled: isOverlay || !canManageTasks,
 		data: {
 			type: "column",
 		},
@@ -79,16 +81,18 @@ export const KanbanColumn = ({
 				<div className="flex flex-row items-center justify-between">
 					<div
 						className="flex min-w-0 flex-1 cursor-grab items-center gap-2 active:cursor-grabbing"
-						{...(isOverlay ? {} : attributes)}
-						{...(isOverlay ? {} : listeners)}
+						{...(isOverlay || !canManageTasks ? {} : attributes)}
+						{...(isOverlay || !canManageTasks ? {} : listeners)}
 					>
-						<GripVertical className="size-3.5 text-muted-foreground/60 transition-colors hover:text-muted-foreground" />
+						{canManageTasks && (
+							<GripVertical className="size-3.5 text-muted-foreground/60 transition-colors hover:text-muted-foreground" />
+						)}
 						<CardTitle className="truncate text-sm font-semibold text-foreground">
 							{title}
 						</CardTitle>
 						<Badge variant="secondary">{tasks.length}</Badge>
 					</div>
-					{!isOverlay && (
+					{!isOverlay && canManageTasks && (
 						<Button
 							variant="ghost"
 							size="icon-sm"
@@ -120,6 +124,7 @@ export const KanbanColumn = ({
 								onClick={() => onTaskClick(task)}
 								onDelete={onDeleteTask ? () => onDeleteTask(task) : undefined}
 								isOverlay={isOverlay}
+								canDrag={canManageTasks}
 							/>
 						))}
 					</SortableContext>

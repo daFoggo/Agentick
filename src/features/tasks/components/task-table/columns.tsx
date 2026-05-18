@@ -31,6 +31,7 @@ import {
 } from "@/features/tasks";
 import { generateColumns } from "@/lib/data-table";
 import { getErrorMessage } from "@/lib/error";
+import type { IDataTableColumnDef } from "@/types/data-table";
 import { DeleteTaskListDialog } from "./delete-task-list-dialog";
 
 const taskDepthClasses = ["", "ml-4", "ml-8", "ml-12", "ml-16"];
@@ -56,7 +57,7 @@ const TaskListActionCell = ({ task }: { task: TTask }) => {
 	};
 
 	return (
-		<>
+		<div onClick={(event) => event.stopPropagation()}>
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
 					<Button
@@ -71,7 +72,8 @@ const TaskListActionCell = ({ task }: { task: TTask }) => {
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="end">
 					<DropdownMenuItem
-						onClick={() =>
+						onClick={(event) => {
+							event.stopPropagation();
 							navigate({
 								to: "/dashboard/$teamId/projects/$projectId/tasks/$taskId",
 								params: {
@@ -79,8 +81,8 @@ const TaskListActionCell = ({ task }: { task: TTask }) => {
 									projectId: task.project_id,
 									taskId: task.id,
 								},
-							})
-						}
+							});
+						}}
 					>
 						<Pencil className="size-4" />
 						Edit
@@ -88,7 +90,10 @@ const TaskListActionCell = ({ task }: { task: TTask }) => {
 					<DropdownMenuSeparator />
 					<DropdownMenuItem
 						variant="destructive"
-						onClick={() => setIsDeleteOpen(true)}
+						onClick={(event) => {
+							event.stopPropagation();
+							setIsDeleteOpen(true);
+						}}
 					>
 						<Trash2 className="size-4" />
 						Delete
@@ -103,12 +108,15 @@ const TaskListActionCell = ({ task }: { task: TTask }) => {
 				isPending={remove.isPending}
 				onConfirm={handleDelete}
 			/>
-		</>
+		</div>
 	);
 };
 
-export const getTaskColumns = (options: ITaskListDialogOptions) =>
-	generateColumns<TTask>([
+export const getTaskColumns = (
+	options: ITaskListDialogOptions,
+	canManageTasks = true,
+) => {
+	const columns: IDataTableColumnDef<TTask>[] = [
 		{
 			accessorKey: "title",
 			label: "Title",
@@ -171,7 +179,7 @@ export const getTaskColumns = (options: ITaskListDialogOptions) =>
 					<TaskTypeBadge
 						name={type.name}
 						color={type.color}
-						interactive
+						interactive={canManageTasks}
 						options={options.types}
 						value={type.id}
 						onValueChange={async (newId) => {
@@ -221,7 +229,7 @@ export const getTaskColumns = (options: ITaskListDialogOptions) =>
 					<TaskStatusBadge
 						name={status.name}
 						color={status.color}
-						interactive
+						interactive={canManageTasks}
 						options={options.statuses}
 						value={status.id}
 						onValueChange={async (newId) => {
@@ -270,7 +278,7 @@ export const getTaskColumns = (options: ITaskListDialogOptions) =>
 					<TaskPriorityBadge
 						name={priority.name}
 						color={priority.color}
-						interactive
+						interactive={canManageTasks}
 						options={options.priorities}
 						value={priority.id}
 						onValueChange={async (newId) => {
@@ -357,8 +365,10 @@ export const getTaskColumns = (options: ITaskListDialogOptions) =>
 				return <span className="text-xs">{v != null ? String(v) : "—"}</span>;
 			},
 		},
+	];
 
-		{
+	if (canManageTasks) {
+		columns.push({
 			id: "actions",
 			label: "Actions",
 			size: 40,
@@ -366,5 +376,8 @@ export const getTaskColumns = (options: ITaskListDialogOptions) =>
 			enableReorder: false,
 			isActionColumn: true,
 			cell: ({ row }) => <TaskListActionCell task={row.original} />,
-		},
-	]);
+		});
+	}
+
+	return generateColumns<TTask>(columns);
+};

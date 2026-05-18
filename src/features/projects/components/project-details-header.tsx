@@ -15,7 +15,8 @@ import {
 	projectMembersQueryOptions,
 	type TProjectMember,
 } from "@/features/project-members";
-import type { TProject } from "@/features/projects";
+import { getProjectPermissions, type TProject } from "@/features/projects";
+import { userMeQueryOptions } from "@/features/users";
 import { getErrorMessage } from "@/lib/error";
 
 export interface IProjectDetailsHeaderProps {
@@ -38,6 +39,7 @@ export function ProjectDetailsHeader({
 		...projectMembersQueryOptions(project?.id ?? ""),
 		enabled: !!project?.id,
 	});
+	const { data: currentUser } = useQuery(userMeQueryOptions());
 
 	if (!project) {
 		return (
@@ -48,6 +50,7 @@ export function ProjectDetailsHeader({
 	}
 
 	const members = membersData?.founds ?? [];
+	const permissions = getProjectPermissions({ members }, currentUser?.id);
 
 	return (
 		<div className="flex w-full items-center justify-between gap-4">
@@ -122,17 +125,21 @@ export function ProjectDetailsHeader({
 					</Tooltip>
 				)}
 
-				<Button onClick={() => setIsInviteOpen(true)} className="gap-2">
-					Share
-					<Share2 className="size-4" />
-				</Button>
+				{permissions.canManageProject && (
+					<Button onClick={() => setIsInviteOpen(true)} className="gap-2">
+						Share
+						<Share2 className="size-4" />
+					</Button>
+				)}
 			</div>
 
-			<InviteProjectMemberDialog
-				open={isInviteOpen}
-				onOpenChange={setIsInviteOpen}
-				projectId={project.id}
-			/>
+			{permissions.canManageProject && (
+				<InviteProjectMemberDialog
+					open={isInviteOpen}
+					onOpenChange={setIsInviteOpen}
+					projectId={project.id}
+				/>
+			)}
 		</div>
 	);
 }

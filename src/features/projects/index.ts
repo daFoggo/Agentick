@@ -6,5 +6,6 @@ export * from "./components/project-task-stats-card";
 export * from "./components/project-workload";
 export * from "./components/sidebar-project-list";
 export * from "./functions";
+export * from "./permissions";
 export * from "./queries";
 export * from "./schemas";

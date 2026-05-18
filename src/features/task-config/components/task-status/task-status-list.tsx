@@ -21,12 +21,16 @@ import { taskStatusColumns } from "./task-status-columns";
 
 interface ITaskStatusListProps {
 	projectId: string;
+	canManageProject?: boolean;
 }
 
 /**
  * Thành phần hiển thị danh sách tất cả các trạng thái (status) của task trong project.
  */
-export const TaskStatusList = ({ projectId }: ITaskStatusListProps) => {
+export const TaskStatusList = ({
+	projectId,
+	canManageProject = true,
+}: ITaskStatusListProps) => {
 	const [isCreateOpen, setIsCreateOpen] = useState(false);
 
 	const {
@@ -78,33 +82,43 @@ export const TaskStatusList = ({ projectId }: ITaskStatusListProps) => {
 							new status to get started.
 						</EmptyDescription>
 					</EmptyHeader>
-					<EmptyContent>
-						<Button onClick={() => setIsCreateOpen(true)}>
-							<Plus className="size-4" />
-							New Status
-						</Button>
-					</EmptyContent>
+					{canManageProject && (
+						<EmptyContent>
+							<Button onClick={() => setIsCreateOpen(true)}>
+								<Plus className="size-4" />
+								New Status
+							</Button>
+						</EmptyContent>
+					)}
 				</Empty>
 
-				<CreateTaskStatusDialog
-					projectId={projectId}
-					open={isCreateOpen}
-					onOpenChange={setIsCreateOpen}
-				/>
+				{canManageProject && (
+					<CreateTaskStatusDialog
+						projectId={projectId}
+						open={isCreateOpen}
+						onOpenChange={setIsCreateOpen}
+					/>
+				)}
 			</>
 		);
 	}
 
 	return (
 		<div className="space-y-4">
-			<Button onClick={() => setIsCreateOpen(true)}>
-				<Plus className="size-4" />
-				New Status
-			</Button>
+			{canManageProject && (
+				<Button onClick={() => setIsCreateOpen(true)}>
+					<Plus className="size-4" />
+					New Status
+				</Button>
+			)}
 
 			<DataTable<TTaskStatus>
 				data={statuses}
-				columns={taskStatusColumns}
+				columns={
+					canManageProject
+						? taskStatusColumns
+						: taskStatusColumns.filter((column) => column.id !== "actions")
+				}
 				getRowId={(row) => row.id}
 				showPagination={true}
 				enablePagination={true}
@@ -113,11 +127,13 @@ export const TaskStatusList = ({ projectId }: ITaskStatusListProps) => {
 				enableColumnPinning={false}
 			/>
 
-			<CreateTaskStatusDialog
-				projectId={projectId}
-				open={isCreateOpen}
-				onOpenChange={setIsCreateOpen}
-			/>
+			{canManageProject && (
+				<CreateTaskStatusDialog
+					projectId={projectId}
+					open={isCreateOpen}
+					onOpenChange={setIsCreateOpen}
+				/>
+			)}
 		</div>
 	);
 };

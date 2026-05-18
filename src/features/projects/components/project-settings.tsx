@@ -22,7 +22,9 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { TIMEZONES } from "@/constants/timezone";
+import { userMeQueryOptions } from "@/features/users";
 import { getErrorMessage } from "@/lib/error";
+import { getProjectPermissions } from "../permissions";
 import {
 	myProjectsQueryOptions,
 	projectQueryOptions,
@@ -47,6 +49,8 @@ export const ProjectSettings = ({
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const { data: project } = useSuspenseQuery(projectQueryOptions(projectId));
+	const { data: currentUser } = useSuspenseQuery(userMeQueryOptions());
+	const permissions = getProjectPermissions(project, currentUser?.id);
 	const { update, remove } = useProjectMutations();
 	const [updatingField, setUpdatingField] = useState<
 		keyof TUpdateProjectInput | null
@@ -159,6 +163,7 @@ export const ProjectSettings = ({
 						isPending={update.isPending && updatingField === "name"}
 						keepVisible={recentlyUpdatedField === "name"}
 						disableAction={update.isPending || recentlyUpdatedField === "name"}
+						readOnly={!permissions.canManageProject}
 						onUpdate={() => handleFieldUpdate("name")}
 					/>
 
@@ -173,6 +178,7 @@ export const ProjectSettings = ({
 						disableAction={
 							update.isPending || recentlyUpdatedField === "avatar_url"
 						}
+						readOnly={!permissions.canManageProject}
 						onUpdate={() => handleFieldUpdate("avatar_url")}
 					/>
 
@@ -187,6 +193,7 @@ export const ProjectSettings = ({
 						disableAction={
 							update.isPending || recentlyUpdatedField === "description"
 						}
+						readOnly={!permissions.canManageProject}
 						onUpdate={() => handleFieldUpdate("description")}
 					/>
 
@@ -204,17 +211,20 @@ export const ProjectSettings = ({
 						disableAction={
 							update.isPending || recentlyUpdatedField === "timezone"
 						}
+						readOnly={!permissions.canManageProject}
 						onUpdate={() => handleFieldUpdate("timezone")}
 					/>
 				</FieldGroup>
 			</div>
 
-			<Separator />
+			{permissions.canManageProject && <Separator />}
 
-			<ProjectDeleteDialog
-				isPending={remove.isPending}
-				onConfirm={handleDeleteProject}
-			/>
+			{permissions.canManageProject && (
+				<ProjectDeleteDialog
+					isPending={remove.isPending}
+					onConfirm={handleDeleteProject}
+				/>
+			)}
 		</div>
 	);
 };
@@ -228,6 +238,7 @@ interface ISettingFieldProps {
 	isPending: boolean;
 	keepVisible: boolean;
 	disableAction: boolean;
+	readOnly?: boolean;
 	onUpdate: () => void;
 }
 
@@ -240,6 +251,7 @@ const SettingField = ({
 	isPending,
 	keepVisible,
 	disableAction,
+	readOnly = false,
 	onUpdate,
 }: ISettingFieldProps) => {
 	return (
@@ -265,19 +277,22 @@ const SettingField = ({
 								onChange={(e) => field.handleChange(e.target.value)}
 								placeholder={placeholder}
 								aria-invalid={isInvalid}
+								readOnly={readOnly}
 							/>
-							<Button
-								type="button"
-								className={`w-20 justify-center ${!shouldShowAction ? "invisible" : ""}`}
-								disabled={disableAction || !isChanged}
-								onClick={onUpdate}
-							>
-								{isPending ? (
-									<Loader2 className="size-4 animate-spin" />
-								) : (
-									<span>Update</span>
-								)}
-							</Button>
+							{!readOnly && (
+								<Button
+									type="button"
+									className={`w-20 justify-center ${!shouldShowAction ? "invisible" : ""}`}
+									disabled={disableAction || !isChanged}
+									onClick={onUpdate}
+								>
+									{isPending ? (
+										<Loader2 className="size-4 animate-spin" />
+									) : (
+										<span>Update</span>
+									)}
+								</Button>
+							)}
 						</div>
 						<FieldError errors={field.state.meta.errors} />
 					</Field>
@@ -296,6 +311,7 @@ interface ISettingSelectFieldProps {
 	isPending: boolean;
 	keepVisible: boolean;
 	disableAction: boolean;
+	readOnly?: boolean;
 	onUpdate: () => void;
 }
 
@@ -308,6 +324,7 @@ const SettingSelectField = ({
 	isPending,
 	keepVisible,
 	disableAction,
+	readOnly = false,
 	onUpdate,
 }: ISettingSelectFieldProps) => {
 	return (
@@ -327,6 +344,7 @@ const SettingSelectField = ({
 						<div className="flex items-center gap-2">
 							<Select
 								value={(field.state.value as string) || ""}
+								disabled={readOnly}
 								onValueChange={(val) => field.handleChange(val)}
 							>
 								<SelectTrigger className="w-full h-8">
@@ -340,18 +358,20 @@ const SettingSelectField = ({
 									))}
 								</SelectContent>
 							</Select>
-							<Button
-								type="button"
-								className={`w-20 justify-center ${!shouldShowAction ? "invisible" : ""}`}
-								disabled={disableAction || !isChanged}
-								onClick={onUpdate}
-							>
-								{isPending ? (
-									<Loader2 className="size-4 animate-spin" />
-								) : (
-									<span>Update</span>
-								)}
-							</Button>
+							{!readOnly && (
+								<Button
+									type="button"
+									className={`w-20 justify-center ${!shouldShowAction ? "invisible" : ""}`}
+									disabled={disableAction || !isChanged}
+									onClick={onUpdate}
+								>
+									{isPending ? (
+										<Loader2 className="size-4 animate-spin" />
+									) : (
+										<span>Update</span>
+									)}
+								</Button>
+							)}
 						</div>
 						<FieldError errors={field.state.meta.errors} />
 					</Field>

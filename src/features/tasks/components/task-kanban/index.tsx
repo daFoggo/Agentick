@@ -39,6 +39,7 @@ interface ITaskKanbanProps {
 	types: TTaskType[];
 	priorities: TTaskPriority[];
 	members: TProjectMember[];
+	canManageTasks?: boolean;
 }
 
 export const TaskKanban = ({
@@ -48,6 +49,7 @@ export const TaskKanban = ({
 	types: _types,
 	priorities: _priorities,
 	members: _members,
+	canManageTasks = true,
 }: ITaskKanbanProps): React.ReactNode => {
 	const {
 		tasks,
@@ -185,17 +187,22 @@ export const TaskKanban = ({
 						strategy: MeasuringStrategy.Always,
 					},
 				}}
-				onDragStart={(e) => handleDragStart(e, statuses)}
-				onDragOver={handleDragOver}
-				onDragEnd={(e) =>
-					handleDragEnd(
-						e,
-						statuses,
-						projectId,
-						initialTasks,
-						updateStatus.mutate,
-						update.mutate,
-					)
+				onDragStart={
+					canManageTasks ? (e) => handleDragStart(e, statuses) : undefined
+				}
+				onDragOver={canManageTasks ? handleDragOver : undefined}
+				onDragEnd={
+					canManageTasks
+						? (e) =>
+								handleDragEnd(
+									e,
+									statuses,
+									projectId,
+									initialTasks,
+									updateStatus.mutate,
+									update.mutate,
+								)
+						: undefined
 				}
 			>
 				<div className="flex h-full w-full gap-4 overflow-x-auto overflow-y-hidden">
@@ -210,7 +217,7 @@ export const TaskKanban = ({
 								title={status.name}
 								tasks={tasks.filter((t) => t.status_id === status.id)}
 								onTaskClick={handleTaskClick}
-								onDeleteTask={openDeleteDialog}
+								onDeleteTask={canManageTasks ? openDeleteDialog : undefined}
 								onAddTask={(statusId) => {
 									navigate({
 										to: "/dashboard/$teamId/projects/$projectId/tasks/create",
@@ -221,6 +228,7 @@ export const TaskKanban = ({
 										} as any,
 									});
 								}}
+								canManageTasks={canManageTasks}
 							/>
 						))}
 					</SortableContext>
@@ -236,12 +244,18 @@ export const TaskKanban = ({
 								onTaskClick={() => {}}
 								onAddTask={() => {}}
 								isOverlay
+								canManageTasks={canManageTasks}
 							/>
 						</div>
 					)}
 					{activeTask && (
 						<div className="pointer-events-none scale-105 -rotate-2 cursor-grabbing transition-transform">
-							<KanbanCard task={activeTask} onClick={() => {}} isOverlay />
+							<KanbanCard
+								task={activeTask}
+								onClick={() => {}}
+								isOverlay
+								canDrag={canManageTasks}
+							/>
 						</div>
 					)}
 				</DragOverlay>

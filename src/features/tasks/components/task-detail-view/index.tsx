@@ -31,6 +31,7 @@ interface ITaskDetailViewProps {
 	isLoading?: boolean;
 	defaultStatusId?: string;
 	defaultParentId?: string | null;
+	canManageTasks?: boolean;
 }
 
 export const TaskDetailView = ({
@@ -40,6 +41,7 @@ export const TaskDetailView = ({
 	isLoading,
 	defaultStatusId,
 	defaultParentId,
+	canManageTasks = true,
 }: ITaskDetailViewProps) => {
 	const navigate = useNavigate();
 	const { teamId, projectId } = useParams({ strict: false });
@@ -128,7 +130,7 @@ export const TaskDetailView = ({
 		formApi: TAutosaveFormApi,
 		value: TTaskDetailFormValues,
 	) => {
-		if (!task?.id) return;
+		if (!task?.id || !canManageTasks) return;
 
 		autosaveQueueRef.current = cloneTaskDetailFormValues(value);
 		if (autosaveRunningRef.current) return;
@@ -185,7 +187,7 @@ export const TaskDetailView = ({
 		listeners: {
 			onChangeDebounceMs: 1000,
 			onChange: ({ formApi }) => {
-				if (task?.id && formApi.state.isDirty) {
+				if (canManageTasks && task?.id && formApi.state.isDirty) {
 					void queueAutosave(
 						formApi,
 						formApi.state.values as TTaskDetailFormValues,
@@ -193,7 +195,7 @@ export const TaskDetailView = ({
 				}
 			},
 			onBlur: ({ formApi }) => {
-				if (task?.id && formApi.state.isDirty) {
+				if (canManageTasks && task?.id && formApi.state.isDirty) {
 					void queueAutosave(
 						formApi,
 						formApi.state.values as TTaskDetailFormValues,
@@ -205,6 +207,7 @@ export const TaskDetailView = ({
 			const taskPayload = buildTaskDetailPayload(
 				value as TTaskDetailFormValues,
 			);
+			if (!canManageTasks) return;
 			if (!taskPayload) {
 				toast.error("Invalid dates provided");
 				return;
@@ -327,7 +330,9 @@ export const TaskDetailView = ({
 				onSubmit={(e) => {
 					e.preventDefault();
 					e.stopPropagation();
-					form.handleSubmit();
+					if (canManageTasks) {
+						form.handleSubmit();
+					}
 				}}
 				className="container h-full"
 			>
@@ -339,6 +344,7 @@ export const TaskDetailView = ({
 						isPending={
 							update.isPending || create.isPending || form.state.isSubmitting
 						}
+						canManageTasks={canManageTasks}
 						onBack={() => navigateBack()}
 						onOpenDeleteDialog={() => setIsDeleteDialogOpen(true)}
 					/>
@@ -351,6 +357,7 @@ export const TaskDetailView = ({
 								options={options}
 								parentTaskOptions={parentTaskOptions}
 								isLoading={isLoading}
+								canManageTasks={canManageTasks}
 							/>
 							<TaskDetailSidebarSection
 								form={form}
@@ -360,12 +367,13 @@ export const TaskDetailView = ({
 								aiExplanation={aiExplanation}
 								isEstimating={estimate.isPending}
 								onAIEstimate={handleAIEstimate}
+								canManageTasks={canManageTasks}
 							/>
 						</div>
 					</CardContent>
 				</Card>
 			</form>
-			{task && (
+			{task && canManageTasks && (
 				<DeleteTaskListDialog
 					task={task}
 					open={isDeleteDialogOpen}

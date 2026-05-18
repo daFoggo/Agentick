@@ -34,6 +34,7 @@ interface ITaskSubTasksSectionProps {
 	options?: ITaskListDialogOptions;
 	parentTaskOptions?: TTask[];
 	isLoading?: boolean;
+	canManageTasks?: boolean;
 }
 
 const getOptionById = <T extends { id: string; name: string; color?: string }>(
@@ -46,6 +47,7 @@ export function TaskSubTasksSection({
 	options,
 	parentTaskOptions = [],
 	isLoading,
+	canManageTasks = true,
 }: ITaskSubTasksSectionProps) {
 	const navigate = useNavigate();
 	const { teamId, projectId } = useParams({ strict: false });
@@ -98,15 +100,17 @@ export function TaskSubTasksSection({
 					<h2 className="text-sm font-medium">Sub-tasks</h2>
 					<Badge variant="secondary">{subTasks.length}</Badge>
 				</div>
-				<Button
-					type="button"
-					variant="outline"
-					size="sm"
-					onClick={navigateToCreateSubTask}
-				>
-					<Plus className="size-4" />
-					Add sub-task
-				</Button>
+				{canManageTasks && (
+					<Button
+						type="button"
+						variant="outline"
+						size="sm"
+						onClick={navigateToCreateSubTask}
+					>
+						<Plus className="size-4" />
+						Add sub-task
+					</Button>
+				)}
 			</div>
 
 			{subTasks.length === 0 ? (
@@ -120,12 +124,14 @@ export function TaskSubTasksSection({
 							Break this task into smaller trackable work items.
 						</EmptyDescription>
 					</EmptyHeader>
-					<EmptyContent>
-						<Button type="button" size="sm" onClick={navigateToCreateSubTask}>
-							<Plus className="size-4" />
-							Create sub-task
-						</Button>
-					</EmptyContent>
+					{canManageTasks && (
+						<EmptyContent>
+							<Button type="button" size="sm" onClick={navigateToCreateSubTask}>
+								<Plus className="size-4" />
+								Create sub-task
+							</Button>
+						</EmptyContent>
+					)}
 				</Empty>
 			) : (
 				<ItemGroup>

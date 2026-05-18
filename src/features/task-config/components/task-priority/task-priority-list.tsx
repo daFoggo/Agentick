@@ -21,9 +21,13 @@ import { taskPriorityColumns } from "./task-priority-columns";
 
 interface ITaskPriorityListProps {
 	projectId: string;
+	canManageProject?: boolean;
 }
 
-export const TaskPriorityList = ({ projectId }: ITaskPriorityListProps) => {
+export const TaskPriorityList = ({
+	projectId,
+	canManageProject = true,
+}: ITaskPriorityListProps) => {
 	const [isCreateOpen, setIsCreateOpen] = useState(false);
 	const {
 		data: prioritiesData,
@@ -73,32 +77,42 @@ export const TaskPriorityList = ({ projectId }: ITaskPriorityListProps) => {
 							new priority to get started.
 						</EmptyDescription>
 					</EmptyHeader>
-					<EmptyContent>
-						<Button onClick={() => setIsCreateOpen(true)}>
-							<Plus className="size-4" />
-							New Priority
-						</Button>
-					</EmptyContent>
+					{canManageProject && (
+						<EmptyContent>
+							<Button onClick={() => setIsCreateOpen(true)}>
+								<Plus className="size-4" />
+								New Priority
+							</Button>
+						</EmptyContent>
+					)}
 				</Empty>
 
-				<CreateTaskPriorityDialog
-					projectId={projectId}
-					open={isCreateOpen}
-					onOpenChange={setIsCreateOpen}
-				/>
+				{canManageProject && (
+					<CreateTaskPriorityDialog
+						projectId={projectId}
+						open={isCreateOpen}
+						onOpenChange={setIsCreateOpen}
+					/>
+				)}
 			</>
 		);
 	}
 
 	return (
 		<div className="space-y-4">
-			<Button onClick={() => setIsCreateOpen(true)}>
-				<Plus className="size-4" />
-				New Priority
-			</Button>
+			{canManageProject && (
+				<Button onClick={() => setIsCreateOpen(true)}>
+					<Plus className="size-4" />
+					New Priority
+				</Button>
+			)}
 			<DataTable<TTaskPriority>
 				data={priorities}
-				columns={taskPriorityColumns}
+				columns={
+					canManageProject
+						? taskPriorityColumns
+						: taskPriorityColumns.filter((column) => column.id !== "actions")
+				}
 				getRowId={(row) => row.id}
 				showPagination={true}
 				enablePagination={true}
@@ -106,11 +120,13 @@ export const TaskPriorityList = ({ projectId }: ITaskPriorityListProps) => {
 				enableColumnReorder={false}
 				enableColumnPinning={false}
 			/>
-			<CreateTaskPriorityDialog
-				projectId={projectId}
-				open={isCreateOpen}
-				onOpenChange={setIsCreateOpen}
-			/>
+			{canManageProject && (
+				<CreateTaskPriorityDialog
+					projectId={projectId}
+					open={isCreateOpen}
+					onOpenChange={setIsCreateOpen}
+				/>
+			)}
 		</div>
 	);
 };

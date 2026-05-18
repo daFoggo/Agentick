@@ -1,13 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ProjectSettings, projectQueryOptions } from "@/features/projects";
+import { userMeQueryOptions } from "@/features/users";
 
 export const Route = createFileRoute(
 	"/dashboard/$teamId/projects/$projectId/settings/",
 )({
 	loader: async ({ context, params }) => {
-		await context.queryClient.ensureQueryData(
-			projectQueryOptions(params.projectId),
-		);
+		await Promise.all([
+			context.queryClient.ensureQueryData(
+				projectQueryOptions(params.projectId),
+			),
+			context.queryClient.ensureQueryData(userMeQueryOptions()),
+		]);
 	},
 	component: ProjectSettingsGeneralPage,
 });

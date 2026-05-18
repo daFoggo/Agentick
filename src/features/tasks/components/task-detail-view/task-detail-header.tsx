@@ -11,6 +11,7 @@ interface TaskDetailHeaderProps {
 	form: TTaskDetailFormApi;
 	canSubmit: boolean;
 	isPending: boolean;
+	canManageTasks?: boolean;
 	onBack: () => void;
 	onOpenDeleteDialog: () => void;
 }
@@ -20,6 +21,7 @@ export const TaskDetailHeader = ({
 	form,
 	canSubmit,
 	isPending,
+	canManageTasks = true,
 	onBack,
 	onOpenDeleteDialog,
 }: TaskDetailHeaderProps) => {
@@ -46,6 +48,7 @@ export const TaskDetailHeader = ({
 								onBlur={field.handleBlur}
 								onChange={(e) => field.handleChange(e.target.value)}
 								placeholder={task ? "Edit task title" : "New task title"}
+								readOnly={!canManageTasks}
 								className="w-full border-none bg-transparent! text-lg font-semibold transition-colors outline-none hover:bg-muted!"
 							/>
 						</div>
@@ -60,6 +63,10 @@ export const TaskDetailHeader = ({
 						const [formCanSubmit, isSubmitting] = state as [boolean, boolean];
 						const shouldDisable =
 							!canSubmit || !formCanSubmit || isPending || isSubmitting;
+
+						if (!canManageTasks) {
+							return null;
+						}
 
 						if (!task) {
 							return (

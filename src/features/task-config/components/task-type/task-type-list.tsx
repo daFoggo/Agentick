@@ -21,9 +21,13 @@ import { taskTypeColumns } from "./task-type-columns";
 
 interface ITaskTypeListProps {
 	projectId: string;
+	canManageProject?: boolean;
 }
 
-export const TaskTypeList = ({ projectId }: ITaskTypeListProps) => {
+export const TaskTypeList = ({
+	projectId,
+	canManageProject = true,
+}: ITaskTypeListProps) => {
 	const [isCreateOpen, setIsCreateOpen] = useState(false);
 	const {
 		data: typesData,
@@ -73,32 +77,42 @@ export const TaskTypeList = ({ projectId }: ITaskTypeListProps) => {
 							type to get started.
 						</EmptyDescription>
 					</EmptyHeader>
-					<EmptyContent>
-						<Button onClick={() => setIsCreateOpen(true)}>
-							<Plus className="size-4" />
-							New Type
-						</Button>
-					</EmptyContent>
+					{canManageProject && (
+						<EmptyContent>
+							<Button onClick={() => setIsCreateOpen(true)}>
+								<Plus className="size-4" />
+								New Type
+							</Button>
+						</EmptyContent>
+					)}
 				</Empty>
 
-				<CreateTaskTypeDialog
-					projectId={projectId}
-					open={isCreateOpen}
-					onOpenChange={setIsCreateOpen}
-				/>
+				{canManageProject && (
+					<CreateTaskTypeDialog
+						projectId={projectId}
+						open={isCreateOpen}
+						onOpenChange={setIsCreateOpen}
+					/>
+				)}
 			</>
 		);
 	}
 
 	return (
 		<div className="space-y-4">
-			<Button onClick={() => setIsCreateOpen(true)}>
-				<Plus className="size-4" />
-				New Type
-			</Button>
+			{canManageProject && (
+				<Button onClick={() => setIsCreateOpen(true)}>
+					<Plus className="size-4" />
+					New Type
+				</Button>
+			)}
 			<DataTable<TTaskType>
 				data={types}
-				columns={taskTypeColumns}
+				columns={
+					canManageProject
+						? taskTypeColumns
+						: taskTypeColumns.filter((column) => column.id !== "actions")
+				}
 				getRowId={(row) => row.id}
 				showPagination={true}
 				enablePagination={true}
@@ -106,11 +120,13 @@ export const TaskTypeList = ({ projectId }: ITaskTypeListProps) => {
 				enableColumnReorder={false}
 				enableColumnPinning={false}
 			/>
-			<CreateTaskTypeDialog
-				projectId={projectId}
-				open={isCreateOpen}
-				onOpenChange={setIsCreateOpen}
-			/>
+			{canManageProject && (
+				<CreateTaskTypeDialog
+					projectId={projectId}
+					open={isCreateOpen}
+					onOpenChange={setIsCreateOpen}
+				/>
+			)}
 		</div>
 	);
 };

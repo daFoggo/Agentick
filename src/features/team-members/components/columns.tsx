@@ -42,8 +42,19 @@ const RoleCell = ({ row }: CellContext<TTeamMember, any>) => {
 	const currentUserRole = members?.founds?.find(
 		(m) => m.user_id === currentUser?.id,
 	)?.role;
+	const ownerCount =
+		members?.founds?.filter((teamMember) => teamMember.role === "owner")
+			.length ?? 0;
+	const isCurrentUser = currentUser?.id === member.user_id;
+	const canManageOwnerRole = currentUserRole === "owner";
+	const isProtectedOwnerRole =
+		member.role === "owner" &&
+		(isCurrentUser || !canManageOwnerRole || ownerCount <= 1);
 
-	if (currentUserRole !== "owner" && currentUserRole !== "manager") {
+	if (
+		(currentUserRole !== "owner" && currentUserRole !== "manager") ||
+		isProtectedOwnerRole
+	) {
 		return (
 			<Badge variant={roleOption.variant} className={`${roleOption.className}`}>
 				<roleOption.icon className="mr-1 size-3" />
@@ -51,6 +62,10 @@ const RoleCell = ({ row }: CellContext<TTeamMember, any>) => {
 			</Badge>
 		);
 	}
+
+	const roleOptions = canManageOwnerRole
+		? TEAM_ROLE_CATALOG
+		: TEAM_ROLE_CATALOG.filter((opt) => opt.value !== "owner");
 
 	return (
 		<DropdownMenu>
@@ -67,7 +82,7 @@ const RoleCell = ({ row }: CellContext<TTeamMember, any>) => {
 			<DropdownMenuContent align="start" className="w-40">
 				<DropdownMenuLabel>Change Role</DropdownMenuLabel>
 				<DropdownMenuSeparator />
-				{TEAM_ROLE_CATALOG.map((opt) => (
+				{roleOptions.map((opt) => (
 					<DropdownMenuItem
 						key={opt.value}
 						className="gap-2"
@@ -117,8 +132,18 @@ const ActionCell = ({ row }: CellContext<TTeamMember, any>) => {
 	const currentUserRole = members?.founds?.find(
 		(m) => m.user_id === currentUser?.id,
 	)?.role;
+	const ownerCount =
+		members?.founds?.filter((teamMember) => teamMember.role === "owner")
+			.length ?? 0;
 
 	if (currentUserRole !== "owner" && currentUserRole !== "manager") {
+		return null;
+	}
+
+	if (
+		member.role === "owner" &&
+		(currentUserRole !== "owner" || ownerCount <= 1)
+	) {
 		return null;
 	}
 

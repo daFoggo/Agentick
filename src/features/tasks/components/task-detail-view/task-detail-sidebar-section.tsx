@@ -53,6 +53,7 @@ interface TaskDetailSidebarSectionProps {
 	aiExplanation: TTaskAIEstimationExplanation | null;
 	isEstimating: boolean;
 	onAIEstimate: () => void;
+	canManageTasks?: boolean;
 }
 
 const getOptionById = <T extends { id: string; name: string; color?: string }>(
@@ -99,6 +100,7 @@ export const TaskDetailSidebarSection = ({
 	aiExplanation,
 	isEstimating,
 	onAIEstimate,
+	canManageTasks = true,
 }: TaskDetailSidebarSectionProps) => {
 	const unavailableParentIds = new Set<string>();
 
@@ -142,6 +144,7 @@ export const TaskDetailSidebarSection = ({
 								<div className="min-w-0 flex-1 space-y-1">
 									<Select
 										value={field.state.value ?? NO_PARENT_VALUE}
+										disabled={!canManageTasks}
 										onValueChange={(value) =>
 											field.handleChange(
 												value === NO_PARENT_VALUE ? null : value,
@@ -194,7 +197,7 @@ export const TaskDetailSidebarSection = ({
 								<TaskStatusBadge
 									name={status?.name || "Unknown"}
 									color={status?.color}
-									interactive
+									interactive={canManageTasks}
 									options={options.statuses}
 									value={field.state.value}
 									onValueChange={field.handleChange}
@@ -227,7 +230,7 @@ export const TaskDetailSidebarSection = ({
 								<TaskTypeBadge
 									name={type?.name || "Unknown"}
 									color={type?.color}
-									interactive
+									interactive={canManageTasks}
 									options={options.types}
 									value={field.state.value}
 									onValueChange={field.handleChange}
@@ -263,7 +266,7 @@ export const TaskDetailSidebarSection = ({
 								<TaskPriorityBadge
 									name={priority?.name || "Unknown"}
 									color={priority?.color}
-									interactive
+									interactive={canManageTasks}
 									options={options.priorities}
 									value={field.state.value}
 									onValueChange={field.handleChange}
@@ -293,14 +296,19 @@ export const TaskDetailSidebarSection = ({
 									</div>
 								</FieldLabel>
 								<MultiSelectCombobox
-									className="w-fit"
+									className={
+										canManageTasks
+											? "w-fit"
+											: "pointer-events-none w-fit opacity-70"
+									}
 									items={options.members}
 									value={options.members.filter((item: any) =>
 										field.state.value.includes(item.user_id),
 									)}
-									onValueChange={(values) =>
-										field.handleChange(values.map((item: any) => item.user_id))
-									}
+									onValueChange={(values) => {
+										if (!canManageTasks) return;
+										field.handleChange(values.map((item: any) => item.user_id));
+									}}
 									itemToString={(item: any) => item.user?.name || ""}
 									itemToValue={(item: any) => item.user_id}
 									placeholder="Select members"
@@ -339,6 +347,7 @@ export const TaskDetailSidebarSection = ({
 										: new Date()
 								}
 								onChange={field.handleChange}
+								disabled={!canManageTasks}
 							/>
 						</Field>
 					)}
@@ -374,21 +383,24 @@ export const TaskDetailSidebarSection = ({
 									}}
 									aria-invalid={isInvalid}
 									placeholder="Hours"
+									readOnly={!canManageTasks}
 								/>
-								<Button
-									type="button"
-									variant="outline"
-									className="ml-auto"
-									onClick={onAIEstimate}
-									disabled={isEstimating}
-								>
-									{isEstimating ? (
-										<Loader2 className="size-4 animate-spin" />
-									) : (
-										<Sparkles className="size-4 text-primary" />
-									)}
-									AI Estimate
-								</Button>
+								{canManageTasks && (
+									<Button
+										type="button"
+										variant="outline"
+										className="ml-auto"
+										onClick={onAIEstimate}
+										disabled={isEstimating}
+									>
+										{isEstimating ? (
+											<Loader2 className="size-4 animate-spin" />
+										) : (
+											<Sparkles className="size-4 text-primary" />
+										)}
+										AI Estimate
+									</Button>
+								)}
 								<FieldError errors={field.state.meta.errors} />
 							</Field>
 						);
@@ -426,6 +438,7 @@ export const TaskDetailSidebarSection = ({
 										}}
 										aria-invalid={isInvalid}
 										placeholder="Hours"
+										readOnly={!canManageTasks}
 									/>
 									<FieldError errors={field.state.meta.errors} />
 								</Field>

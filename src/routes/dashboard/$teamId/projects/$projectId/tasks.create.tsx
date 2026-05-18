@@ -1,10 +1,12 @@
 import { useSuspenseQueries } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { z } from "zod";
 import { projectMembersQueryOptions } from "@/features/project-members";
+import { getProjectPermissions } from "@/features/projects";
 import { taskConfigQueries } from "@/features/task-config";
 import { TaskDetailView, tasksQueryOptions } from "@/features/tasks";
+import { userMeQueryOptions } from "@/features/users";
 
 export const Route = createFileRoute(
 	"/dashboard/$teamId/projects/$projectId/tasks/create",
@@ -29,6 +31,7 @@ export const Route = createFileRoute(
 			context.queryClient.ensureQueryData(
 				tasksQueryOptions(projectId, taskListParams),
 			),
+			context.queryClient.ensureQueryData(userMeQueryOptions()),
 			context.queryClient.ensureQueryData(
 				taskConfigQueries.statuses(projectId, commonParams),
 			),
@@ -51,7 +54,7 @@ export const Route = createFileRoute(
 });
 
 function TaskCreatePageOrchestrator() {
-	const { projectId } = Route.useParams();
+	const { teamId, projectId } = Route.useParams();
 	const { status_id, parent_id } = Route.useSearch();
 	const commonParams = { page: 1, page_size: "all" } as const;
 	const taskListParams = {
@@ -61,22 +64,31 @@ function TaskCreatePageOrchestrator() {
 		is_deleted__eq: false,
 	} as const;
 
-	const [tasksRes, statusesRes, typesRes, prioritiesRes, membersRes] =
-		useSuspenseQueries({
-			queries: [
-				tasksQueryOptions(projectId, taskListParams),
-				taskConfigQueries.statuses(projectId, commonParams),
-				taskConfigQueries.types(projectId, commonParams),
-				taskConfigQueries.priorities(projectId, commonParams),
-				projectMembersQueryOptions(projectId),
-			],
-		});
+	const [
+		tasksRes,
+		currentUserRes,
+		statusesRes,
+		typesRes,
+		prioritiesRes,
+		membersRes,
+	] = useSuspenseQueries({
+		queries: [
+			tasksQueryOptions(projectId, taskListParams),
+			userMeQueryOptions(),
+			taskConfigQueries.statuses(projectId, commonParams),
+			taskConfigQueries.types(projectId, commonParams),
+			taskConfigQueries.priorities(projectId, commonParams),
+			projectMembersQueryOptions(projectId),
+		],
+	});
 
 	const parentTaskOptions = tasksRes.data?.founds ?? [];
+	const currentUser = currentUserRes.data;
 	const statuses = statusesRes.data?.founds ?? [];
 	const types = typesRes.data?.founds ?? [];
 	const priorities = prioritiesRes.data?.founds ?? [];
 	const members = membersRes.data?.founds ?? [];
+	const permissions = getProjectPermissions({ members }, currentUser?.id);
 
 	const taskOptions = useMemo(
 		() => ({
@@ -88,12 +100,22 @@ function TaskCreatePageOrchestrator() {
 		[statuses, types, priorities, members],
 	);
 
+	if (!permissions.canManageTasks) {
+		return (
+			<Navigate
+				to="/dashboard/$teamId/projects/$projectId/list"
+				params={{ teamId, projectId }}
+			/>
+		);
+	}
+
 	return (
 		<TaskDetailView
 			options={taskOptions}
 			parentTaskOptions={parentTaskOptions}
 			defaultStatusId={status_id}
 			defaultParentId={parent_id}
+			canManageTasks={permissions.canManageTasks}
 		/>
 	);
 }

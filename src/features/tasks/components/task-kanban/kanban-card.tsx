@@ -13,9 +13,15 @@ interface KanbanCardProps {
 	onClick: () => void;
 	onDelete?: () => void;
 	isOverlay?: boolean;
+	canDrag?: boolean;
 }
 
-export const KanbanCard = ({ task, onClick, isOverlay }: KanbanCardProps) => {
+export const KanbanCard = ({
+	task,
+	onClick,
+	isOverlay,
+	canDrag = true,
+}: KanbanCardProps) => {
 	const {
 		attributes,
 		listeners,
@@ -25,7 +31,7 @@ export const KanbanCard = ({ task, onClick, isOverlay }: KanbanCardProps) => {
 		isDragging,
 	} = useSortable({
 		id: task.id,
-		disabled: isOverlay,
+		disabled: isOverlay || !canDrag,
 		data: {
 			type: "card",
 			task,
@@ -43,9 +49,14 @@ export const KanbanCard = ({ task, onClick, isOverlay }: KanbanCardProps) => {
 		<div
 			ref={setNodeRef}
 			style={style}
-			{...(isOverlay ? {} : attributes)}
-			{...(isOverlay ? {} : listeners)}
-			className="group relative cursor-grab active:cursor-grabbing"
+			{...(isOverlay || !canDrag ? {} : attributes)}
+			{...(isOverlay || !canDrag ? {} : listeners)}
+			className={cn(
+				"group relative",
+				canDrag && !isOverlay
+					? "cursor-grab active:cursor-grabbing"
+					: "cursor-pointer",
+			)}
 			onClick={(e) => {
 				if (isOverlay) return;
 				e.stopPropagation();

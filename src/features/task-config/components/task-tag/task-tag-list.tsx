@@ -21,9 +21,13 @@ import { taskTagColumns } from "./task-tag-columns";
 
 interface ITaskTagListProps {
 	projectId: string;
+	canManageProject?: boolean;
 }
 
-export const TaskTagList = ({ projectId }: ITaskTagListProps) => {
+export const TaskTagList = ({
+	projectId,
+	canManageProject = true,
+}: ITaskTagListProps) => {
 	const [isCreateOpen, setIsCreateOpen] = useState(false);
 	const {
 		data: tagsData,
@@ -73,32 +77,42 @@ export const TaskTagList = ({ projectId }: ITaskTagListProps) => {
 							tag to get started.
 						</EmptyDescription>
 					</EmptyHeader>
-					<EmptyContent>
-						<Button onClick={() => setIsCreateOpen(true)}>
-							<Plus className="size-4" />
-							New Tag
-						</Button>
-					</EmptyContent>
+					{canManageProject && (
+						<EmptyContent>
+							<Button onClick={() => setIsCreateOpen(true)}>
+								<Plus className="size-4" />
+								New Tag
+							</Button>
+						</EmptyContent>
+					)}
 				</Empty>
 
-				<CreateTaskTagDialog
-					projectId={projectId}
-					open={isCreateOpen}
-					onOpenChange={setIsCreateOpen}
-				/>
+				{canManageProject && (
+					<CreateTaskTagDialog
+						projectId={projectId}
+						open={isCreateOpen}
+						onOpenChange={setIsCreateOpen}
+					/>
+				)}
 			</>
 		);
 	}
 
 	return (
 		<div className="space-y-4">
-			<Button onClick={() => setIsCreateOpen(true)}>
-				<Plus className="size-4" />
-				New Tag
-			</Button>
+			{canManageProject && (
+				<Button onClick={() => setIsCreateOpen(true)}>
+					<Plus className="size-4" />
+					New Tag
+				</Button>
+			)}
 			<DataTable<TTaskTag>
 				data={tags}
-				columns={taskTagColumns}
+				columns={
+					canManageProject
+						? taskTagColumns
+						: taskTagColumns.filter((column) => column.id !== "actions")
+				}
 				getRowId={(row) => row.id}
 				showPagination={true}
 				enablePagination={true}
@@ -106,11 +120,13 @@ export const TaskTagList = ({ projectId }: ITaskTagListProps) => {
 				enableColumnReorder={false}
 				enableColumnPinning={false}
 			/>
-			<CreateTaskTagDialog
-				projectId={projectId}
-				open={isCreateOpen}
-				onOpenChange={setIsCreateOpen}
-			/>
+			{canManageProject && (
+				<CreateTaskTagDialog
+					projectId={projectId}
+					open={isCreateOpen}
+					onOpenChange={setIsCreateOpen}
+				/>
+			)}
 		</div>
 	);
 };

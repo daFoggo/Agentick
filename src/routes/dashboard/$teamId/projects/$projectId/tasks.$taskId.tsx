@@ -4,12 +4,14 @@ import { useMemo } from "react";
 import { z } from "zod";
 
 import { projectMembersQueryOptions } from "@/features/project-members";
+import { getProjectPermissions } from "@/features/projects";
 import { taskConfigQueries } from "@/features/task-config";
 import {
 	TaskDetailView,
 	taskQueryOptions,
 	tasksQueryOptions,
 } from "@/features/tasks";
+import { userMeQueryOptions } from "@/features/users";
 
 export const Route = createFileRoute(
 	"/dashboard/$teamId/projects/$projectId/tasks/$taskId",
@@ -31,6 +33,7 @@ export const Route = createFileRoute(
 		// Standard Loader Prefetching Pattern from Rule 1
 		await Promise.all([
 			context.queryClient.ensureQueryData(taskQueryOptions(projectId, taskId)),
+			context.queryClient.ensureQueryData(userMeQueryOptions()),
 			context.queryClient.ensureQueryData(
 				tasksQueryOptions(projectId, taskListParams),
 			),
@@ -66,24 +69,34 @@ function TaskDetailPageOrchestrator() {
 	} as const;
 
 	// Using React Suspense Queries ensures safe immediate state access since data preloaded above
-	const [taskRes, tasksRes, statusesRes, typesRes, prioritiesRes, membersRes] =
-		useSuspenseQueries({
-			queries: [
-				taskQueryOptions(projectId, taskId),
-				tasksQueryOptions(projectId, taskListParams),
-				taskConfigQueries.statuses(projectId, commonParams),
-				taskConfigQueries.types(projectId, commonParams),
-				taskConfigQueries.priorities(projectId, commonParams),
-				projectMembersQueryOptions(projectId),
-			],
-		});
+	const [
+		taskRes,
+		currentUserRes,
+		tasksRes,
+		statusesRes,
+		typesRes,
+		prioritiesRes,
+		membersRes,
+	] = useSuspenseQueries({
+		queries: [
+			taskQueryOptions(projectId, taskId),
+			userMeQueryOptions(),
+			tasksQueryOptions(projectId, taskListParams),
+			taskConfigQueries.statuses(projectId, commonParams),
+			taskConfigQueries.types(projectId, commonParams),
+			taskConfigQueries.priorities(projectId, commonParams),
+			projectMembersQueryOptions(projectId),
+		],
+	});
 
 	const task = taskRes.data;
+	const currentUser = currentUserRes.data;
 	const statuses = statusesRes.data?.founds ?? [];
 	const types = typesRes.data?.founds ?? [];
 	const priorities = prioritiesRes.data?.founds ?? [];
 	const members = membersRes.data?.founds ?? [];
 	const parentTaskOptions = tasksRes.data?.founds ?? [];
+	const permissions = getProjectPermissions({ members }, currentUser?.id);
 
 	const taskOptions = useMemo(
 		() => ({
@@ -102,6 +115,7 @@ function TaskDetailPageOrchestrator() {
 			task={task}
 			options={taskOptions}
 			parentTaskOptions={parentTaskOptions}
+			canManageTasks={permissions.canManageTasks}
 		/>
 	);
 }
