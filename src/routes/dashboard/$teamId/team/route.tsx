@@ -1,15 +1,19 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { useDeferredValue, useState } from "react";
 import { NestedErrorFallback } from "@/components/common/error-pages";
 import { ViewModeList } from "@/components/layout/app/view-mode-list";
 import { TEAM_VIEW_MODE_CATALOG } from "@/constants/view-mode-list";
-import { teamMembersQueryOptions } from "@/features/team-members";
+import {
+	InviteTeamMemberDialog,
+	teamMembersQueryOptions,
+} from "@/features/team-members";
 import {
 	getTeamPermissions,
 	TeamDetailsHeader,
 	teamQueryOptions,
 } from "@/features/teams";
-import { userMeQueryOptions } from "@/features/users";
+import { searchUsersQueryOptions, userMeQueryOptions } from "@/features/users";
 
 export const Route = createFileRoute("/dashboard/$teamId/team")({
 	errorComponent: NestedErrorFallback,
@@ -35,8 +39,41 @@ export const Route = createFileRoute("/dashboard/$teamId/team")({
 });
 
 function HeaderWrapper() {
+	const { teamId } = Route.useParams();
 	const team = Route.useLoaderData();
-	return <TeamDetailsHeader team={team} />;
+	const [inviteOpen, setInviteOpen] = useState(false);
+	const [inviteSearchQuery, setInviteSearchQuery] = useState("");
+	const deferredInviteSearchQuery = useDeferredValue(inviteSearchQuery);
+	const { data: currentUser } = useSuspenseQuery(userMeQueryOptions());
+	const { data: membersData } = useSuspenseQuery(
+		teamMembersQueryOptions(teamId),
+	);
+	const inviteSearch = useQuery(
+		searchUsersQueryOptions(deferredInviteSearchQuery, {
+			excludeTeamId: teamId,
+		}),
+	);
+
+	return (
+		<>
+			<TeamDetailsHeader
+				team={team}
+				members={membersData?.founds ?? []}
+				currentUser={currentUser}
+				onInviteMembers={() => setInviteOpen(true)}
+			/>
+			<InviteTeamMemberDialog
+				teamId={team.id}
+				open={inviteOpen}
+				onOpenChange={setInviteOpen}
+				users={inviteSearch.data ?? []}
+				isUsersLoading={inviteSearch.isLoading}
+				isUsersError={inviteSearch.isError}
+				usersError={inviteSearch.error}
+				onSearchQueryChange={setInviteSearchQuery}
+			/>
+		</>
+	);
 }
 
 function RouteComponent() {

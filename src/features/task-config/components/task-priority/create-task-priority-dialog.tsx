@@ -1,9 +1,7 @@
 import { useForm } from "@tanstack/react-form";
-import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { toast } from "sonner";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -28,13 +26,12 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
 	TAILWIND_500_COLORS,
 	TAILWIND_COLOR_OPTIONS,
 } from "@/constants/color-options";
 import { getErrorMessage } from "@/lib/error";
-import { taskConfigQueries, useTaskConfigMutations } from "../../queries";
+import { useTaskConfigMutations } from "../../queries";
 import {
 	TaskPriorityCreateSchema,
 	type TTaskPriorityCreateInput,
@@ -42,30 +39,18 @@ import {
 
 interface ICreateTaskPriorityDialogProps {
 	projectId: string;
+	nextOrder: number;
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 }
 
 export const CreateTaskPriorityDialog = ({
 	projectId,
+	nextOrder,
 	open,
 	onOpenChange,
 }: ICreateTaskPriorityDialogProps) => {
 	const { createPriority } = useTaskConfigMutations();
-	const {
-		data: prioritiesData,
-		isLoading: isPrioritiesLoading,
-		isError: isPrioritiesError,
-		error: prioritiesError,
-	} = useQuery(
-		taskConfigQueries.priorities(projectId, {
-			page: 1,
-			page_size: "all",
-			ordering: "order",
-		}),
-	);
-
-	const nextOrder = prioritiesData?.founds.length ?? 0;
 	const form = useForm({
 		defaultValues: {
 			name: "",
@@ -89,9 +74,9 @@ export const CreateTaskPriorityDialog = ({
 	});
 
 	useEffect(() => {
-		if (!open || isPrioritiesLoading || isPrioritiesError) return;
+		if (!open) return;
 		form.setFieldValue("order", nextOrder);
-	}, [open, nextOrder, isPrioritiesLoading, isPrioritiesError, form]);
+	}, [open, nextOrder, form]);
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
@@ -110,20 +95,6 @@ export const CreateTaskPriorityDialog = ({
 							Add a new priority for task triage.
 						</DialogDescription>
 					</DialogHeader>
-
-					{isPrioritiesLoading && <Skeleton className="h-9 w-full" />}
-
-					{isPrioritiesError && (
-						<Alert variant="destructive">
-							<AlertCircle className="size-4" />
-							<AlertDescription>
-								{getErrorMessage(
-									prioritiesError,
-									"Could not load task priorities.",
-								)}
-							</AlertDescription>
-						</Alert>
-					)}
 
 					<FieldGroup>
 						<form.Field
@@ -269,12 +240,7 @@ export const CreateTaskPriorityDialog = ({
 							children={([canSubmit]) => (
 								<Button
 									type="submit"
-									disabled={
-										!canSubmit ||
-										createPriority.isPending ||
-										isPrioritiesLoading ||
-										isPrioritiesError
-									}
+									disabled={!canSubmit || createPriority.isPending}
 								>
 									{createPriority.isPending && (
 										<Loader2 className="mr-2 size-4 animate-spin" />

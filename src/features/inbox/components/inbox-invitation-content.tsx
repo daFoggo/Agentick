@@ -1,6 +1,4 @@
-import { useNavigate } from "@tanstack/react-router";
 import { UserPlus } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -9,38 +7,22 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { type TInboxItem, useInboxMutations } from "@/features/inbox";
-import {
-	navigateAfterInvitationAccept,
-	useInvitationMutations,
-} from "@/features/invitations";
-import { getErrorMessage } from "@/lib/error";
+import type { TInboxItem } from "../schemas";
 
 interface IInboxInvitationContentProps {
 	item: TInboxItem;
+	isAcceptingInvitation?: boolean;
+	onAcceptInvitation?: (item: TInboxItem) => void;
 }
 
 export const InboxInvitationContent = ({
 	item,
+	isAcceptingInvitation = false,
+	onAcceptInvitation,
 }: IInboxInvitationContentProps) => {
-	const navigate = useNavigate();
-	const { accept: acceptInvitation } = useInvitationMutations();
-	const { markAsRead } = useInboxMutations();
-
 	const handleAccept = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		if (item.resource_id) {
-			acceptInvitation.mutate(item.resource_id, {
-				onSuccess: (result) => {
-					toast.success("Invitation accepted successfully");
-					navigateAfterInvitationAccept(result, navigate);
-					markAsRead.mutate(item.id);
-				},
-				onError: (error) => {
-					toast.error(getErrorMessage(error, "Failed to accept invitation"));
-				},
-			});
-		}
+		onAcceptInvitation?.(item);
 	};
 
 	return (
@@ -57,7 +39,11 @@ export const InboxInvitationContent = ({
 				</CardDescription>
 			</CardHeader>
 			<CardFooter className="flex justify-center">
-				<Button onClick={handleAccept} className="w-full">
+				<Button
+					onClick={handleAccept}
+					className="w-full"
+					disabled={!item.resource_id || isAcceptingInvitation}
+				>
 					Accept Invitation
 				</Button>
 			</CardFooter>

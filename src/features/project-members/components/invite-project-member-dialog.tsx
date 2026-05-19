@@ -1,6 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, Loader2, Plus } from "lucide-react";
-import { useDeferredValue, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { MultiSelectCombobox } from "@/components/common/multi-select-combobox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -22,10 +21,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { ASSIGNABLE_ROLES } from "@/constants/team-roles";
-import {
-	searchUsersQueryOptions,
-	type TUserSearchResult,
-} from "@/features/users";
+import type { TUserSearchResult } from "@/features/users";
 import { getErrorMessage } from "@/lib/error";
 import { useProjectMemberMutations } from "../queries";
 import type { TProjectRole } from "../schemas";
@@ -34,6 +30,11 @@ interface IInviteProjectMemberDialogProps {
 	projectId: string;
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
+	users: TUserSearchResult[];
+	isUsersLoading?: boolean;
+	isUsersError?: boolean;
+	usersError?: unknown;
+	onSearchQueryChange: (query: string) => void;
 }
 
 /**
@@ -44,27 +45,21 @@ export const InviteProjectMemberDialog = ({
 	projectId,
 	open,
 	onOpenChange,
+	users: fetchedUsers,
+	isUsersLoading = false,
+	isUsersError = false,
+	usersError,
+	onSearchQueryChange,
 }: IInviteProjectMemberDialogProps) => {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedUsers, setSelectedUsers] = useState<TUserSearchResult[]>([]);
 	const [selectedRole, setSelectedRole] = useState<TProjectRole>("member");
-	const deferredQuery = useDeferredValue(searchQuery);
-
-	// Use global user search with smart exclusion
-	const {
-		data: fetchedUsers,
-		isLoading,
-		isError,
-		error,
-	} = useQuery(
-		searchUsersQueryOptions(deferredQuery, { excludeProjectId: projectId }),
-	);
 
 	const users = useMemo(() => {
-		if (isError) return [];
+		if (isUsersError) return [];
 
 		const list = [...(fetchedUsers ?? [])];
-		const trimmedQuery = deferredQuery.trim();
+		const trimmedQuery = searchQuery.trim();
 		const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedQuery);
 
 		if (
@@ -79,7 +74,7 @@ export const InviteProjectMemberDialog = ({
 			});
 		}
 		return list;
-	}, [fetchedUsers, deferredQuery, isError]);
+	}, [fetchedUsers, searchQuery, isUsersError]);
 
 	const { generateInvite } = useProjectMemberMutations();
 
@@ -105,6 +100,7 @@ export const InviteProjectMemberDialog = ({
 
 	const handleReset = () => {
 		setSearchQuery("");
+		onSearchQueryChange("");
 		setSelectedUsers([]);
 		setSelectedRole("member");
 	};
@@ -135,8 +131,11 @@ export const InviteProjectMemberDialog = ({
 							onValueChange={(vals) => {
 								setSelectedUsers(vals);
 							}}
-							onInputValueChange={setSearchQuery}
-							isLoading={isLoading}
+							onInputValueChange={(query) => {
+								setSearchQuery(query);
+								onSearchQueryChange(query);
+							}}
+							isLoading={isUsersLoading}
 							itemToString={(user) => user.name}
 							itemToValue={(user) => user.id}
 							renderChip={(user) =>
@@ -162,10 +161,12 @@ export const InviteProjectMemberDialog = ({
 								</div>
 							)}
 						/>
-						{isError && (
+						{isUsersError && (
 							<div className="flex items-center gap-1.5 text-xs text-destructive">
 								<AlertCircle className="size-3.5 shrink-0" />
-								<span>{getErrorMessage(error, "Could not search users.")}</span>
+								<span>
+									{getErrorMessage(usersError, "Could not search users.")}
+								</span>
 							</div>
 						)}
 					</Field>
@@ -206,7 +207,9 @@ export const InviteProjectMemberDialog = ({
 						type="button"
 						onClick={handleAdd}
 						disabled={
-							selectedUsers.length === 0 || generateInvite.isPending || isError
+							selectedUsers.length === 0 ||
+							generateInvite.isPending ||
+							isUsersError
 						}
 					>
 						{generateInvite.isPending ? (

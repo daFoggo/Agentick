@@ -5,21 +5,24 @@ import { toast } from "sonner";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getErrorMessage } from "@/lib/error";
 import {
 	buildTaskDetailPayload,
-	CreateTaskSchema,
 	cloneTaskDetailFormValues,
 	getTaskDetailDefaultValues,
-	type ITaskListDialogOptions,
 	serializeTaskDetailFormValues,
+} from "../../helpers";
+import { useTaskMutations } from "../../queries";
+import {
+	CreateTaskSchema,
+	type ITaskListDialogOptions,
 	type TTask,
 	type TTaskAIEstimationExplanation,
 	type TTaskDetailFormValues,
 	UpdateTaskSchema,
-	useTaskMutations,
-} from "@/features/tasks";
-import { getErrorMessage } from "@/lib/error";
+} from "../../schemas";
 import { DeleteTaskListDialog } from "../task-table/delete-task-list-dialog";
+import type { ITaskActivityLog } from "./task-activity";
 import { TaskDetailHeader } from "./task-detail-header";
 import { TaskDetailMainSection } from "./task-detail-main-section";
 import { TaskDetailSidebarSection } from "./task-detail-sidebar-section";
@@ -31,6 +34,10 @@ interface ITaskDetailViewProps {
 	isLoading?: boolean;
 	defaultStatusId?: string;
 	defaultParentId?: string | null;
+	activities?: ITaskActivityLog[];
+	isActivitiesLoading?: boolean;
+	isActivitiesError?: boolean;
+	activitiesError?: unknown;
 	canManageTasks?: boolean;
 }
 
@@ -41,6 +48,10 @@ export const TaskDetailView = ({
 	isLoading,
 	defaultStatusId,
 	defaultParentId,
+	activities = [],
+	isActivitiesLoading = false,
+	isActivitiesError = false,
+	activitiesError,
 	canManageTasks = true,
 }: ITaskDetailViewProps) => {
 	const navigate = useNavigate();
@@ -357,6 +368,10 @@ export const TaskDetailView = ({
 								options={options}
 								parentTaskOptions={parentTaskOptions}
 								isLoading={isLoading}
+								activities={activities}
+								isActivitiesLoading={isActivitiesLoading}
+								isActivitiesError={isActivitiesError}
+								activitiesError={activitiesError}
 								canManageTasks={canManageTasks}
 							/>
 							<TaskDetailSidebarSection

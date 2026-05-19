@@ -1,27 +1,25 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { DataTable } from "@/components/common/data-table";
-import { teamMembersQueryOptions } from "../queries";
 import type { TTeamMember } from "../schemas";
-import { teamMemberColumns } from "./columns";
+import { getTeamMemberColumns } from "./columns";
 
 interface ITeamMemberListProps {
-	teamId: string;
+	members: TTeamMember[];
+	currentUserId?: string;
 }
 
 /**
  * Hiển thị danh sách các thành viên trong Team dưới dạng bảng dữ liệu (DataTable).
  */
-export const TeamMemberList = ({ teamId }: ITeamMemberListProps) => {
-	const { data: membersData } = useSuspenseQuery(
-		teamMembersQueryOptions(teamId),
-	);
-
-	const members = membersData?.founds ?? [];
+export const TeamMemberList = ({
+	members,
+	currentUserId,
+}: ITeamMemberListProps) => {
+	const columns = getTeamMemberColumns({ members, currentUserId });
 
 	return (
 		<DataTable<TTeamMember>
 			data={members}
-			columns={teamMemberColumns}
+			columns={columns}
 			getRowId={(row) => row.id}
 			showPagination={false}
 			enablePagination={false}

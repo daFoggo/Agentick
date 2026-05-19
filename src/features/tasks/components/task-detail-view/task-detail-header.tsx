@@ -4,7 +4,7 @@ import { ArrowLeft, Loader2, Save, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CardAction, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import type { TTask, TTaskDetailFormApi } from "@/features/tasks/schemas";
+import type { TTask, TTaskDetailFormApi } from "../../schemas";
 
 interface TaskDetailHeaderProps {
 	task?: TTask;

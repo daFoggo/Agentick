@@ -7,8 +7,8 @@ import {
 	EmptyMedia,
 	EmptyTitle,
 } from "@/components/ui/empty";
-import type { TInboxItem } from "@/features/inbox";
 import { useInboxStore } from "@/stores/use-inbox-store";
+import type { TInboxItem } from "../schemas";
 import { InboxItem } from "./inbox-item";
 
 interface IInboxListProps {

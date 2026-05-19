@@ -3,8 +3,11 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { NestedErrorFallback } from "@/components/common/error-pages";
 import { ViewModeList } from "@/components/layout/app/view-mode-list";
 import { INBOX_VIEW_MODE_CATALOG } from "@/constants/view-mode-list";
-import { InboxMarkAllReadButton, type TInboxStats } from "@/features/inbox";
-import { inboxStatsQueryOptions } from "@/features/inbox/queries";
+import {
+	InboxMarkAllReadButton,
+	inboxStatsQueryOptions,
+	type TInboxStats,
+} from "@/features/inbox";
 
 const toInboxBadgeMap = (stats: TInboxStats) => ({
 	active: stats.active_count,

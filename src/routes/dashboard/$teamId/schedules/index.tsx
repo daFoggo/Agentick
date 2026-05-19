@@ -27,6 +27,7 @@ import {
 	WorkTimePattern,
 } from "@/features/schedules";
 import { tasksQueryOptions, useTaskMutations } from "@/features/tasks";
+import { teamMembersQueryOptions } from "@/features/team-members";
 import { userMeQueryOptions } from "@/features/users";
 import { getErrorMessage } from "@/lib/error";
 import type { IBigCalendarEvent } from "@/types/big-calendar";
@@ -38,6 +39,9 @@ export const Route = createFileRoute("/dashboard/$teamId/schedules/")({
 		void context.queryClient.prefetchQuery(userMeQueryOptions());
 		void context.queryClient.prefetchQuery(
 			eventsQueryOptions({ team_id__eq: params.teamId }),
+		);
+		void context.queryClient.prefetchQuery(
+			teamMembersQueryOptions(params.teamId),
 		);
 		void context.queryClient.prefetchQuery(
 			tasksQueryOptions(undefined, {
@@ -81,6 +85,12 @@ function RouteComponent() {
 		isError: isErrorUser,
 		error: userError,
 	} = useQuery(userMeQueryOptions());
+	const {
+		data: teamMembersData,
+		isLoading: isLoadingTeamMembers,
+		isError: isErrorTeamMembers,
+		error: teamMembersError,
+	} = useQuery(teamMembersQueryOptions(params.teamId));
 	const {
 		data: eventsData,
 		isLoading: isLoadingEvents,
@@ -243,7 +253,13 @@ function RouteComponent() {
 						</Button>
 					</div>
 
-					<WorkTimePattern />
+					<WorkTimePattern
+						schedules={schedules}
+						teamId={params.teamId}
+						userId={userData?.id}
+						isLoading={isLoadingUser || isLoadingSchedules}
+						error={userError ?? schedulesError}
+					/>
 					<EventTypeFilter
 						value={selectedEventTypes}
 						onChange={setSelectedEventTypes}
@@ -348,6 +364,15 @@ function RouteComponent() {
 				open={actionBarOpen}
 				onOpenChange={closeActionBar}
 				event={actionBarEvent}
+				teamId={params.teamId}
+				currentUser={userData}
+				teamMembers={teamMembersData?.founds ?? []}
+				isCurrentUserLoading={isLoadingUser}
+				isCurrentUserError={isErrorUser}
+				currentUserError={userError}
+				isTeamMembersLoading={isLoadingTeamMembers}
+				isTeamMembersError={isErrorTeamMembers}
+				teamMembersError={teamMembersError}
 			/>
 		</div>
 	);

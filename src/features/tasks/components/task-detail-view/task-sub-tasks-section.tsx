@@ -23,11 +23,8 @@ import {
 	ItemTitle,
 } from "@/components/ui/item";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-	formatCalendarDate,
-	type ITaskListDialogOptions,
-	type TTask,
-} from "@/features/tasks";
+import { formatCalendarDate } from "../../helpers";
+import type { ITaskListDialogOptions, TTask } from "../../schemas";
 
 interface ITaskSubTasksSectionProps {
 	task?: TTask;

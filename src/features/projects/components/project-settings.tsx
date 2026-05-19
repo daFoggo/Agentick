@@ -1,5 +1,5 @@
 import { useForm } from "@tanstack/react-form";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -22,20 +22,22 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { TIMEZONES } from "@/constants/timezone";
-import { userMeQueryOptions } from "@/features/users";
+import type { TUser } from "@/features/users";
 import { getErrorMessage } from "@/lib/error";
 import { getProjectPermissions } from "../permissions";
+import { myProjectsQueryOptions, useProjectMutations } from "../queries";
 import {
-	myProjectsQueryOptions,
-	projectQueryOptions,
-	useProjectMutations,
-} from "../queries";
-import { type TUpdateProjectInput, UpdateProjectSchema } from "../schemas";
+	type TProject,
+	type TUpdateProjectInput,
+	UpdateProjectSchema,
+} from "../schemas";
 import { ProjectDeleteDialog } from "./project-delete-dialog";
 
 interface IProjectSettingsProps {
 	projectId: string;
 	teamId: string;
+	project: TProject;
+	currentUser?: TUser;
 }
 
 /**
@@ -45,11 +47,11 @@ interface IProjectSettingsProps {
 export const ProjectSettings = ({
 	projectId,
 	teamId,
+	project,
+	currentUser,
 }: IProjectSettingsProps) => {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
-	const { data: project } = useSuspenseQuery(projectQueryOptions(projectId));
-	const { data: currentUser } = useSuspenseQuery(userMeQueryOptions());
 	const permissions = getProjectPermissions(project, currentUser?.id);
 	const { update, remove } = useProjectMutations();
 	const [updatingField, setUpdatingField] = useState<

@@ -1,3 +1,4 @@
+import { useSuspenseQueries } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { ProjectSettings, projectQueryOptions } from "@/features/projects";
 import { userMeQueryOptions } from "@/features/users";
@@ -18,6 +19,16 @@ export const Route = createFileRoute(
 
 function ProjectSettingsGeneralPage() {
 	const { teamId, projectId } = Route.useParams();
+	const [projectRes, currentUserRes] = useSuspenseQueries({
+		queries: [projectQueryOptions(projectId), userMeQueryOptions()],
+	});
 
-	return <ProjectSettings teamId={teamId} projectId={projectId} />;
+	return (
+		<ProjectSettings
+			teamId={teamId}
+			projectId={projectId}
+			project={projectRes.data}
+			currentUser={currentUserRes.data}
+		/>
+	);
 }

@@ -1,13 +1,10 @@
-import { useSuspenseQueries } from "@tanstack/react-query";
-import { useParams } from "@tanstack/react-router";
-import { format } from "date-fns";
 import { memo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { userMeQueryOptions } from "@/features/users";
-import { myTasksOverviewQueryOptions } from "../../queries";
+import type { TUser } from "@/features/users";
+import type { TMyTasksOverview } from "../../schemas";
 import { TaskList } from "./task-list";
 
 export const TaskLineSkeleton = () => {
@@ -36,17 +33,12 @@ export const TaskLineSkeleton = () => {
 /**
  * TaskLine component - Orchestrates the personal tasks widget on Dashboard Overview
  */
-export const TaskLine = memo(() => {
-	const { teamId } = useParams({ strict: false });
-	const [userRes, overviewRes] = useSuspenseQueries({
-		queries: [
-			userMeQueryOptions(),
-			myTasksOverviewQueryOptions(teamId, format(new Date(), "yyyy-MM-dd")),
-		],
-	});
-	const user = userRes.data;
-	const overview = overviewRes.data;
+interface ITaskLineProps {
+	user: TUser;
+	overview: TMyTasksOverview;
+}
 
+export const TaskLine = memo(({ user, overview }: ITaskLineProps) => {
 	const { in_progress: inProgress, upcoming, overdue } = overview;
 
 	const initials =

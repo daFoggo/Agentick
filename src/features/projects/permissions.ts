@@ -1,5 +1,5 @@
 import type { TProjectRole } from "@/features/project-members";
-import type { TProject } from "@/features/projects";
+import type { TProject } from "./schemas";
 
 export type TProjectPermissionSet = {
 	role: TProjectRole | null;

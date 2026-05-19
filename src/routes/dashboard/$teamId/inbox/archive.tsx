@@ -1,6 +1,7 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { InboxView, inboxListQueryOptions } from "@/features/inbox";
+import { inboxListQueryOptions } from "@/features/inbox";
+import { InboxViewContainer } from "./-inbox-view-container";
 
 export const Route = createFileRoute("/dashboard/$teamId/inbox/archive")({
 	loader: ({ context }) =>
@@ -11,5 +12,5 @@ export const Route = createFileRoute("/dashboard/$teamId/inbox/archive")({
 function ArchiveInboxView() {
 	const { data: items } = useSuspenseQuery(inboxListQueryOptions("ARCHIVED"));
 
-	return <InboxView items={items} />;
+	return <InboxViewContainer items={items} />;
 }

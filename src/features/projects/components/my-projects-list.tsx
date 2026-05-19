@@ -1,5 +1,4 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { useNavigate, useParams } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { Briefcase, FolderGit2, Plus } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -13,17 +12,17 @@ import {
 	EmptyMedia,
 	EmptyTitle,
 } from "@/components/ui/empty";
-import { myProjectsQueryOptions } from "@/features/projects/queries";
+import type { TProject } from "../schemas";
 import { CreateProjectDialog } from "./create-project-dialog";
 
-export function MyProjectsList() {
-	const navigate = useNavigate();
-	const { teamId } = useParams({ strict: false });
-	const [isCreateOpen, setIsCreateOpen] = useState(false);
+interface IMyProjectsListProps {
+	teamId: string;
+	projects: TProject[];
+}
 
-	const { data: projects = [] } = useSuspenseQuery(
-		myProjectsQueryOptions(teamId),
-	);
+export function MyProjectsList({ teamId, projects }: IMyProjectsListProps) {
+	const navigate = useNavigate();
+	const [isCreateOpen, setIsCreateOpen] = useState(false);
 
 	const content = (() => {
 		if (projects.length === 0) {
@@ -102,7 +101,7 @@ export function MyProjectsList() {
 			<CreateProjectDialog
 				open={isCreateOpen}
 				onOpenChange={setIsCreateOpen}
-				teamId={teamId || "personal"}
+				teamId={teamId}
 			/>
 		</>
 	);

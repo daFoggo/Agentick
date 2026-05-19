@@ -1,4 +1,4 @@
-import type { TTeamMember, TTeamRole } from "@/features/team-members/schemas";
+import type { TTeamMember, TTeamRole } from "@/features/team-members";
 
 export interface TeamPermissions {
 	role: TTeamRole | null;

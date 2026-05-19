@@ -27,9 +27,13 @@ export const Route = createFileRoute(
 });
 
 function ProjectSettingsMembersPage() {
-	const { projectId } = Route.useParams();
-	const [projectRes, currentUserRes] = useSuspenseQueries({
-		queries: [projectQueryOptions(projectId), userMeQueryOptions()],
+	const { teamId, projectId } = Route.useParams();
+	const [membersRes, projectRes, currentUserRes] = useSuspenseQueries({
+		queries: [
+			projectMembersQueryOptions(projectId),
+			projectQueryOptions(projectId),
+			userMeQueryOptions(),
+		],
 	});
 	const permissions = getProjectPermissions(
 		projectRes.data,
@@ -38,7 +42,9 @@ function ProjectSettingsMembersPage() {
 
 	return (
 		<ProjectMemberList
-			projectId={projectId}
+			teamId={teamId}
+			members={membersRes.data?.founds ?? []}
+			currentUserId={currentUserRes.data?.id}
 			canManageProject={permissions.canManageProject}
 		/>
 	);

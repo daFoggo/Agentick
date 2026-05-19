@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { TInboxItem } from "@/features/inbox";
+import type { TInboxItem } from "../schemas";
 
 interface IInboxTaskAssignedContentProps {
 	item: TInboxItem;

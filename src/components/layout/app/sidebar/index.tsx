@@ -18,7 +18,14 @@ import {
 	SIDEBAR_TEAM,
 } from "@/constants/sidebar-navigation";
 import { inboxStatsQueryOptions } from "@/features/inbox/queries";
-import { projectQueryOptions, SidebarProjectList } from "@/features/projects";
+import {
+	projectQueryOptions,
+	projectsQueryOptions,
+	SidebarProjectList,
+} from "@/features/projects";
+import { teamMembersQueryOptions } from "@/features/team-members";
+import { getTeamPermissions } from "@/features/teams";
+import { userMeQueryOptions } from "@/features/users";
 import { useSidebarContextStore } from "@/stores/use-sidebar-context-store";
 import { HeaderContent } from "./header-content";
 import { SidebarGroupSection } from "./sidebar-navigation";
@@ -63,6 +70,9 @@ export const AppSidebar = () => {
 	const projectMatch = pathname.match(
 		/^\/dashboard\/([^/]+)\/projects\/([^/]+)/,
 	);
+	const teamMatch = pathname.match(/^\/dashboard\/([^/]+)/);
+	const teamId = teamMatch ? teamMatch[1] : "";
+	const isTeamContext = Boolean(teamId && teamId !== "personal");
 	const projectId = projectMatch ? projectMatch[2] : undefined;
 
 	const { data: project } = useQuery({
@@ -70,6 +80,41 @@ export const AppSidebar = () => {
 		enabled: !!projectId,
 	});
 	const timezone = project?.timezone;
+	const {
+		data: projectsData,
+		isLoading: isProjectsLoading,
+		error: projectsError,
+	} = useQuery({
+		...projectsQueryOptions({ team_id__eq: teamId }),
+		enabled: isTeamContext,
+	});
+	const {
+		data: currentUser,
+		isLoading: isCurrentUserLoading,
+		isError: isCurrentUserError,
+		error: currentUserError,
+	} = useQuery(userMeQueryOptions());
+	const {
+		data: membersData,
+		isLoading: isMembersLoading,
+		isError: isMembersError,
+		error: membersError,
+	} = useQuery({
+		...teamMembersQueryOptions(teamId),
+		enabled: isTeamContext,
+	});
+	const permissions = getTeamPermissions(
+		membersData?.founds ?? [],
+		currentUser?.id,
+	);
+	const isPermissionLoading =
+		isTeamContext && (isCurrentUserLoading || isMembersLoading);
+	const permissionError =
+		isTeamContext && (isCurrentUserError || isMembersError)
+			? (currentUserError ?? membersError)
+			: undefined;
+	const canCreateProject =
+		permissions.canCreateProjects && !isPermissionLoading && !permissionError;
 
 	return (
 		<Sidebar variant="inset">
@@ -93,7 +138,15 @@ export const AppSidebar = () => {
 					<>
 						<SidebarGroupSection group={personalNavigation} />
 
-						<SidebarProjectList />
+						<SidebarProjectList
+							teamId={teamId}
+							projects={projectsData?.founds ?? []}
+							isProjectsLoading={isTeamContext && isProjectsLoading}
+							projectsError={projectsError}
+							canCreateProject={canCreateProject}
+							isPermissionLoading={isPermissionLoading}
+							permissionError={permissionError}
+						/>
 
 						<SidebarGroupSection group={SIDEBAR_TEAM} />
 					</>

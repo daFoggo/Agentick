@@ -1,12 +1,12 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { DataTable } from "@/components/common/data-table";
 import { RoleBadge } from "@/components/common/role-badge";
-import { projectMembersQueryOptions } from "../queries";
 import type { TProjectMember } from "../schemas";
-import { projectMemberColumns } from "./columns";
+import { getProjectMemberColumns } from "./columns";
 
 interface IProjectMemberListProps {
-	projectId: string;
+	teamId?: string;
+	members: TProjectMember[];
+	currentUserId?: string;
 	canManageProject?: boolean;
 }
 
@@ -15,14 +15,15 @@ interface IProjectMemberListProps {
  * Hoàn toàn ủy thác việc xử lý loading/error cho Suspense Boundary cấp Route.
  */
 export const ProjectMemberList = ({
-	projectId,
+	teamId,
+	members,
+	currentUserId,
 	canManageProject = true,
 }: IProjectMemberListProps) => {
-	const { data: membersData } = useSuspenseQuery(
-		projectMembersQueryOptions(projectId),
-	);
-
-	const members = membersData?.founds ?? [];
+	const projectMemberColumns = getProjectMemberColumns({
+		currentUserId,
+		teamId,
+	});
 	const columns = canManageProject
 		? projectMemberColumns
 		: projectMemberColumns

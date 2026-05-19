@@ -1,7 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { useParams } from "@tanstack/react-router";
 import { AlertCircle, CalendarRange, Settings2Icon } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
 	Dialog,
 	DialogContent,
@@ -11,39 +9,29 @@ import {
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DAYS_OF_WEEK, DISPLAY_ORDER_MON_SUN } from "@/constants/days";
-import {
-	formatSchedules,
-	mySchedulesQueryOptions,
-	useScheduleMutations,
-} from "@/features/schedules";
-import { userMeQueryOptions } from "@/features/users";
 import { getErrorMessage } from "@/lib/error";
 import { cn } from "@/lib/utils";
+import { useScheduleMutations } from "../queries";
+import type { TUpsertScheduleInput } from "../schemas";
 import { WorkTimePatternEditor } from "./work-time-pattern-editor";
 
-export const WorkTimePattern = () => {
+interface IWorkTimePatternProps {
+	schedules: TUpsertScheduleInput[];
+	teamId: string;
+	userId?: string;
+	isLoading?: boolean;
+	error?: unknown;
+}
+
+export const WorkTimePattern = ({
+	schedules,
+	teamId,
+	userId,
+	isLoading = false,
+	error,
+}: IWorkTimePatternProps) => {
 	const [mounted, setMounted] = useState(false);
-	const params = useParams({ from: "/dashboard/$teamId/schedules/" });
-	const teamId = params.teamId;
-
-	const {
-		data: user,
-		isError: isUserError,
-		error: userError,
-	} = useQuery(userMeQueryOptions());
-	const {
-		data: rawSchedules,
-		isLoading,
-		isError: isSchedulesError,
-		error: schedulesError,
-	} = useQuery(mySchedulesQueryOptions());
 	const { upsert } = useScheduleMutations();
-
-	const schedules = useMemo(
-		() => formatSchedules(rawSchedules, teamId, user?.id),
-		[rawSchedules, teamId, user?.id],
-	);
-	const userId = user?.id;
 
 	useEffect(() => {
 		setMounted(true);
@@ -53,16 +41,11 @@ export const WorkTimePattern = () => {
 		return <Skeleton className="h-24 w-full rounded-xl" />;
 	}
 
-	if (isUserError || isSchedulesError) {
+	if (error) {
 		return (
 			<div className="flex items-center gap-1.5 px-2 py-3 text-xs text-destructive">
 				<AlertCircle className="size-3.5 shrink-0" />
-				<span>
-					{getErrorMessage(
-						userError ?? schedulesError,
-						"Could not load work days.",
-					)}
-				</span>
+				<span>{getErrorMessage(error, "Could not load work days.")}</span>
 			</div>
 		);
 	}

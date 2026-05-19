@@ -8,8 +8,8 @@ import {
 	CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Label } from "@/components/ui/label";
-import { EVENT_TYPE_OPTIONS } from "@/features/events";
 import { cn } from "@/lib/utils";
+import { EVENT_TYPE_OPTIONS } from "../constants";
 
 interface IEventTypeFilterProps {
 	value?: string[];

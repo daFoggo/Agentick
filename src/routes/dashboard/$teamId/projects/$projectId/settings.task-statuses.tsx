@@ -4,7 +4,7 @@ import {
 	getProjectPermissions,
 	projectQueryOptions,
 } from "@/features/projects";
-import { TaskStatusList } from "@/features/task-config";
+import { TaskStatusList, taskConfigQueries } from "@/features/task-config";
 import { userMeQueryOptions } from "@/features/users";
 
 export const Route = createFileRoute(
@@ -16,14 +16,29 @@ export const Route = createFileRoute(
 				projectQueryOptions(params.projectId),
 			),
 			context.queryClient.ensureQueryData(userMeQueryOptions()),
+			context.queryClient.ensureQueryData(
+				taskConfigQueries.statuses(params.projectId, {
+					page: 1,
+					page_size: "all",
+					ordering: "order",
+				}),
+			),
 		]),
 	component: ProjectTaskStatusesSettingsPage,
 });
 
 function ProjectTaskStatusesSettingsPage() {
 	const { projectId } = Route.useParams();
-	const [projectRes, currentUserRes] = useSuspenseQueries({
-		queries: [projectQueryOptions(projectId), userMeQueryOptions()],
+	const [projectRes, currentUserRes, statusesRes] = useSuspenseQueries({
+		queries: [
+			projectQueryOptions(projectId),
+			userMeQueryOptions(),
+			taskConfigQueries.statuses(projectId, {
+				page: 1,
+				page_size: "all",
+				ordering: "order",
+			}),
+		],
 	});
 	const permissions = getProjectPermissions(
 		projectRes.data,
@@ -33,6 +48,7 @@ function ProjectTaskStatusesSettingsPage() {
 	return (
 		<TaskStatusList
 			projectId={projectId}
+			statuses={statusesRes.data.founds}
 			canManageProject={permissions.canManageProject}
 		/>
 	);

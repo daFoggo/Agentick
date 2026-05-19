@@ -1,9 +1,7 @@
 import { useForm } from "@tanstack/react-form";
-import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { toast } from "sonner";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -28,13 +26,12 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
 	TAILWIND_500_COLORS,
 	TAILWIND_COLOR_OPTIONS,
 } from "@/constants/color-options";
 import { getErrorMessage } from "@/lib/error";
-import { taskConfigQueries, useTaskConfigMutations } from "../../queries";
+import { useTaskConfigMutations } from "../../queries";
 import {
 	TaskStatusCreateSchema,
 	type TTaskStatusCreateInput,
@@ -42,32 +39,18 @@ import {
 
 interface ICreateTaskStatusDialogProps {
 	projectId: string;
+	nextOrder: number;
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 }
 
 export const CreateTaskStatusDialog = ({
 	projectId,
+	nextOrder,
 	open,
 	onOpenChange,
 }: ICreateTaskStatusDialogProps) => {
 	const { createStatus } = useTaskConfigMutations();
-	const {
-		data: statusesData,
-		isLoading: isStatusesLoading,
-		isError: isStatusesError,
-		error: statusesError,
-	} = useQuery(
-		taskConfigQueries.statuses(projectId, {
-			page: 1,
-			page_size: "all",
-			ordering: "order",
-		}),
-	);
-
-	const statuses = statusesData?.founds ?? [];
-	const nextOrder = statuses.length;
-
 	const form = useForm({
 		defaultValues: {
 			name: "",
@@ -96,9 +79,9 @@ export const CreateTaskStatusDialog = ({
 	});
 
 	useEffect(() => {
-		if (!open || isStatusesLoading || isStatusesError) return;
+		if (!open) return;
 		form.setFieldValue("order", nextOrder);
-	}, [open, nextOrder, isStatusesLoading, isStatusesError, form]);
+	}, [open, nextOrder, form]);
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
@@ -117,20 +100,6 @@ export const CreateTaskStatusDialog = ({
 							Add a new status to customize your task workflow.
 						</DialogDescription>
 					</DialogHeader>
-
-					{isStatusesLoading && <Skeleton className="h-9 w-full" />}
-
-					{isStatusesError && (
-						<Alert variant="destructive">
-							<AlertCircle className="size-4" />
-							<AlertDescription>
-								{getErrorMessage(
-									statusesError,
-									"Could not load task statuses.",
-								)}
-							</AlertDescription>
-						</Alert>
-					)}
 
 					<FieldGroup>
 						<form.Field
@@ -272,12 +241,7 @@ export const CreateTaskStatusDialog = ({
 							children={([canSubmit]) => (
 								<Button
 									type="submit"
-									disabled={
-										!canSubmit ||
-										createStatus.isPending ||
-										isStatusesLoading ||
-										isStatusesError
-									}
+									disabled={!canSubmit || createStatus.isPending}
 								>
 									{createStatus.isPending && (
 										<Loader2 className="mr-2 size-4 animate-spin" />

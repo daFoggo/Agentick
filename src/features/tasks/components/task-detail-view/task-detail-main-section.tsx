@@ -7,9 +7,12 @@ import {
 	FieldGroup,
 	FieldLabel,
 } from "@/components/ui/field";
-import type { ITaskListDialogOptions, TTask } from "@/features/tasks";
-import type { TTaskDetailFormApi } from "@/features/tasks/schemas";
-import { TaskActivity } from "./task-activity";
+import type {
+	ITaskListDialogOptions,
+	TTask,
+	TTaskDetailFormApi,
+} from "../../schemas";
+import { type ITaskActivityLog, TaskActivity } from "./task-activity";
 import { TaskSubTasksSection } from "./task-sub-tasks-section";
 
 interface ITaskDetailMainSectionProps {
@@ -19,6 +22,10 @@ interface ITaskDetailMainSectionProps {
 	options: ITaskListDialogOptions;
 	parentTaskOptions?: TTask[];
 	isLoading?: boolean;
+	activities?: ITaskActivityLog[];
+	isActivitiesLoading?: boolean;
+	isActivitiesError?: boolean;
+	activitiesError?: unknown;
 	canManageTasks?: boolean;
 }
 
@@ -29,6 +36,10 @@ export const TaskDetailMainSection = ({
 	options,
 	parentTaskOptions = [],
 	isLoading,
+	activities = [],
+	isActivitiesLoading = false,
+	isActivitiesError = false,
+	activitiesError,
 	canManageTasks = true,
 }: ITaskDetailMainSectionProps) => {
 	return (
@@ -73,7 +84,16 @@ export const TaskDetailMainSection = ({
 				canManageTasks={canManageTasks}
 			/>
 
-			{taskId && <TaskActivity taskId={taskId} canComment={canManageTasks} />}
+			{taskId && (
+				<TaskActivity
+					taskId={taskId}
+					activities={activities}
+					isLoading={isActivitiesLoading}
+					isError={isActivitiesError}
+					error={activitiesError}
+					canComment={canManageTasks}
+				/>
+			)}
 		</div>
 	);
 };

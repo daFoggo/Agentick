@@ -4,7 +4,7 @@ import {
 	getProjectPermissions,
 	projectQueryOptions,
 } from "@/features/projects";
-import { TaskPriorityList } from "@/features/task-config";
+import { TaskPriorityList, taskConfigQueries } from "@/features/task-config";
 import { userMeQueryOptions } from "@/features/users";
 
 export const Route = createFileRoute(
@@ -16,14 +16,29 @@ export const Route = createFileRoute(
 				projectQueryOptions(params.projectId),
 			),
 			context.queryClient.ensureQueryData(userMeQueryOptions()),
+			context.queryClient.ensureQueryData(
+				taskConfigQueries.priorities(params.projectId, {
+					page: 1,
+					page_size: "all",
+					ordering: "order",
+				}),
+			),
 		]),
 	component: ProjectTaskPrioritiesSettingsPage,
 });
 
 function ProjectTaskPrioritiesSettingsPage() {
 	const { projectId } = Route.useParams();
-	const [projectRes, currentUserRes] = useSuspenseQueries({
-		queries: [projectQueryOptions(projectId), userMeQueryOptions()],
+	const [projectRes, currentUserRes, prioritiesRes] = useSuspenseQueries({
+		queries: [
+			projectQueryOptions(projectId),
+			userMeQueryOptions(),
+			taskConfigQueries.priorities(projectId, {
+				page: 1,
+				page_size: "all",
+				ordering: "order",
+			}),
+		],
 	});
 	const permissions = getProjectPermissions(
 		projectRes.data,
@@ -33,6 +48,7 @@ function ProjectTaskPrioritiesSettingsPage() {
 	return (
 		<TaskPriorityList
 			projectId={projectId}
+			priorities={prioritiesRes.data.founds}
 			canManageProject={permissions.canManageProject}
 		/>
 	);

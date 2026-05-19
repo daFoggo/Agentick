@@ -1,3 +1,4 @@
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import {
@@ -23,10 +24,21 @@ export const Route = createFileRoute("/invite/accept")({
 
 function AcceptInvitePage() {
 	const { id } = Route.useSearch();
+	const { data: invitation } = useSuspenseQuery(
+		invitationDetailQueryOptions(id),
+	);
+	const { data: currentUser, isLoading: isFetchingUser } = useQuery({
+		...userMeQueryOptions(),
+		retry: false,
+	});
 
 	return (
 		<div className="flex min-h-screen w-full items-center justify-center bg-muted/30 p-4">
-			<AcceptInviteCard invitationId={id} />
+			<AcceptInviteCard
+				invitation={invitation}
+				currentUser={currentUser}
+				isFetchingUser={isFetchingUser}
+			/>
 		</div>
 	);
 }

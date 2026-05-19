@@ -1,9 +1,5 @@
 import { useForm } from "@tanstack/react-form";
-import {
-	useQuery,
-	useQueryClient,
-	useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -18,40 +14,40 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { teamMembersQueryOptions } from "@/features/team-members";
-import { TeamDeleteDialog } from "@/features/teams/components/team-delete-dialog";
-import { userMeQueryOptions } from "@/features/users";
+import type { TTeamMember } from "@/features/team-members";
+import type { TUser } from "@/features/users";
 import { getErrorMessage } from "@/lib/error";
 import { getTeamPermissions } from "../permissions";
-import {
-	myTeamsQueryOptions,
-	teamQueryOptions,
-	useTeamMutations,
-} from "../queries";
+import { myTeamsQueryOptions, useTeamMutations } from "../queries";
 import {
 	CreateTeamSchema,
 	type TCreateTeamInput,
 	type TTeam,
 } from "../schemas";
 import { CreateTeamDialog } from "./create-team-dialog";
+import { TeamDeleteDialog } from "./team-delete-dialog";
 
 interface ITeamSettingsProps {
 	teamId: string;
+	team: TTeam;
+	myTeams: TTeam[];
+	currentUser?: TUser;
+	members: TTeamMember[];
 }
 
 /**
  * Thành phần trang thiết lập Team.
  * Cho phép quản lý thông tin chung và thực hiện quy trình xóa Team an toàn.
  */
-export const TeamSettings = ({ teamId }: ITeamSettingsProps) => {
+export const TeamSettings = ({
+	teamId,
+	team,
+	myTeams,
+	currentUser,
+	members,
+}: ITeamSettingsProps) => {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
-	const { data: team } = useSuspenseQuery(teamQueryOptions(teamId));
-	const { data: currentUser } = useSuspenseQuery(userMeQueryOptions());
-	const { data: membersData } = useSuspenseQuery(
-		teamMembersQueryOptions(teamId),
-	);
-	const { data: myTeams } = useQuery(myTeamsQueryOptions());
 	const { update, remove } = useTeamMutations();
 	const [updatingField, setUpdatingField] = useState<
 		keyof TCreateTeamInput | null
@@ -66,10 +62,7 @@ export const TeamSettings = ({ teamId }: ITeamSettingsProps) => {
 	const [requiresTeamCreation, setRequiresTeamCreation] = useState(false);
 
 	const isLastTeam = myTeams?.length === 1 && myTeams?.[0]?.id === teamId;
-	const permissions = getTeamPermissions(
-		membersData?.founds ?? [],
-		currentUser?.id,
-	);
+	const permissions = getTeamPermissions(members, currentUser?.id);
 
 	useEffect(() => {
 		return () => {

@@ -3,12 +3,10 @@ import { formatDistanceToNow } from "date-fns";
 import { Check, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
-	navigateAfterInvitationAccept,
-	type TInvitation,
-	useInvitationMutations,
-} from "@/features/invitations";
 import { getErrorMessage } from "@/lib/error";
+import { navigateAfterInvitationAccept } from "../helpers";
+import { useInvitationMutations } from "../queries";
+import type { TInvitation } from "../schemas";
 
 interface IInvitationItemProps {
 	invitation: TInvitation;

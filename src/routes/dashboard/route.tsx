@@ -7,7 +7,7 @@ import {
 import { AppPageHeader } from "@/components/layout/app/page-header";
 import { AppSidebar } from "@/components/layout/app/sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { inboxStatsQueryOptions } from "@/features/inbox/queries";
+import { inboxStatsQueryOptions } from "@/features/inbox";
 import { myTeamsQueryOptions } from "@/features/teams";
 import { userMeQueryOptions } from "@/features/users";
 import { cn } from "@/lib/utils";

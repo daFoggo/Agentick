@@ -1,39 +1,38 @@
-import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, UserPlus, Users } from "lucide-react";
-import { useState } from "react";
 import { MemberAvatarGroup } from "@/components/common/member-avatar-group";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { TTeamMember } from "@/features/team-members";
-import { InviteTeamMemberDialog } from "@/features/team-members";
-import { teamMembersQueryOptions } from "@/features/team-members/queries";
-import type { TTeam } from "@/features/teams";
-import { getTeamPermissions } from "@/features/teams/permissions";
-import { userMeQueryOptions } from "@/features/users";
+import type { TUser } from "@/features/users";
 import { getErrorMessage } from "@/lib/error";
+import { getTeamPermissions } from "../permissions";
+import type { TTeam } from "../schemas";
 
 export interface ITeamDetailsHeaderProps {
 	team: TTeam | null;
+	members: TTeamMember[];
+	currentUser?: TUser;
+	isMembersLoading?: boolean;
+	isMembersError?: boolean;
+	membersError?: unknown;
+	isCurrentUserLoading?: boolean;
+	isCurrentUserError?: boolean;
+	currentUserError?: unknown;
+	onInviteMembers?: () => void;
 }
 
-export function TeamDetailsHeader({ team }: ITeamDetailsHeaderProps) {
-	const [inviteOpen, setInviteOpen] = useState(false);
-	const {
-		data: currentUser,
-		isLoading: isCurrentUserLoading,
-		isError: isCurrentUserError,
-		error: currentUserError,
-	} = useQuery(userMeQueryOptions());
-	const {
-		data: membersData,
-		isLoading: isMembersLoading,
-		isError: isMembersError,
-		error: membersError,
-	} = useQuery({
-		...teamMembersQueryOptions(team?.id ?? ""),
-		enabled: !!team?.id,
-	});
-
+export function TeamDetailsHeader({
+	team,
+	members,
+	currentUser,
+	isMembersLoading = false,
+	isMembersError = false,
+	membersError,
+	isCurrentUserLoading = false,
+	isCurrentUserError = false,
+	currentUserError,
+	onInviteMembers,
+}: ITeamDetailsHeaderProps) {
 	if (!team) {
 		return (
 			<div className="flex w-full items-center justify-between gap-4 py-2 text-destructive">
@@ -42,7 +41,6 @@ export function TeamDetailsHeader({ team }: ITeamDetailsHeaderProps) {
 		);
 	}
 
-	const members = membersData?.founds ?? [];
 	const permissions = getTeamPermissions(members, currentUser?.id);
 	const isPermissionLoading = isMembersLoading || isCurrentUserLoading;
 	const isPermissionError = isMembersError || isCurrentUserError;
@@ -100,20 +98,10 @@ export function TeamDetailsHeader({ team }: ITeamDetailsHeaderProps) {
 				{permissions.canManageMembers &&
 					!isPermissionLoading &&
 					!isPermissionError && (
-						<Button onClick={() => setInviteOpen(true)}>
+						<Button onClick={onInviteMembers}>
 							Invite
 							<UserPlus />
 						</Button>
-					)}
-
-				{permissions.canManageMembers &&
-					!isPermissionLoading &&
-					!isPermissionError && (
-						<InviteTeamMemberDialog
-							teamId={team.id}
-							open={inviteOpen}
-							onOpenChange={setInviteOpen}
-						/>
 					)}
 			</div>
 		</div>

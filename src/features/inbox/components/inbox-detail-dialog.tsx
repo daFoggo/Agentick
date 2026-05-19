@@ -16,8 +16,8 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import type { TInboxItem } from "@/features/inbox";
 import { cn } from "@/lib/utils";
+import type { TInboxItem } from "../schemas";
 import { InboxContent } from "./inbox-content";
 
 interface IInboxDetailDialogProps {

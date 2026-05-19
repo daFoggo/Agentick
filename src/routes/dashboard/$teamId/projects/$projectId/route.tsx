@@ -1,11 +1,17 @@
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Outlet, useMatches } from "@tanstack/react-router";
+import { useDeferredValue, useState } from "react";
 import { NestedErrorFallback } from "@/components/common/error-pages";
 import { ViewModeList } from "@/components/layout/app/view-mode-list";
 import { PROJECT_VIEW_MODE_CATALOG } from "@/constants/view-mode-list";
-import { ProjectDetailsHeader } from "@/features/projects/components/project-details-header";
-import { projectQueryOptions } from "@/features/projects/queries";
+import {
+	InviteProjectMemberDialog,
+	projectMembersQueryOptions,
+} from "@/features/project-members";
+import { ProjectDetailsHeader, projectQueryOptions } from "@/features/projects";
 import { taskConfigQueries } from "@/features/task-config";
 import { tasksQueryOptions } from "@/features/tasks";
+import { searchUsersQueryOptions, userMeQueryOptions } from "@/features/users";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/dashboard/$teamId/projects/$projectId")({
@@ -14,12 +20,10 @@ export const Route = createFileRoute("/dashboard/$teamId/projects/$projectId")({
 		const { projectId } = params;
 		const commonParams = { page: 1, page_size: "all" } as const;
 
-		// Tải thông tin project là bắt buộc
 		const project = await context.queryClient.ensureQueryData(
 			projectQueryOptions(projectId),
 		);
 
-		// Các thông tin khác là tùy chọn, không để chúng làm sập trang
 		void context.queryClient.prefetchQuery(
 			tasksQueryOptions(projectId, {
 				ordering: "-id",
@@ -51,7 +55,49 @@ export const Route = createFileRoute("/dashboard/$teamId/projects/$projectId")({
 const ProjectHeaderWrapper = () => {
 	const { teamId } = Route.useParams();
 	const project = Route.useLoaderData();
-	return <ProjectDetailsHeader teamId={teamId} project={project} />;
+	const [inviteOpen, setInviteOpen] = useState(false);
+	const [inviteSearchQuery, setInviteSearchQuery] = useState("");
+	const deferredInviteSearchQuery = useDeferredValue(inviteSearchQuery);
+	const {
+		data: membersData,
+		isLoading: isMembersLoading,
+		isError: isMembersError,
+		error: membersError,
+	} = useQuery({
+		...projectMembersQueryOptions(project?.id ?? ""),
+		enabled: !!project?.id,
+	});
+	const { data: currentUser } = useQuery(userMeQueryOptions());
+	const inviteSearch = useQuery(
+		searchUsersQueryOptions(deferredInviteSearchQuery, {
+			excludeProjectId: project.id,
+		}),
+	);
+
+	return (
+		<>
+			<ProjectDetailsHeader
+				teamId={teamId}
+				project={project}
+				members={membersData?.founds ?? []}
+				currentUser={currentUser}
+				isMembersLoading={isMembersLoading}
+				isMembersError={isMembersError}
+				membersError={membersError}
+				onInviteMembers={() => setInviteOpen(true)}
+			/>
+			<InviteProjectMemberDialog
+				open={inviteOpen}
+				onOpenChange={setInviteOpen}
+				projectId={project.id}
+				users={inviteSearch.data ?? []}
+				isUsersLoading={inviteSearch.isLoading}
+				isUsersError={inviteSearch.isError}
+				usersError={inviteSearch.error}
+				onSearchQueryChange={setInviteSearchQuery}
+			/>
+		</>
+	);
 };
 function RouteComponent() {
 	const { teamId, projectId } = Route.useParams();
@@ -62,8 +108,8 @@ function RouteComponent() {
 	return (
 		<div
 			className={cn(
-				"flex flex-col gap-4 min-w-0",
-				isFixedHeight && "flex-1 min-h-0 overflow-hidden",
+				"flex min-w-0 flex-col gap-4",
+				isFixedHeight && "min-h-0 flex-1 overflow-hidden",
 			)}
 		>
 			<div className="shrink-0">
@@ -76,7 +122,7 @@ function RouteComponent() {
 			</div>
 			<div
 				className={cn(
-					"flex flex-col flex-1 min-h-0 min-w-0",
+					"flex min-h-0 min-w-0 flex-1 flex-col",
 					isFixedHeight && "overflow-hidden",
 				)}
 			>

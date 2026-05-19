@@ -1,9 +1,8 @@
 /** biome-ignore-all lint/correctness/useExhaustiveDependencies: <idjk> */
 
-import { useQuery } from "@tanstack/react-query";
 import { format, formatDistanceToNow, isValid } from "date-fns";
 import { Logs, MoreHorizontal, TriangleAlert } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { MarkdownEditor } from "@/components/common/markdown-editor";
 import { MarkdownRenderer } from "@/components/common/markdown-renderer";
@@ -20,11 +19,15 @@ import {
 import { InputGroup, InputGroupAddon } from "@/components/ui/input-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { taskActivitiesQueryOptions, useTaskMutations } from "@/features/tasks";
 import { getErrorMessage } from "@/lib/error";
+import { useTaskMutations } from "../../queries";
 
 interface ITaskActivityProps {
 	taskId?: string;
+	activities: ITaskActivityLog[];
+	isLoading?: boolean;
+	isError?: boolean;
+	error?: unknown;
 	canComment?: boolean;
 }
 
@@ -55,26 +58,19 @@ const formatValue = (val: unknown) => {
 
 export const TaskActivity = ({
 	taskId,
+	activities,
+	isLoading = false,
+	isError = false,
+	error,
 	canComment = true,
 }: ITaskActivityProps) => {
 	const [commentText, setCommentText] = useState("");
 	const bottomRef = useRef<HTMLDivElement>(null);
 
-	const {
-		data: activities,
-		isLoading,
-		isError,
-		error,
-	} = useQuery({
-		...taskActivitiesQueryOptions(taskId || ""),
-		enabled: !!taskId,
-		select: (data) => [...data].reverse(), // Reverse to show oldest at top, newest at bottom (like standard timelines)
-	});
-
 	const { addComment } = useTaskMutations();
 
-	const timelineItems = activities || [];
-	const activitiesCount = activities?.length ?? 0;
+	const timelineItems = useMemo(() => [...activities].reverse(), [activities]);
+	const activitiesCount = activities.length;
 	const hasActivities = activitiesCount > 0;
 
 	useEffect(() => {

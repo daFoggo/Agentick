@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, TriangleAlertIcon } from "lucide-react";
 import { memo } from "react";
 import { TaskStatusBadge } from "@/components/common/task-status-badge";
@@ -14,7 +13,6 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getErrorMessage } from "@/lib/error";
-import { projectRecentStatusUpdatesQueryOptions } from "../queries";
 import type { TTaskActivity } from "../schemas";
 
 function formatDateTime(date?: string | Date | null) {
@@ -37,15 +35,20 @@ function getLatestStatusColor(task: TTaskActivity) {
 	return task.new_status_color ?? task.old_status_color ?? "currentColor";
 }
 
-export const ProjectStatusUpdate = memo(
-	({ projectId }: { projectId: string }) => {
-		const {
-			data: items = [],
-			isLoading,
-			isError,
-			error,
-		} = useQuery(projectRecentStatusUpdatesQueryOptions(projectId, 15));
+interface IProjectStatusUpdateProps {
+	items: TTaskActivity[];
+	isLoading?: boolean;
+	isError?: boolean;
+	error?: unknown;
+}
 
+export const ProjectStatusUpdate = memo(
+	({
+		items,
+		isLoading = false,
+		isError = false,
+		error,
+	}: IProjectStatusUpdateProps) => {
 		return (
 			<Card>
 				<CardHeader>

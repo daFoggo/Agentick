@@ -1,4 +1,4 @@
-import { useSuspenseQueries } from "@tanstack/react-query";
+import { useQuery, useSuspenseQueries } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { z } from "zod";
@@ -8,6 +8,7 @@ import { getProjectPermissions } from "@/features/projects";
 import { taskConfigQueries } from "@/features/task-config";
 import {
 	TaskDetailView,
+	taskActivitiesQueryOptions,
 	taskQueryOptions,
 	tasksQueryOptions,
 } from "@/features/tasks";
@@ -50,6 +51,7 @@ export const Route = createFileRoute(
 				projectMembersQueryOptions(projectId),
 			),
 		]);
+		void context.queryClient.prefetchQuery(taskActivitiesQueryOptions(taskId));
 	},
 	component: TaskDetailPageOrchestrator,
 	staticData: {
@@ -90,6 +92,7 @@ function TaskDetailPageOrchestrator() {
 	});
 
 	const task = taskRes.data;
+	const activitiesQuery = useQuery(taskActivitiesQueryOptions(taskId));
 	const currentUser = currentUserRes.data;
 	const statuses = statusesRes.data?.founds ?? [];
 	const types = typesRes.data?.founds ?? [];
@@ -115,6 +118,10 @@ function TaskDetailPageOrchestrator() {
 			task={task}
 			options={taskOptions}
 			parentTaskOptions={parentTaskOptions}
+			activities={activitiesQuery.data ?? []}
+			isActivitiesLoading={activitiesQuery.isLoading}
+			isActivitiesError={activitiesQuery.isError}
+			activitiesError={activitiesQuery.error}
 			canManageTasks={permissions.canManageTasks}
 		/>
 	);

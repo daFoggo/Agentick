@@ -3,8 +3,8 @@ import {
 	useMutation,
 	useQueryClient,
 } from "@tanstack/react-query";
-import { projectKeys } from "@/features/projects/queries";
-import { teamKeys } from "@/features/teams/queries";
+import { projectKeys } from "@/features/projects";
+import { teamKeys } from "@/features/teams";
 import {
 	acceptTeamInviteFn,
 	addTeamMemberFn,

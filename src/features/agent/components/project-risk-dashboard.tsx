@@ -1,31 +1,31 @@
-import { useQuery } from "@tanstack/react-query";
 import { Loader2, RefreshCw, TriangleAlertIcon } from "lucide-react";
 import { memo } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-	projectRiskStatsQueryOptions,
-	useAgentMutations,
-} from "@/features/agent";
 import { getErrorMessage } from "@/lib/error";
+import { useAgentMutations } from "../queries";
+import type { TProjectRiskStats } from "../schemas";
 import { ProjectRiskGauge } from "./project-risk-gauge";
 import { RiskDriversChart } from "./risk-drivers-chart";
 import { RiskMatrixChart } from "./risk-matrix-chart";
 
 interface IProjectRiskDashboardProps {
 	projectId: string;
+	riskStats?: TProjectRiskStats;
+	isLoading?: boolean;
+	isError?: boolean;
+	error?: unknown;
 }
 
 export const ProjectRiskDashboard = memo(
-	({ projectId }: IProjectRiskDashboardProps) => {
-		const {
-			data: riskStats,
-			isLoading,
-			isError,
-			error,
-		} = useQuery(projectRiskStatsQueryOptions(projectId));
-
+	({
+		projectId,
+		riskStats,
+		isLoading = false,
+		isError = false,
+		error,
+	}: IProjectRiskDashboardProps) => {
 		const { analyzeProjectRisk } = useAgentMutations();
 
 		const handleAnalyzeAll = () => {

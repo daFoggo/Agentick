@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
-import { EVENT_TYPE_OPTIONS, type TEventType } from "@/features/events";
 import { cn } from "@/lib/utils";
+import { EVENT_TYPE_OPTIONS } from "../constants";
+import type { TEventType } from "../schemas";
 
 interface IEventTypeBadgeProps {
 	type: TEventType | string;

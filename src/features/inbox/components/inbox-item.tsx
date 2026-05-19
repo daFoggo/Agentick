@@ -20,10 +20,10 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import type { TInboxItem, TInboxType } from "@/features/inbox";
-import { useInboxMutations } from "@/features/inbox";
 import { cn } from "@/lib/utils";
 import { useInboxStore } from "@/stores/use-inbox-store";
+import { useInboxMutations } from "../queries";
+import type { TInboxItem, TInboxType } from "../schemas";
 import { InboxActionButton } from "./inbox-action-button";
 
 const TYPE_CONFIG: Record<TInboxType, { label: string; className: string }> = {

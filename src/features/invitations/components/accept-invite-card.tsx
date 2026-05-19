@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import {
 	AlertCircle,
@@ -21,20 +21,24 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-	invitationDetailQueryOptions,
-	navigateAfterInvitationAccept,
-	useInvitationMutations,
-} from "@/features/invitations";
-import { userMeQueryOptions } from "@/features/users";
+import type { TUser } from "@/features/users";
 import { deleteAuthToken, getAuthToken } from "@/lib/auth-token";
 import { getErrorMessage } from "@/lib/error";
+import { navigateAfterInvitationAccept } from "../helpers";
+import { useInvitationMutations } from "../queries";
+import type { TInvitation } from "../schemas";
 
 interface IAcceptInviteCardProps {
-	invitationId: string;
+	invitation: TInvitation;
+	currentUser?: TUser;
+	isFetchingUser?: boolean;
 }
 
-export function AcceptInviteCard({ invitationId }: IAcceptInviteCardProps) {
+export function AcceptInviteCard({
+	invitation,
+	currentUser,
+	isFetchingUser = false,
+}: IAcceptInviteCardProps) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const [status, setStatus] = useState<
@@ -42,18 +46,7 @@ export function AcceptInviteCard({ invitationId }: IAcceptInviteCardProps) {
 	>("idle");
 	const [errorMessage, setErrorMessage] = useState("");
 
-	const {
-		data: invitation,
-		isLoading: isFetchingInvitation,
-		isError: isInvitationError,
-		error: invitationError,
-	} = useQuery(invitationDetailQueryOptions(invitationId));
-	const { data: currentUser, isLoading: isFetchingUser } = useQuery({
-		...userMeQueryOptions(),
-		retry: false,
-	});
-
-	const isLoading = isFetchingInvitation || isFetchingUser;
+	const isLoading = isFetchingUser;
 	const { accept, decline } = useInvitationMutations();
 
 	if (isLoading) {
@@ -76,36 +69,8 @@ export function AcceptInviteCard({ invitationId }: IAcceptInviteCardProps) {
 		);
 	}
 
-	if (isInvitationError) {
-		return (
-			<Card className="w-full max-w-md border-primary/10 shadow-lg">
-				<CardHeader className="text-center">
-					<CardTitle className="text-2xl font-bold tracking-tight">
-						Invitation unavailable
-					</CardTitle>
-					<CardDescription>
-						We could not load the invitation details.
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<Alert variant="destructive">
-						<AlertCircle className="size-4" />
-						<AlertTitle>Error loading invitation</AlertTitle>
-						<AlertDescription>
-							{getErrorMessage(
-								invitationError,
-								"Failed to load the invitation.",
-							)}
-						</AlertDescription>
-					</Alert>
-				</CardContent>
-			</Card>
-		);
-	}
-
 	const isEmailMismatch =
 		currentUser &&
-		invitation &&
 		currentUser.email.trim().toLowerCase() !==
 			invitation.email.trim().toLowerCase();
 
@@ -124,7 +89,7 @@ export function AcceptInviteCard({ invitationId }: IAcceptInviteCardProps) {
 
 		setStatus("loading");
 		try {
-			const result = await accept.mutateAsync(invitationId);
+			const result = await accept.mutateAsync(invitation.id);
 			toast.success("Invitation accepted successfully");
 			navigateAfterInvitationAccept(result, navigate);
 		} catch (error) {
@@ -149,7 +114,7 @@ export function AcceptInviteCard({ invitationId }: IAcceptInviteCardProps) {
 	const handleDecline = async () => {
 		setStatus("loading");
 		try {
-			await decline.mutateAsync(invitationId);
+			await decline.mutateAsync(invitation.id);
 			toast.success("Invitation declined");
 			navigate({ to: "/dashboard" });
 		} catch (error) {

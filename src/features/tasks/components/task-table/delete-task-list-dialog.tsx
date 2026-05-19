@@ -12,7 +12,7 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type { TTask } from "@/features/tasks/schemas";
+import type { TTask } from "../../schemas";
 
 interface IDeleteTaskListDialogProps {
 	task: TTask;

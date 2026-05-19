@@ -1,9 +1,7 @@
 import { useForm } from "@tanstack/react-form";
-import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { toast } from "sonner";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -28,42 +26,28 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
 	TAILWIND_500_COLORS,
 	TAILWIND_COLOR_OPTIONS,
 } from "@/constants/color-options";
 import { getErrorMessage } from "@/lib/error";
-import { taskConfigQueries, useTaskConfigMutations } from "../../queries";
+import { useTaskConfigMutations } from "../../queries";
 import { TaskTypeCreateSchema, type TTaskTypeCreateInput } from "../../schemas";
 
 interface ICreateTaskTypeDialogProps {
 	projectId: string;
+	nextOrder: number;
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 }
 
 export const CreateTaskTypeDialog = ({
 	projectId,
+	nextOrder,
 	open,
 	onOpenChange,
 }: ICreateTaskTypeDialogProps) => {
 	const { createType } = useTaskConfigMutations();
-	const {
-		data: typesData,
-		isLoading: isTypesLoading,
-		isError: isTypesError,
-		error: typesError,
-	} = useQuery(
-		taskConfigQueries.types(projectId, {
-			page: 1,
-			page_size: "all",
-			ordering: "order",
-		}),
-	);
-
-	const nextOrder = typesData?.founds.length ?? 0;
-
 	const form = useForm({
 		defaultValues: {
 			name: "",
@@ -89,9 +73,9 @@ export const CreateTaskTypeDialog = ({
 	});
 
 	useEffect(() => {
-		if (!open || isTypesLoading || isTypesError) return;
+		if (!open) return;
 		form.setFieldValue("order", nextOrder);
-	}, [open, nextOrder, isTypesLoading, isTypesError, form]);
+	}, [open, nextOrder, form]);
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
@@ -110,17 +94,6 @@ export const CreateTaskTypeDialog = ({
 							Add a new type to classify tasks in your project.
 						</DialogDescription>
 					</DialogHeader>
-
-					{isTypesLoading && <Skeleton className="h-9 w-full" />}
-
-					{isTypesError && (
-						<Alert variant="destructive">
-							<AlertCircle className="size-4" />
-							<AlertDescription>
-								{getErrorMessage(typesError, "Could not load task types.")}
-							</AlertDescription>
-						</Alert>
-					)}
 
 					<FieldGroup>
 						<form.Field
@@ -268,12 +241,7 @@ export const CreateTaskTypeDialog = ({
 							children={([canSubmit]) => (
 								<Button
 									type="submit"
-									disabled={
-										!canSubmit ||
-										createType.isPending ||
-										isTypesLoading ||
-										isTypesError
-									}
+									disabled={!canSubmit || createType.isPending}
 								>
 									{createType.isPending && (
 										<Loader2 className="mr-2 size-4 animate-spin" />

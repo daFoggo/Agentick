@@ -1,8 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, Inbox, Plus } from "lucide-react";
+import { Inbox, Plus } from "lucide-react";
 import { useState } from "react";
 import { DataTable } from "@/components/common/data-table";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
 	Empty,
@@ -12,56 +10,23 @@ import {
 	EmptyMedia,
 	EmptyTitle,
 } from "@/components/ui/empty";
-import { Skeleton } from "@/components/ui/skeleton";
-import { getErrorMessage } from "@/lib/error";
-import { taskConfigQueries } from "../../queries";
 import type { TTaskType } from "../../schemas";
 import { CreateTaskTypeDialog } from "./create-task-type-dialog";
 import { taskTypeColumns } from "./task-type-columns";
 
 interface ITaskTypeListProps {
 	projectId: string;
+	types: TTaskType[];
 	canManageProject?: boolean;
 }
 
 export const TaskTypeList = ({
 	projectId,
+	types,
 	canManageProject = true,
 }: ITaskTypeListProps) => {
 	const [isCreateOpen, setIsCreateOpen] = useState(false);
-	const {
-		data: typesData,
-		isLoading,
-		error,
-	} = useQuery(
-		taskConfigQueries.types(projectId, {
-			page: 1,
-			page_size: "all",
-			ordering: "order",
-		}),
-	);
-	const types = typesData?.founds ?? [];
-
-	if (isLoading) {
-		return (
-			<div className="space-y-4">
-				<Skeleton className="h-9 w-32" />
-				<Skeleton className="h-64 w-full" />
-			</div>
-		);
-	}
-
-	if (error) {
-		return (
-			<Alert variant="destructive">
-				<AlertCircle className="size-4" />
-				<AlertTitle>Error</AlertTitle>
-				<AlertDescription>
-					{getErrorMessage(error, "Failed to load task types.")}
-				</AlertDescription>
-			</Alert>
-		);
-	}
+	const nextOrder = types.length;
 
 	if (types.length === 0) {
 		return (
@@ -90,6 +55,7 @@ export const TaskTypeList = ({
 				{canManageProject && (
 					<CreateTaskTypeDialog
 						projectId={projectId}
+						nextOrder={nextOrder}
 						open={isCreateOpen}
 						onOpenChange={setIsCreateOpen}
 					/>
@@ -123,6 +89,7 @@ export const TaskTypeList = ({
 			{canManageProject && (
 				<CreateTaskTypeDialog
 					projectId={projectId}
+					nextOrder={nextOrder}
 					open={isCreateOpen}
 					onOpenChange={setIsCreateOpen}
 				/>

@@ -1,5 +1,5 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate, useParams } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import type { CellContext } from "@tanstack/react-table";
 import { ChevronDown, Loader2, MoreHorizontal, UserMinus } from "lucide-react";
 import { useState } from "react";
@@ -16,36 +16,39 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getTeamRoleOption, TEAM_ROLE_CATALOG } from "@/constants/team-roles";
-import { userMeQueryOptions } from "@/features/users";
 import { generateColumns } from "@/lib/data-table";
 import { getErrorMessage } from "@/lib/error";
 import { useDashboardStore } from "@/stores/use-dashboard-store";
 import {
 	memberProjectCountQueryOptions,
-	teamMembersQueryOptions,
 	useTeamMemberMutations,
 } from "../queries";
 import type { TTeamMember } from "../schemas";
 import { RemoveTeamMemberDialog } from "./remove-team-member-dialog";
 
-const RoleCell = ({ row }: CellContext<TTeamMember, any>) => {
+interface ITeamMemberColumnsOptions {
+	members: TTeamMember[];
+	currentUserId?: string;
+}
+
+const RoleCell = ({
+	row,
+	members,
+	currentUserId,
+}: CellContext<TTeamMember, any> & ITeamMemberColumnsOptions) => {
 	const member = row.original;
 	const { updateRole } = useTeamMemberMutations();
-	const { data: currentUser } = useQuery(userMeQueryOptions());
-	const { teamId } = useParams({ strict: false }) as { teamId?: string };
-	const { data: members } = useQuery(teamMembersQueryOptions(teamId ?? ""));
 
 	const roleOption = getTeamRoleOption(member.role);
 
 	if (!roleOption) return null;
 
-	const currentUserRole = members?.founds?.find(
-		(m) => m.user_id === currentUser?.id,
+	const currentUserRole = members.find(
+		(m) => m.user_id === currentUserId,
 	)?.role;
 	const ownerCount =
-		members?.founds?.filter((teamMember) => teamMember.role === "owner")
-			.length ?? 0;
-	const isCurrentUser = currentUser?.id === member.user_id;
+		members.filter((teamMember) => teamMember.role === "owner").length ?? 0;
+	const isCurrentUser = currentUserId === member.user_id;
 	const canManageOwnerRole = currentUserRole === "owner";
 	const isProtectedOwnerRole =
 		member.role === "owner" &&
@@ -113,7 +116,11 @@ const RoleCell = ({ row }: CellContext<TTeamMember, any>) => {
 	);
 };
 
-const ActionCell = ({ row }: CellContext<TTeamMember, any>) => {
+const ActionCell = ({
+	row,
+	members,
+	currentUserId,
+}: CellContext<TTeamMember, any> & ITeamMemberColumnsOptions) => {
 	const member = row.original;
 	const { removeMember } = useTeamMemberMutations();
 	const queryClient = useQueryClient();
@@ -122,19 +129,15 @@ const ActionCell = ({ row }: CellContext<TTeamMember, any>) => {
 	const [projectCount, setProjectCount] = useState<number>(0);
 	const [isChecking, setIsChecking] = useState(false);
 
-	const { data: currentUser } = useQuery(userMeQueryOptions());
-	const isCurrentUser = currentUser?.id === member.user_id;
+	const isCurrentUser = currentUserId === member.user_id;
 
 	const navigate = useNavigate();
-	const { teamId } = useParams({ strict: false }) as { teamId?: string };
-	const { data: members } = useQuery(teamMembersQueryOptions(teamId ?? ""));
 
-	const currentUserRole = members?.founds?.find(
-		(m) => m.user_id === currentUser?.id,
+	const currentUserRole = members.find(
+		(m) => m.user_id === currentUserId,
 	)?.role;
 	const ownerCount =
-		members?.founds?.filter((teamMember) => teamMember.role === "owner")
-			.length ?? 0;
+		members.filter((teamMember) => teamMember.role === "owner").length ?? 0;
 
 	if (currentUserRole !== "owner" && currentUserRole !== "manager") {
 		return null;
@@ -230,55 +233,71 @@ const ActionCell = ({ row }: CellContext<TTeamMember, any>) => {
 	);
 };
 
-export const teamMemberColumns = generateColumns<TTeamMember>([
-	{
-		id: "member",
-		label: "Member",
-		size: 200,
-		cell: ({ row }) => {
-			const member = row.original;
-			return (
-				<div className="flex items-center gap-2">
-					<Avatar>
-						<AvatarImage src={member.user?.avatar_url} />
-						<AvatarFallback>
-							{member.user?.name.slice(0, 2).toUpperCase()}
-						</AvatarFallback>
-					</Avatar>
-					<div className="flex flex-col">
-						<span className="font-medium">{member.user?.name}</span>
-						<span className="text-xs text-muted-foreground">
-							{member.user?.email}
-						</span>
+export const getTeamMemberColumns = ({
+	members,
+	currentUserId,
+}: ITeamMemberColumnsOptions) =>
+	generateColumns<TTeamMember>([
+		{
+			id: "member",
+			label: "Member",
+			size: 200,
+			cell: ({ row }) => {
+				const member = row.original;
+				return (
+					<div className="flex items-center gap-2">
+						<Avatar>
+							<AvatarImage src={member.user?.avatar_url} />
+							<AvatarFallback>
+								{member.user?.name.slice(0, 2).toUpperCase()}
+							</AvatarFallback>
+						</Avatar>
+						<div className="flex flex-col">
+							<span className="font-medium">{member.user?.name}</span>
+							<span className="text-xs text-muted-foreground">
+								{member.user?.email}
+							</span>
+						</div>
 					</div>
-				</div>
-			);
+				);
+			},
 		},
-	},
-	{
-		accessorKey: "role",
-		label: "Role",
-		size: 150,
-		cell: RoleCell,
-	},
-	{
-		accessorKey: "joined_at",
-		label: "Joined At",
-		size: 150,
-		cell: ({ getValue }) => {
-			const val = getValue() as string;
-			return (
-				<span className="text-sm text-muted-foreground">
-					{val ? new Date(val).toLocaleDateString() : "N/A"}
-				</span>
-			);
+		{
+			accessorKey: "role",
+			label: "Role",
+			size: 150,
+			cell: (context) => (
+				<RoleCell
+					{...context}
+					members={members}
+					currentUserId={currentUserId}
+				/>
+			),
 		},
-	},
-	{
-		id: "actions",
-		label: "Actions",
-		size: 60,
-		isActionColumn: true,
-		cell: ActionCell,
-	},
-]);
+		{
+			accessorKey: "joined_at",
+			label: "Joined At",
+			size: 150,
+			cell: ({ getValue }) => {
+				const val = getValue() as string;
+				return (
+					<span className="text-sm text-muted-foreground">
+						{val ? new Date(val).toLocaleDateString() : "N/A"}
+					</span>
+				);
+			},
+		},
+		{
+			id: "actions",
+			label: "Actions",
+			size: 60,
+			isActionColumn: true,
+			cell: (context) => (
+				<ActionCell
+					{...context}
+					members={members}
+					currentUserId={currentUserId}
+				/>
+			),
+		},
+	]);

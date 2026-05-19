@@ -11,9 +11,9 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useEventMutations } from "@/features/events";
 import { getErrorMessage } from "@/lib/error";
 import type { IBigCalendarEvent } from "@/types/big-calendar";
+import { useEventMutations } from "../queries";
 
 interface IDeleteEventDialogProps {
 	event: IBigCalendarEvent | null;

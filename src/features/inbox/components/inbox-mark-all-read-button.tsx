@@ -2,7 +2,7 @@ import { useMatch } from "@tanstack/react-router";
 import { CheckCheck, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { useInboxMutations } from "@/features/inbox";
+import { useInboxMutations } from "../queries";
 
 export const InboxMarkAllReadButton = () => {
 	const isActiveRoute = useMatch({

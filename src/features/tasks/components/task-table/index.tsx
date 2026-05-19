@@ -27,8 +27,9 @@ import type {
 	TTaskStatus as TTaskStatusOption,
 	TTaskType as TTaskTypeOption,
 } from "@/features/task-config";
-import { type TTask, useTaskMutations } from "@/features/tasks";
 import { getErrorMessage } from "@/lib/error";
+import { useTaskMutations } from "../../queries";
+import type { TTask } from "../../schemas";
 import { getTaskColumns } from "./columns";
 
 interface ITaskTableProps {

@@ -15,6 +15,7 @@ This handbook replaces the older root-level `docs/*.md` set. Prefer this handboo
 | 5 | `05_ui_state_patterns.md` | Loading, error, empty, compact UI, and form action states |
 | 6 | `06_quality_rules.md` | Consistency rules, checks, and review expectations |
 | 7 | `07_development_checklist.md` | Practical development and review checklist |
+| 8 | `08_feature_boundary_refactor_checklist.md` | Feature boundary refactor plan and remaining migration list |
 
 ## Mandatory Agent Rule Files
 

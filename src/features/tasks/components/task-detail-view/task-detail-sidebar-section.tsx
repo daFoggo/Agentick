@@ -39,7 +39,7 @@ import type {
 	TTask,
 	TTaskAIEstimationExplanation,
 	TTaskDetailFormApi,
-} from "@/features/tasks/schemas";
+} from "../../schemas";
 import {
 	TaskAIEstimationAlert,
 	TaskAIEstimationAlertSkeleton,

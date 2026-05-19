@@ -1,6 +1,4 @@
 import { useForm } from "@tanstack/react-form";
-import { useQuery } from "@tanstack/react-query";
-import { useParams } from "@tanstack/react-router";
 import {
 	AlertCircle,
 	CalendarPlus,
@@ -18,18 +16,18 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import {
-	CreateEventBaseSchema,
-	EVENT_TYPE_OPTIONS,
-	type TEventType,
-	UpdateEventSchema,
-	useEventMutations,
-} from "@/features/events";
-import { teamMembersQueryOptions } from "@/features/team-members";
-import { userMeQueryOptions } from "@/features/users";
+import type { TTeamMember } from "@/features/team-members";
+import type { TUser } from "@/features/users";
 import { getErrorMessage } from "@/lib/error";
 import { cn } from "@/lib/utils";
 import type { IBigCalendarEvent } from "@/types/big-calendar";
+import { EVENT_TYPE_OPTIONS } from "../constants";
+import { useEventMutations } from "../queries";
+import {
+	CreateEventBaseSchema,
+	type TEventType,
+	UpdateEventSchema,
+} from "../schemas";
 
 type TMode = "create" | "edit";
 
@@ -37,6 +35,15 @@ interface IEventActionBarProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	event?: IBigCalendarEvent | null;
+	teamId: string;
+	currentUser?: TUser;
+	teamMembers: TTeamMember[];
+	isCurrentUserLoading?: boolean;
+	isCurrentUserError?: boolean;
+	currentUserError?: unknown;
+	isTeamMembersLoading?: boolean;
+	isTeamMembersError?: boolean;
+	teamMembersError?: unknown;
 	onSuccess?: () => void;
 }
 
@@ -44,38 +51,29 @@ export const EventActionBar = ({
 	open,
 	onOpenChange,
 	event,
+	teamId,
+	currentUser,
+	teamMembers,
+	isCurrentUserLoading = false,
+	isCurrentUserError = false,
+	currentUserError,
+	isTeamMembersLoading = false,
+	isTeamMembersError = false,
+	teamMembersError,
 	onSuccess,
 }: IEventActionBarProps) => {
 	const mode: TMode = event && !event.id.startsWith("new") ? "edit" : "create";
 	const { create, update } = useEventMutations();
-	const params = useParams({ strict: false }) as { teamId?: string };
-	const teamId = params.teamId || "";
-	const {
-		data: me,
-		isLoading: isMeLoading,
-		isError: isMeError,
-		error: meError,
-	} = useQuery(userMeQueryOptions());
 	const titleRef = useRef<HTMLInputElement>(null);
 
-	const {
-		data: teamMembersData,
-		isLoading: isTeamMembersLoading,
-		isError: isTeamMembersError,
-		error: teamMembersError,
-	} = useQuery({
-		...teamMembersQueryOptions(teamId),
-		enabled: !!teamId,
-	});
-	const teamMembers = teamMembersData?.founds || [];
-	const isDependencyLoading = isMeLoading || isTeamMembersLoading;
-	const dependencyError = meError ?? teamMembersError;
-	const hasDependencyError = isMeError || isTeamMembersError;
+	const isDependencyLoading = isCurrentUserLoading || isTeamMembersLoading;
+	const dependencyError = currentUserError ?? teamMembersError;
+	const hasDependencyError = isCurrentUserError || isTeamMembersError;
 
 	const form = useForm({
 		defaultValues: {
 			team_id: teamId,
-			user_id: me?.id || "",
+			user_id: currentUser?.id || "",
 			title: "",
 			description: "" as string,
 			type: "meeting" as TEventType,
@@ -134,7 +132,7 @@ export const EventActionBar = ({
 			if (event) {
 				form.reset({
 					team_id: teamId,
-					user_id: me?.id || "",
+					user_id: currentUser?.id || "",
 					title: event.title || "",
 					description: (event.meta?.description as string) || "",
 					type: (event.meta?.type as TEventType) || "meeting",
@@ -145,7 +143,7 @@ export const EventActionBar = ({
 			} else {
 				form.reset({
 					team_id: teamId,
-					user_id: me?.id || "",
+					user_id: currentUser?.id || "",
 					title: "",
 					description: "",
 					type: "meeting",
@@ -163,7 +161,7 @@ export const EventActionBar = ({
 	}, [
 		open,
 		event?.id,
-		me?.id,
+		currentUser?.id,
 		form.reset,
 		event?.meta?.type,
 		teamId,
@@ -177,7 +175,7 @@ export const EventActionBar = ({
 		isDependencyLoading ||
 		hasDependencyError ||
 		!teamId ||
-		!me?.id;
+		!currentUser?.id;
 
 	useEffect(() => {
 		if (!open) return;

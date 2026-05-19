@@ -20,18 +20,17 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { generateColumns } from "@/lib/data-table";
+import { getErrorMessage } from "@/lib/error";
+import type { IDataTableColumnDef } from "@/types/data-table";
 import {
 	formatCalendarDate,
 	getPriorityOption,
 	getStatusOption,
 	getTypeOption,
-	type ITaskListDialogOptions,
-	type TTask,
-	useTaskMutations,
-} from "@/features/tasks";
-import { generateColumns } from "@/lib/data-table";
-import { getErrorMessage } from "@/lib/error";
-import type { IDataTableColumnDef } from "@/types/data-table";
+} from "../../helpers";
+import { useTaskMutations } from "../../queries";
+import type { ITaskListDialogOptions, TTask } from "../../schemas";
 import { DeleteTaskListDialog } from "./delete-task-list-dialog";
 
 const taskDepthClasses = ["", "ml-4", "ml-8", "ml-12", "ml-16"];

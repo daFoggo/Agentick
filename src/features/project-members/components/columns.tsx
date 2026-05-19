@@ -1,5 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
-import { useNavigate, useParams } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import type { CellContext } from "@tanstack/react-table";
 import { ChevronDown, MoreHorizontal, UserMinus } from "lucide-react";
 import { toast } from "sonner";
@@ -15,64 +14,80 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getTeamRoleOption, TEAM_ROLE_CATALOG } from "@/constants/team-roles";
-import { userMeQueryOptions } from "@/features/users";
 import { generateColumns } from "@/lib/data-table";
 import { getErrorMessage } from "@/lib/error";
 import { useProjectMemberMutations } from "../queries";
 import type { TProjectMember } from "../schemas";
 
-export const projectMemberColumns = generateColumns<TProjectMember>([
-	{
-		id: "member",
-		label: "Member",
-		size: 200,
-		cell: ({ row }) => {
-			const member = row.original;
-			return (
-				<div className="flex items-center gap-2">
-					<Avatar>
-						<AvatarImage src={member.user?.avatar_url ?? undefined} />
-						<AvatarFallback>
-							{member.user?.name.slice(0, 2).toUpperCase()}
-						</AvatarFallback>
-					</Avatar>
-					<div className="flex flex-col">
-						<span className="font-medium">{member.user?.name}</span>
-						<span className="text-xs text-muted-foreground">
-							{member.user?.email}
-						</span>
+interface IProjectMemberColumnsOptions {
+	currentUserId?: string;
+	teamId?: string;
+}
+
+export const getProjectMemberColumns = ({
+	currentUserId,
+	teamId,
+}: IProjectMemberColumnsOptions = {}) =>
+	generateColumns<TProjectMember>([
+		{
+			id: "member",
+			label: "Member",
+			size: 200,
+			cell: ({ row }) => {
+				const member = row.original;
+				return (
+					<div className="flex items-center gap-2">
+						<Avatar>
+							<AvatarImage src={member.user?.avatar_url ?? undefined} />
+							<AvatarFallback>
+								{member.user?.name.slice(0, 2).toUpperCase()}
+							</AvatarFallback>
+						</Avatar>
+						<div className="flex flex-col">
+							<span className="font-medium">{member.user?.name}</span>
+							<span className="text-xs text-muted-foreground">
+								{member.user?.email}
+							</span>
+						</div>
 					</div>
-				</div>
-			);
+				);
+			},
 		},
-	},
-	{
-		accessorKey: "role",
-		label: "Role",
-		size: 150,
-		cell: RoleCell,
-	},
-	{
-		accessorKey: "joined_at",
-		label: "Joined At",
-		size: 150,
-		cell: ({ getValue }) => {
-			const val = getValue() as string;
-			return (
-				<span className="text-sm text-muted-foreground">
-					{val ? new Date(val).toLocaleDateString() : "N/A"}
-				</span>
-			);
+		{
+			accessorKey: "role",
+			label: "Role",
+			size: 150,
+			cell: RoleCell,
 		},
-	},
-	{
-		id: "actions",
-		label: "Actions",
-		size: 60,
-		isActionColumn: true,
-		cell: ActionCell,
-	},
-]);
+		{
+			accessorKey: "joined_at",
+			label: "Joined At",
+			size: 150,
+			cell: ({ getValue }) => {
+				const val = getValue() as string;
+				return (
+					<span className="text-sm text-muted-foreground">
+						{val ? new Date(val).toLocaleDateString() : "N/A"}
+					</span>
+				);
+			},
+		},
+		{
+			id: "actions",
+			label: "Actions",
+			size: 60,
+			isActionColumn: true,
+			cell: (context) => (
+				<ActionCell
+					{...context}
+					currentUserId={currentUserId}
+					teamId={teamId}
+				/>
+			),
+		},
+	]);
+
+export const projectMemberColumns = getProjectMemberColumns();
 
 function RoleCell({ row }: CellContext<TProjectMember, any>) {
 	const member = row.original;
@@ -127,14 +142,16 @@ function RoleCell({ row }: CellContext<TProjectMember, any>) {
 	);
 }
 
-function ActionCell({ row }: CellContext<TProjectMember, any>) {
+function ActionCell({
+	row,
+	currentUserId,
+	teamId,
+}: CellContext<TProjectMember, any> & IProjectMemberColumnsOptions) {
 	const member = row.original;
 	const { removeMember } = useProjectMemberMutations();
-	const { data: currentUser } = useQuery(userMeQueryOptions());
-	const isCurrentUser = currentUser?.id === member.user_id;
+	const isCurrentUser = currentUserId === member.user_id;
 
 	const navigate = useNavigate();
-	const { teamId } = useParams({ strict: false }) as { teamId?: string };
 
 	return (
 		<DropdownMenu>

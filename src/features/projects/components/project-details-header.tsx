@@ -1,7 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { AlertCircle, FolderOpen, Settings, Share2 } from "lucide-react";
-import { useState } from "react";
 import { MemberAvatarGroup } from "@/components/common/member-avatar-group";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,36 +8,34 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-	InviteProjectMemberDialog,
-	projectMembersQueryOptions,
-	type TProjectMember,
-} from "@/features/project-members";
-import { getProjectPermissions, type TProject } from "@/features/projects";
-import { userMeQueryOptions } from "@/features/users";
+import type { TProjectMember } from "@/features/project-members";
+import type { TUser } from "@/features/users";
 import { getErrorMessage } from "@/lib/error";
+import { getProjectPermissions } from "../permissions";
+import type { TProject } from "../schemas";
 
 export interface IProjectDetailsHeaderProps {
 	teamId: string;
 	project: TProject | null;
+	members: TProjectMember[];
+	currentUser?: TUser;
+	isMembersLoading?: boolean;
+	isMembersError?: boolean;
+	membersError?: unknown;
+	onInviteMembers?: () => void;
 }
 
 export function ProjectDetailsHeader({
 	teamId,
 	project,
+	members,
+	currentUser,
+	isMembersLoading = false,
+	isMembersError = false,
+	membersError,
+	onInviteMembers,
 }: IProjectDetailsHeaderProps) {
-	const [isInviteOpen, setIsInviteOpen] = useState(false);
 	const navigate = useNavigate();
-	const {
-		data: membersData,
-		isLoading: isMembersLoading,
-		isError: isMembersError,
-		error: membersError,
-	} = useQuery({
-		...projectMembersQueryOptions(project?.id ?? ""),
-		enabled: !!project?.id,
-	});
-	const { data: currentUser } = useQuery(userMeQueryOptions());
 
 	if (!project) {
 		return (
@@ -49,7 +45,6 @@ export function ProjectDetailsHeader({
 		);
 	}
 
-	const members = membersData?.founds ?? [];
 	const permissions = getProjectPermissions({ members }, currentUser?.id);
 
 	return (
@@ -126,20 +121,12 @@ export function ProjectDetailsHeader({
 				)}
 
 				{permissions.canManageProject && (
-					<Button onClick={() => setIsInviteOpen(true)} className="gap-2">
+					<Button onClick={onInviteMembers} className="gap-2">
 						Share
 						<Share2 className="size-4" />
 					</Button>
 				)}
 			</div>
-
-			{permissions.canManageProject && (
-				<InviteProjectMemberDialog
-					open={isInviteOpen}
-					onOpenChange={setIsInviteOpen}
-					projectId={project.id}
-				/>
-			)}
 		</div>
 	);
 }

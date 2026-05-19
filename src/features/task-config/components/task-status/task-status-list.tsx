@@ -1,8 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, Inbox, Plus } from "lucide-react";
+import { Inbox, Plus } from "lucide-react";
 import { useState } from "react";
 import { DataTable } from "@/components/common/data-table";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
 	Empty,
@@ -12,15 +10,13 @@ import {
 	EmptyMedia,
 	EmptyTitle,
 } from "@/components/ui/empty";
-import { Skeleton } from "@/components/ui/skeleton";
-import { getErrorMessage } from "@/lib/error";
-import { taskConfigQueries } from "../../queries";
 import type { TTaskStatus } from "../../schemas";
 import { CreateTaskStatusDialog } from "./create-task-status-dialog";
 import { taskStatusColumns } from "./task-status-columns";
 
 interface ITaskStatusListProps {
 	projectId: string;
+	statuses: TTaskStatus[];
 	canManageProject?: boolean;
 }
 
@@ -29,44 +25,11 @@ interface ITaskStatusListProps {
  */
 export const TaskStatusList = ({
 	projectId,
+	statuses,
 	canManageProject = true,
 }: ITaskStatusListProps) => {
 	const [isCreateOpen, setIsCreateOpen] = useState(false);
-
-	const {
-		data: statusesData,
-		isLoading,
-		error,
-	} = useQuery(
-		taskConfigQueries.statuses(projectId, {
-			page: 1,
-			page_size: "all",
-			ordering: "order",
-		}),
-	);
-
-	const statuses = statusesData?.founds ?? [];
-
-	if (isLoading) {
-		return (
-			<div className="space-y-4">
-				<Skeleton className="h-9 w-32" />
-				<Skeleton className="h-64 w-full" />
-			</div>
-		);
-	}
-
-	if (error) {
-		return (
-			<Alert variant="destructive">
-				<AlertCircle className="size-4" />
-				<AlertTitle>Error</AlertTitle>
-				<AlertDescription>
-					{getErrorMessage(error, "Failed to load task statuses.")}
-				</AlertDescription>
-			</Alert>
-		);
-	}
+	const nextOrder = statuses.length;
 
 	if (statuses.length === 0) {
 		return (
@@ -95,6 +58,7 @@ export const TaskStatusList = ({
 				{canManageProject && (
 					<CreateTaskStatusDialog
 						projectId={projectId}
+						nextOrder={nextOrder}
 						open={isCreateOpen}
 						onOpenChange={setIsCreateOpen}
 					/>
@@ -130,6 +94,7 @@ export const TaskStatusList = ({
 			{canManageProject && (
 				<CreateTaskStatusDialog
 					projectId={projectId}
+					nextOrder={nextOrder}
 					open={isCreateOpen}
 					onOpenChange={setIsCreateOpen}
 				/>

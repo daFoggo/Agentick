@@ -1,4 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import {
 	ProjectRiskDashboard,
 	projectRiskStatsQueryOptions,
@@ -10,6 +12,7 @@ import {
 	projectRecentStatusUpdatesQueryOptions,
 	projectTaskStatsQueryOptions,
 	projectWorkloadQueryOptions,
+	type TStatsPeriod,
 } from "@/features/projects";
 
 export const Route = createFileRoute(
@@ -35,19 +38,57 @@ export const Route = createFileRoute(
 
 function ProjectDashboardView() {
 	const { projectId } = Route.useParams();
+	const [taskStatsPeriod, setTaskStatsPeriod] =
+		useState<TStatsPeriod>("weekly");
+	const [workloadPeriod, setWorkloadPeriod] = useState<TStatsPeriod>("weekly");
+	const taskStatsQuery = useQuery(
+		projectTaskStatsQueryOptions(projectId, taskStatsPeriod),
+	);
+	const workloadQuery = useQuery(
+		projectWorkloadQueryOptions(projectId, workloadPeriod),
+	);
+	const recentUpdatesQuery = useQuery(
+		projectRecentStatusUpdatesQueryOptions(projectId, 15),
+	);
+	const riskStatsQuery = useQuery(projectRiskStatsQueryOptions(projectId));
 
 	return (
 		<div className="flex flex-col gap-4">
 			{/* AI Risk Analysis Center (New Feature) */}
-			<ProjectRiskDashboard projectId={projectId} />
+			<ProjectRiskDashboard
+				projectId={projectId}
+				riskStats={riskStatsQuery.data}
+				isLoading={riskStatsQuery.isLoading}
+				isError={riskStatsQuery.isError}
+				error={riskStatsQuery.error}
+			/>
 
 			<div className="grid grid-cols-1 gap-4 lg:grid-cols-5 auto-rows-max">
 				<div className="grid gap-4 lg:col-span-3">
-					<ProjectTaskStatsCard />
-					<ProjectWorkload />
+					<ProjectTaskStatsCard
+						stats={taskStatsQuery.data}
+						period={taskStatsPeriod}
+						onPeriodChange={setTaskStatsPeriod}
+						isLoading={taskStatsQuery.isLoading}
+						isError={taskStatsQuery.isError}
+						error={taskStatsQuery.error}
+					/>
+					<ProjectWorkload
+						workloadData={workloadQuery.data}
+						period={workloadPeriod}
+						onPeriodChange={setWorkloadPeriod}
+						isLoading={workloadQuery.isLoading}
+						isError={workloadQuery.isError}
+						error={workloadQuery.error}
+					/>
 				</div>
 				<div className="flex flex-col gap-4 lg:col-span-2">
-					<ProjectStatusUpdate projectId={projectId} />
+					<ProjectStatusUpdate
+						items={recentUpdatesQuery.data ?? []}
+						isLoading={recentUpdatesQuery.isLoading}
+						isError={recentUpdatesQuery.isError}
+						error={recentUpdatesQuery.error}
+					/>
 				</div>
 			</div>
 		</div>

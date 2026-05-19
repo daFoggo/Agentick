@@ -5,16 +5,22 @@ import {
 	ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type { TInboxItem } from "@/features/inbox";
 import { useInboxStore } from "@/stores/use-inbox-store";
+import type { TInboxItem } from "../schemas";
 import { InboxDetailPanel } from "./inbox-detail-panel";
 import { InboxList } from "./inbox-list";
 
 interface IInboxViewProps {
 	items: TInboxItem[];
+	isAcceptingInvitation?: boolean;
+	onAcceptInvitation?: (item: TInboxItem) => void;
 }
 
-export const InboxView = ({ items }: IInboxViewProps) => {
+export const InboxView = ({
+	items,
+	isAcceptingInvitation,
+	onAcceptInvitation,
+}: IInboxViewProps) => {
 	const { selectedItemId } = useInboxStore();
 	const selectedItem = items.find((item) => item.id === selectedItemId) || null;
 	const [mounted, setMounted] = useState(false);
@@ -51,7 +57,11 @@ export const InboxView = ({ items }: IInboxViewProps) => {
 
 						{/* Right Panel - Detail View */}
 						<ResizablePanel defaultSize="65%" className="overflow-hidden">
-							<InboxDetailPanel item={selectedItem} />
+							<InboxDetailPanel
+								item={selectedItem}
+								isAcceptingInvitation={isAcceptingInvitation}
+								onAcceptInvitation={onAcceptInvitation}
+							/>
 						</ResizablePanel>
 					</ResizablePanelGroup>
 				</div>

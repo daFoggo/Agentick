@@ -1,15 +1,15 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Calendar, Mail, User as UserIcon, UserRoundPen } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { TUser } from "../schemas";
 
-import { userMeQueryOptions } from "../queries";
+interface IProfileCardProps {
+	user: TUser;
+}
 
-export function ProfileCard() {
-	const { data: user } = useSuspenseQuery(userMeQueryOptions());
-
+export function ProfileCard({ user }: IProfileCardProps) {
 	const initials =
 		user.name
 			?.split(" ")

@@ -25,9 +25,10 @@ import {
 	type TTaskType,
 	useTaskConfigMutations,
 } from "@/features/task-config";
-import { type TTask, useTaskMutations } from "@/features/tasks";
 import { getErrorMessage } from "@/lib/error";
 import { useKanbanStore } from "@/stores/use-kanban-store";
+import { useTaskMutations } from "../../queries";
+import type { TTask } from "../../schemas";
 import { DeleteTaskListDialog } from "../task-table/delete-task-list-dialog";
 import { KanbanCard } from "./kanban-card";
 import { KanbanColumn } from "./kanban-column";

@@ -1,5 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
-import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
 	AlertCircle,
 	CheckCircle2,
@@ -30,12 +29,8 @@ import {
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { teamMembersQueryOptions } from "@/features/team-members";
-import { getTeamPermissions } from "@/features/teams";
-import { userMeQueryOptions } from "@/features/users";
 import { getErrorMessage } from "@/lib/error";
 import { cn } from "@/lib/utils";
-import { projectsQueryOptions } from "../queries";
 import type { TProject } from "../schemas";
 import { CreateProjectDialog } from "./create-project-dialog";
 
@@ -48,18 +43,30 @@ const chartConfig = {
 	},
 } satisfies ChartConfig;
 
+interface ISidebarProjectListProps {
+	teamId: string;
+	projects: TProject[];
+	isProjectsLoading?: boolean;
+	projectsError?: unknown;
+	canCreateProject?: boolean;
+	isPermissionLoading?: boolean;
+	permissionError?: unknown;
+}
+
 /**
  * Hiển thị danh sách các Project của Team trên thanh Sidebar.
  * Tự động đồng bộ trạng thái Active và các hiệu ứng Icon khi người dùng điều hướng.
  */
-export const SidebarProjectList = () => {
+export const SidebarProjectList = ({
+	teamId,
+	projects,
+	isProjectsLoading = false,
+	projectsError,
+	canCreateProject = false,
+	isPermissionLoading = false,
+	permissionError,
+}: ISidebarProjectListProps) => {
 	const navigate = useNavigate();
-	const { pathname } = useLocation();
-
-	// Extract teamId reliably via regex directly from pathname to prevent hydration timing delay
-	const match = pathname.match(/^\/dashboard\/([^/]+)/);
-	const teamId = match ? match[1] : "";
-	const isTeamContext = Boolean(teamId && teamId !== "personal");
 
 	const [isCreateProjectDialogOpen, setIsCreateProjectDialogOpen] =
 		useState(false);
@@ -69,45 +76,10 @@ export const SidebarProjectList = () => {
 		setIsMounted(true);
 	}, []);
 
-	const {
-		data: projectsData,
-		isLoading,
-		error,
-	} = useQuery(projectsQueryOptions({ team_id__eq: teamId }));
-	const {
-		data: currentUser,
-		isLoading: isCurrentUserLoading,
-		isError: isCurrentUserError,
-		error: currentUserError,
-	} = useQuery(userMeQueryOptions());
-	const {
-		data: membersData,
-		isLoading: isMembersLoading,
-		isError: isMembersError,
-		error: membersError,
-	} = useQuery({
-		...teamMembersQueryOptions(teamId),
-		enabled: isTeamContext,
-	});
+	const isInitialLoading = isProjectsLoading || !isMounted;
 
-	const isInitialLoading = isLoading || !isMounted;
-
-	const projects = projectsData?.founds ?? [];
 	const visibleProjects = projects.slice(0, VISIBLE_PROJECT_LIMIT);
 	const hasMoreProjects = projects.length > VISIBLE_PROJECT_LIMIT;
-	const permissions = getTeamPermissions(
-		membersData?.founds ?? [],
-		currentUser?.id,
-	);
-	const isPermissionLoading =
-		isTeamContext && (isCurrentUserLoading || isMembersLoading);
-	const isPermissionError =
-		isTeamContext && (isCurrentUserError || isMembersError);
-	const permissionError = isPermissionError
-		? (currentUserError ?? membersError)
-		: undefined;
-	const canCreateProject =
-		permissions.canCreateProjects && !isPermissionLoading && !isPermissionError;
 
 	const handleProjectCreated = (project: TProject) => {
 		navigate({
@@ -130,14 +102,14 @@ export const SidebarProjectList = () => {
 						</SidebarMenuItem>
 					))}
 
-				{!isInitialLoading && !!error && (
+				{!isInitialLoading && !!projectsError && (
 					<div className="flex items-center gap-1.5 px-2 py-1 text-xs text-destructive">
 						<AlertCircle className="size-3.5 shrink-0" />
 						<span className="truncate">Failed to load projects</span>
 					</div>
 				)}
 
-				{!isInitialLoading && !error && projects.length === 0 && (
+				{!isInitialLoading && !projectsError && projects.length === 0 && (
 					<div className="px-2 py-1 text-xs text-muted-foreground">
 						You have no projects yet.
 					</div>
@@ -183,7 +155,7 @@ export const SidebarProjectList = () => {
 				{!isInitialLoading &&
 					(hasMoreProjects ||
 						isPermissionLoading ||
-						isPermissionError ||
+						permissionError ||
 						canCreateProject) && (
 						<SidebarMenuItem>
 							{hasMoreProjects ? (
@@ -200,7 +172,7 @@ export const SidebarProjectList = () => {
 									<Skeleton className="size-4 shrink-0" />
 									<Skeleton className="h-3.5 flex-1" />
 								</SidebarMenuButton>
-							) : isPermissionError ? (
+							) : permissionError ? (
 								<div className="flex items-center gap-1.5 px-2 py-1 text-xs text-destructive">
 									<AlertCircle className="size-3.5 shrink-0" />
 									<span className="truncate">

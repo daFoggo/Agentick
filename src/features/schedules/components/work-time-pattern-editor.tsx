@@ -5,9 +5,9 @@ import { Field, FieldGroup } from "@/components/ui/field";
 import { InputGroup, InputGroupText } from "@/components/ui/input-group";
 import { Switch } from "@/components/ui/radix-switch";
 import { DAYS_OF_WEEK, DISPLAY_ORDER_MON_SUN } from "@/constants/days";
-import type { TSchedule, TUpsertScheduleInput } from "@/features/schedules";
 import { getErrorMessage } from "@/lib/error";
 import { cn } from "@/lib/utils";
+import type { TSchedule, TUpsertScheduleInput } from "../schemas";
 
 type TScheduleView = Omit<TUpsertScheduleInput, "user_id"> & {
 	user_id: string | undefined;

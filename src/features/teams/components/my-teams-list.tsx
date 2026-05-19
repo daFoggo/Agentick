@@ -1,7 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, Plus, Users } from "lucide-react";
+import { Plus, Users } from "lucide-react";
 import { useState } from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,45 +11,17 @@ import {
 	EmptyMedia,
 	EmptyTitle,
 } from "@/components/ui/empty";
-import { Skeleton } from "@/components/ui/skeleton";
-import { myTeamsQueryOptions } from "@/features/teams/queries";
-import { getErrorMessage } from "@/lib/error";
+import type { TTeam } from "../schemas";
 import { CreateTeamDialog } from "./create-team-dialog";
 
-export function MyTeamsList() {
-	const [isCreateOpen, setIsCreateOpen] = useState(false);
-	const {
-		data: teamsData,
-		isLoading,
-		isError,
-		error,
-	} = useQuery(myTeamsQueryOptions());
+interface IMyTeamsListProps {
+	teams: TTeam[];
+}
 
-	const teams = teamsData ?? [];
+export function MyTeamsList({ teams }: IMyTeamsListProps) {
+	const [isCreateOpen, setIsCreateOpen] = useState(false);
 
 	const content = (() => {
-		if (isLoading) {
-			return (
-				<div className="space-y-4">
-					{[1, 2].map((i) => (
-						<Skeleton key={i} className="h-16 w-full rounded-xl" />
-					))}
-				</div>
-			);
-		}
-
-		if (isError) {
-			return (
-				<Alert variant="destructive">
-					<AlertCircle className="size-4" />
-					<AlertTitle>Error loading teams</AlertTitle>
-					<AlertDescription>
-						{getErrorMessage(error, "Could not load your teams.")}
-					</AlertDescription>
-				</Alert>
-			);
-		}
-
 		if (teams.length === 0) {
 			return (
 				<Empty>

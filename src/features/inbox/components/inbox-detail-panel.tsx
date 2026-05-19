@@ -16,17 +16,23 @@ import {
 	EmptyTitle,
 } from "@/components/ui/empty";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import type { TInboxItem } from "@/features/inbox";
-import { useInboxMutations } from "@/features/inbox";
 import { cn } from "@/lib/utils";
+import { useInboxMutations } from "../queries";
+import type { TInboxItem } from "../schemas";
 import { InboxActionButton } from "./inbox-action-button";
 import { InboxContent } from "./inbox-content";
 
 interface IInboxDetailPanelProps {
 	item: TInboxItem | null;
+	isAcceptingInvitation?: boolean;
+	onAcceptInvitation?: (item: TInboxItem) => void;
 }
 
-export const InboxDetailPanel = ({ item }: IInboxDetailPanelProps) => {
+export const InboxDetailPanel = ({
+	item,
+	isAcceptingInvitation,
+	onAcceptInvitation,
+}: IInboxDetailPanelProps) => {
 	const { markAsRead, unarchive, toggleBookmark, remove } = useInboxMutations();
 
 	const handleToggleRead = (e: React.MouseEvent) => {
@@ -141,7 +147,11 @@ export const InboxDetailPanel = ({ item }: IInboxDetailPanelProps) => {
 						<CardDescription className="prose prose-sm dark:prose-invert max-w-none leading-relaxed whitespace-pre-wrap text-muted-foreground">
 							{item.content}
 						</CardDescription>
-						<InboxContent item={item} />
+						<InboxContent
+							item={item}
+							isAcceptingInvitation={isAcceptingInvitation}
+							onAcceptInvitation={onAcceptInvitation}
+						/>
 					</div>
 				</div>
 			</TooltipProvider>
