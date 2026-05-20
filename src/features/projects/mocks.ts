@@ -1,4 +1,4 @@
-import type { TTask } from "@/features/tasks/schemas";
+import type { TTask } from "@/features/tasks";
 
 export type TProjectDashboardTask = Partial<TTask> & {
 	status_from?: string;

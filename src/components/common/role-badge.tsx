@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { getTeamRoleOption } from "@/constants/team-roles";
-import type { TTeamRole } from "@/features/team-members/schemas";
+import type { TTeamRole } from "@/features/team-members";
 
 interface IRoleBadgeProps {
 	role: TTeamRole;

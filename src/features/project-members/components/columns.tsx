@@ -179,7 +179,7 @@ function ActionCell({
 									if (isCurrentUser) {
 										if (teamId) {
 											navigate({
-												to: "/dashboard/$teamId/projects",
+												to: "/dashboard/$teamId/overview",
 												params: { teamId },
 											});
 										} else {

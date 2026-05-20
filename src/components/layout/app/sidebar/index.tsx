@@ -17,7 +17,7 @@ import {
 	SIDEBAR_PROJECT_SETTINGS,
 	SIDEBAR_TEAM,
 } from "@/constants/sidebar-navigation";
-import { inboxStatsQueryOptions } from "@/features/inbox/queries";
+import { inboxStatsQueryOptions } from "@/features/inbox";
 import {
 	projectQueryOptions,
 	projectsQueryOptions,

@@ -19,6 +19,10 @@ This checklist is focused on implementation and review. It intentionally avoids 
 - `index.ts` exports only client-safe public API.
 - Do not export `server.ts` from feature barrels.
 - Avoid cross-feature coupling inside feature modules; compose cross-feature pages in routes.
+- Do not call another feature's query or mutation hook from a feature component for page composition.
+- Move cross-feature data loading/actions to routes, layouts, or route-local containers, then pass data, loading/error state, and callbacks through props.
+- Use column factories with injected context instead of querying inside table cells.
+- Use relative imports inside a feature instead of importing that same feature through its public barrel.
 
 ## Data Fetching
 
@@ -86,6 +90,8 @@ Submit-critical examples:
 ## Review Checklist
 
 - Does the change preserve feature boundaries?
+- Are cross-feature data dependencies owned by routes/layouts instead of feature components?
+- Are cross-feature workflows injected through props/callbacks instead of direct query/mutation imports?
 - Does server-state code throw on failure?
 - Are route loaders aligned with Suspense usage?
 - Is `useSuspenseQuery` backed by `ensureQueryData`?

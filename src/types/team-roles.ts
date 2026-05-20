@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import type { TTeamRole } from "@/features/team-members/schemas";
+import type { TTeamRole } from "@/features/team-members";
 
 export interface ITeamRoleCatalogItem {
 	value: TTeamRole;

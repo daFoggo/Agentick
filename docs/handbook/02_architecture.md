@@ -85,6 +85,60 @@ Routes own page-level composition:
 
 Feature A should not import Feature B's page widget just to compose a route. Put that composition in `src/routes`.
 
+## Feature Data Boundary
+
+Feature components should not fetch data from another feature.
+
+If a component in `src/features/[feature]/components` needs data owned by another feature, move that data dependency to a route, layout, or route-local container and pass it down through props. Pass all relevant states, not only the successful data:
+
+- data
+- loading state
+- error state
+- error object, when UI copy needs `getErrorMessage`
+- callbacks for cross-feature actions
+
+Avoid this in feature components:
+
+```tsx
+const { data: members } = useQuery(teamMembersQueryOptions(teamId))
+```
+
+Prefer route/layout orchestration:
+
+```tsx
+const members = useQuery(teamMembersQueryOptions(teamId))
+
+return (
+  <EventActionBar
+    members={members.data?.founds ?? []}
+    isMembersLoading={members.isLoading}
+    isMembersError={members.isError}
+    membersError={members.error}
+  />
+)
+```
+
+Allowed coupling:
+
+- feature-local mutation hooks inside the same feature
+- own-feature queries for deliberately self-contained widgets
+- type-only imports from another feature's public barrel
+- aggregate schemas that model backend aggregate payloads
+- query key imports for cache invalidation
+- callbacks or injected adapters for cross-feature workflows
+
+When a feature component renders a cross-feature workflow, such as a member invite dialog requiring user search or an inbox item accepting an invitation, inject the searched data and action callbacks from the route/container instead of importing the other feature's query or mutation hook.
+
+Common boundary patterns:
+
+- Team/project headers receive members, current user, permissions, and invite callbacks through props.
+- App shell/layout components may compose navigation data across teams, projects, inbox, and users.
+- Invite dialogs receive search results, loading/error state, and search callbacks from the route/header wrapper.
+- Table columns that need current user, role, or membership context are created by column factory functions.
+- Dashboard cards receive their chart/list data and period state from route-owned dashboard containers.
+- Task config settings routes load task statuses, types, priorities, or tags and pass the list plus next-order defaults to feature components.
+- Inbox item content receives invitation accept/decline callbacks from the inbox route container.
+
 ## QueryClient Lifecycle
 
 The app must not use a request-shared module singleton `QueryClient` for user data.

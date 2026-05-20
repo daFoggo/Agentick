@@ -1,5 +1,4 @@
 import { useForm } from "@tanstack/react-form";
-import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -25,7 +24,7 @@ import { TIMEZONES } from "@/constants/timezone";
 import type { TUser } from "@/features/users";
 import { getErrorMessage } from "@/lib/error";
 import { getProjectPermissions } from "../permissions";
-import { myProjectsQueryOptions, useProjectMutations } from "../queries";
+import { useProjectMutations } from "../queries";
 import {
 	type TProject,
 	type TUpdateProjectInput,
@@ -51,7 +50,6 @@ export const ProjectSettings = ({
 	currentUser,
 }: IProjectSettingsProps) => {
 	const navigate = useNavigate();
-	const queryClient = useQueryClient();
 	const permissions = getProjectPermissions(project, currentUser?.id);
 	const { update, remove } = useProjectMutations();
 	const [updatingField, setUpdatingField] = useState<
@@ -128,23 +126,11 @@ export const ProjectSettings = ({
 			await remove.mutateAsync(projectId);
 			toast.success("Project deleted successfully");
 
-			const remaining = await queryClient.fetchQuery(
-				myProjectsQueryOptions(teamId),
-			);
-
-			if (!remaining || remaining.length === 0) {
-				navigate({
-					to: "/dashboard/$teamId/overview",
-					params: { teamId },
-					replace: true,
-				});
-			} else {
-				navigate({
-					to: "/dashboard/$teamId/projects",
-					params: { teamId },
-					replace: true,
-				});
-			}
+			navigate({
+				to: "/dashboard/$teamId/overview",
+				params: { teamId },
+				replace: true,
+			});
 			return true;
 		} catch (error) {
 			toast.error(getErrorMessage(error, "Failed to delete project"));

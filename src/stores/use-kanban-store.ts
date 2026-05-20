@@ -7,7 +7,7 @@ import { arrayMove } from "@dnd-kit/sortable";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { TTaskStatus } from "@/features/task-config";
-import type { TTask } from "@/features/tasks/schemas";
+import type { TTask } from "@/features/tasks";
 
 interface IKanbanStore {
 	// Persisted state

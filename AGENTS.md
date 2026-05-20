@@ -19,6 +19,9 @@ This file is the fast entry point for agents working in Agentick-FE. Keep it sho
 
 - The app uses feature-based architecture under `src/features/`.
 - Routes in `src/routes/` are the orchestration layer. Cross-feature page composition belongs in routes, not inside one feature importing another feature's UI arbitrarily.
+- Feature components should not fetch cross-feature data. Move cross-feature `useQuery` / `useSuspenseQuery` / `useSuspenseQueries` calls to routes or layout/container components, then pass data plus loading/error state through props.
+- Components inside a feature may use their own feature mutation hooks and may use own-feature queries only for deliberately self-contained widgets. If a query depends on another feature, route/layout orchestration must own it.
+- Cross-feature workflows, such as invite dialogs needing user search or inbox items accepting invitations, should receive injected data/callbacks instead of importing another feature's query or mutation hook directly.
 - Feature barrels (`index.ts`) are client-safe public APIs. Never export `server.ts` or server-only modules from a feature barrel.
 - Use the `@/*` alias for imports instead of long relative paths.
 

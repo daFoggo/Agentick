@@ -1,5 +1,5 @@
 import { Eye, ShieldCheck, ShieldUser, User } from "lucide-react";
-import type { TTeamRole } from "@/features/team-members/schemas";
+import type { TTeamRole } from "@/features/team-members";
 import type { ITeamRoleCatalogItem } from "@/types/team-roles";
 
 export const TEAM_ROLE_CATALOG: ITeamRoleCatalogItem[] = [

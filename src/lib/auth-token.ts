@@ -69,7 +69,7 @@ export async function refreshAuthToken(options?: { clearOnFailure?: boolean }) {
 
 	refreshPromise = (async () => {
 		try {
-			const { refreshSessionFn } = await import("@/features/auth/functions");
+			const { refreshSessionFn } = await import("@/features/auth");
 			const response = await refreshSessionFn();
 			setCachedToken(response.access_token);
 

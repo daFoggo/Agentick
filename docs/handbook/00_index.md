@@ -15,7 +15,6 @@ This handbook replaces the older root-level `docs/*.md` set. Prefer this handboo
 | 5 | `05_ui_state_patterns.md` | Loading, error, empty, compact UI, and form action states |
 | 6 | `06_quality_rules.md` | Consistency rules, checks, and review expectations |
 | 7 | `07_development_checklist.md` | Practical development and review checklist |
-| 8 | `08_feature_boundary_refactor_checklist.md` | Feature boundary refactor plan and remaining migration list |
 
 ## Mandatory Agent Rule Files
 
@@ -29,6 +28,7 @@ The `.agents/rules/` files are enforcement-oriented and should stay aligned with
 ## Core Decisions
 
 - Feature modules own feature-local code; routes own cross-feature page composition.
+- Feature components receive cross-feature data and actions through props/callbacks; routes or layout containers own those dependencies.
 - `server.ts` is server-only and never exported from feature barrels.
 - Query functions return valid data or throw. Failed queries are not empty states.
 - Route loaders decide criticality: `ensureQueryData` blocks, `prefetchQuery` warms cache.
