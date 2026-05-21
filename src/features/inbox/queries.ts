@@ -19,7 +19,7 @@ export const inboxStatsQueryOptions = (params: GetInboxStatsInput = {}) =>
 		queryKey: inboxKeys.stats(),
 		queryFn: () => getInboxStatsFn({ data: params }) as Promise<TInboxStats>,
 		staleTime: 1000 * 60 * 2, // 2 minutes
-		refetchInterval: 60000,
+		refetchInterval: 6000,
 	});
 
 export const inboxListQueryOptions = (
@@ -34,7 +34,7 @@ export const inboxListQueryOptions = (
 				TInboxItem[]
 			>,
 		staleTime: 1000 * 30, // 30 seconds
-		refetchInterval: 60000,
+		refetchInterval: 6000,
 	});
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
